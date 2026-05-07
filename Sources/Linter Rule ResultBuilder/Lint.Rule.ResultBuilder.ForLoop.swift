@@ -50,8 +50,8 @@ public import SwiftSyntax
 ///   (DECISION v2.0.0).
 /// - `swift-institute/Experiments/result-builder-perf/` (12-case empirical
 ///   acceptance suite, 8/12 PASS post-fix).
-extension Lint.Rule {
-    public struct ResultBuilderForLoop: Lint.Rule.`Protocol` {
+extension Lint.Rule.ResultBuilder {
+    public struct ForLoop: Lint.Rule.`Protocol` {
         public static let id: Lint.Rule.ID = "result_builder_for_loop"
         public static let defaultSeverity: Diagnostic.Severity = .warning
 
@@ -126,7 +126,7 @@ extension Lint.Rule {
     }
 }
 
-extension Lint.Rule.ResultBuilderForLoop {
+extension Lint.Rule.ResultBuilder.ForLoop {
     @usableFromInline
     static let message: Swift.String =
         "`for`-loop in result-builder body materializes a fresh [Element] per "
@@ -193,8 +193,8 @@ extension Lint.Rule.ResultBuilderForLoop {
                         column: location.column
                     ),
                     severity: severity,
-                    identifier: Lint.Rule.ResultBuilderForLoop.id.underlying,
-                    message: Lint.Rule.ResultBuilderForLoop.message
+                    identifier: Lint.Rule.ResultBuilder.ForLoop.id.underlying,
+                    message: Lint.Rule.ResultBuilder.ForLoop.message
                 )
             )
         }
