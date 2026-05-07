@@ -38,8 +38,8 @@ extension Lint.Rule.Cardinal.Count.Test {
 
 extension Lint.Rule.Cardinal.Count.Test.Unit {
     @Test
-    func `Bare count - 1 is flagged`() {
-        let findings = Lint.Rule.Cardinal.Count.Test.findings(in: "let n = count - 1")
+    func `Member-access seq.count - 1 is flagged`() {
+        let findings = Lint.Rule.Cardinal.Count.Test.findings(in: "let n = seq.count - 1")
         let count = findings.count
         #expect(count == 1)
         if count == 1 {
@@ -49,14 +49,14 @@ extension Lint.Rule.Cardinal.Count.Test.Unit {
     }
 
     @Test
-    func `Member-access count - 1 is flagged`() {
-        let findings = Lint.Rule.Cardinal.Count.Test.findings(in: "let n = seq.count - 1")
+    func `Member-access on local arr.count - 1 is flagged`() {
+        let findings = Lint.Rule.Cardinal.Count.Test.findings(in: "let n = arr.count - 1")
         #expect(findings.count == 1)
     }
 
     @Test
     func `Custom severity is honored`() {
-        let source = "let n = count - 1"
+        let source = "let n = seq.count - 1"
         let tree = Parser.parse(source: source)
         let converter = SourceLocationConverter(fileName: "test.swift", tree: tree)
         var manager = Source.Manager()
@@ -73,8 +73,8 @@ extension Lint.Rule.Cardinal.Count.Test.Unit {
 
 extension Lint.Rule.Cardinal.Count.Test.Evasion {
     @Test
-    func `Paren-wrapped (count - 1) is flagged`() {
-        let findings = Lint.Rule.Cardinal.Count.Test.findings(in: "let n = (count - 1)")
+    func `Paren-wrapped (seq.count - 1) is flagged`() {
+        let findings = Lint.Rule.Cardinal.Count.Test.findings(in: "let n = (seq.count - 1)")
         #expect(findings.count == 1)
     }
 
@@ -85,39 +85,39 @@ extension Lint.Rule.Cardinal.Count.Test.Evasion {
     }
 
     @Test
-    func `Algebraic-flip i + 1 less-than count is flagged`() {
-        let findings = Lint.Rule.Cardinal.Count.Test.findings(in: "if i + 1 < count { }")
+    func `Algebraic-flip i + 1 less-than seq.count is flagged`() {
+        let findings = Lint.Rule.Cardinal.Count.Test.findings(in: "if i + 1 < seq.count { }")
         #expect(findings.count == 1)
     }
 
     @Test
-    func `Algebraic-flip distance + 1 equals count is flagged`() {
-        let findings = Lint.Rule.Cardinal.Count.Test.findings(in: "if distance + 1 == count { }")
+    func `Algebraic-flip distance + 1 equals seq.count is flagged`() {
+        let findings = Lint.Rule.Cardinal.Count.Test.findings(in: "if distance + 1 == seq.count { }")
         #expect(findings.count == 1)
     }
 
     @Test
-    func `Algebraic-flip count greater-than i + 1 is flagged`() {
-        let findings = Lint.Rule.Cardinal.Count.Test.findings(in: "if count > i + 1 { }")
+    func `Algebraic-flip seq.count greater-than i + 1 is flagged`() {
+        let findings = Lint.Rule.Cardinal.Count.Test.findings(in: "if seq.count > i + 1 { }")
         #expect(findings.count == 1)
     }
 
     @Test
     func `Algebraic-flip with 1 + i (commutative) is flagged`() {
-        let findings = Lint.Rule.Cardinal.Count.Test.findings(in: "if 1 + i < count { }")
+        let findings = Lint.Rule.Cardinal.Count.Test.findings(in: "if 1 + i < seq.count { }")
         #expect(findings.count == 1)
     }
 
     @Test
-    func `Operand-reorder count - i - 1 is flagged`() {
-        let findings = Lint.Rule.Cardinal.Count.Test.findings(in: "let n = count - i - 1")
+    func `Operand-reorder seq.count - i - 1 is flagged`() {
+        let findings = Lint.Rule.Cardinal.Count.Test.findings(in: "let n = seq.count - i - 1")
         #expect(findings.count >= 1)
     }
 
     @Test
     func `Comments-as-code is NOT flagged`() {
         let source = """
-        // count - 1 is the canonical anti-pattern (this is just prose)
+        // seq.count - 1 is the canonical anti-pattern (this is just prose)
         let x = 42
         """
         let findings = Lint.Rule.Cardinal.Count.Test.findings(in: source)
@@ -127,8 +127,8 @@ extension Lint.Rule.Cardinal.Count.Test.Evasion {
 
 extension Lint.Rule.Cardinal.Count.Test.Negative {
     @Test
-    func `count - 2 is NOT flagged`() {
-        let findings = Lint.Rule.Cardinal.Count.Test.findings(in: "let n = count - 2")
+    func `seq.count - 2 is NOT flagged`() {
+        let findings = Lint.Rule.Cardinal.Count.Test.findings(in: "let n = seq.count - 2")
         #expect(findings.isEmpty)
     }
 
@@ -139,8 +139,8 @@ extension Lint.Rule.Cardinal.Count.Test.Negative {
     }
 
     @Test
-    func `count + 1 is NOT flagged outside comparison context`() {
-        let findings = Lint.Rule.Cardinal.Count.Test.findings(in: "let n = count + 1")
+    func `seq.count + 1 is NOT flagged outside comparison context`() {
+        let findings = Lint.Rule.Cardinal.Count.Test.findings(in: "let n = seq.count + 1")
         #expect(findings.isEmpty)
     }
 
@@ -155,18 +155,47 @@ extension Lint.Rule.Cardinal.Count.Test.Negative {
         let findings = Lint.Rule.Cardinal.Count.Test.findings(in: "")
         #expect(findings.isEmpty)
     }
-}
 
-extension Lint.Rule.Cardinal.Count.Test.`Edge Case` {
     @Test
-    func `count - 1 inside string literal is NOT flagged`() {
-        let findings = Lint.Rule.Cardinal.Count.Test.findings(in: #"let s = "count - 1""#)
+    func `Bare count - 1 (non-member-access) is NOT flagged`() {
+        // Pre-narrowing the rule walked tokens for any identifier `count`;
+        // post-narrowing only `<expr>.count` member-access form fires.
+        let findings = Lint.Rule.Cardinal.Count.Test.findings(in: "let n = count - 1")
         #expect(findings.isEmpty)
     }
 
     @Test
-    func `Nested expression let n = (a + b) + (count - 1) is flagged`() {
-        let findings = Lint.Rule.Cardinal.Count.Test.findings(in: "let n = (a + b) + (count - 1)")
+    func `Local binding let count = i; count - 1 is NOT flagged`() {
+        let source = """
+        let count = i
+        let last = count - 1
+        """
+        let findings = Lint.Rule.Cardinal.Count.Test.findings(in: source)
+        #expect(findings.isEmpty)
+    }
+
+    @Test
+    func `Loop variable for count in 0..<n; count - 1 is NOT flagged`() {
+        let source = """
+        for count in 0..<n {
+            _ = count - 1
+        }
+        """
+        let findings = Lint.Rule.Cardinal.Count.Test.findings(in: source)
+        #expect(findings.isEmpty)
+    }
+}
+
+extension Lint.Rule.Cardinal.Count.Test.`Edge Case` {
+    @Test
+    func `seq.count - 1 inside string literal is NOT flagged`() {
+        let findings = Lint.Rule.Cardinal.Count.Test.findings(in: #"let s = "seq.count - 1""#)
+        #expect(findings.isEmpty)
+    }
+
+    @Test
+    func `Nested expression let n = (a + b) + (seq.count - 1) is flagged`() {
+        let findings = Lint.Rule.Cardinal.Count.Test.findings(in: "let n = (a + b) + (seq.count - 1)")
         #expect(findings.count == 1)
     }
 
@@ -174,7 +203,7 @@ extension Lint.Rule.Cardinal.Count.Test.`Edge Case` {
     func `Multi-line nested algebraic-flip is flagged`() {
         let source = """
         if i + 1
-            < count {
+            < seq.count {
             doSomething()
         }
         """

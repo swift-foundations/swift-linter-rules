@@ -13,7 +13,7 @@ public import Linter_Primitives
 internal import SwiftSyntax
 internal import SwiftOperators
 
-/// R1 — `count - 1` and its semantically-equivalent rewrites.
+/// R1 — `<expr>.count - 1` and its semantically-equivalent rewrites.
 ///
 /// Subsumes the regex pair `cardinal_count_minus_one_anti_pattern` +
 /// `cardinal_count_minus_one_evasion`. After operator folding the four
@@ -21,22 +21,32 @@ internal import SwiftOperators
 ///
 /// 1. **Subtraction with literal `1`** — an `InfixOperatorExprSyntax`
 ///    whose operator is `-`, whose right operand is the integer literal
-///    `1`, and whose left operand contains an identifier `count`.
-///    Catches the base `count - 1`, paren-wrapped `(count) - 1`,
-///    cast-outside `Double(seq.count) - 1`, and operand-reorder
-///    `count - i - 1` (left-associativity makes the outer `- 1`
-///    binary-bind to a left subtree that contains `count`).
+///    `1`, and whose left operand contains a member-access expression
+///    of shape `<expr>.count` (`MemberAccessExprSyntax` with
+///    `declName.baseName.text == "count"`). Catches member-access
+///    `seq.count - 1`, paren-wrapped `(seq.count) - 1`, cast-outside
+///    `Double(seq.count) - 1`, and operand-reorder `seq.count - i - 1`
+///    (left-associativity makes the outer `- 1` binary-bind to a left
+///    subtree that contains `seq.count`).
 ///
 /// 2. **Algebraic-flip via comparison** — an `InfixOperatorExprSyntax`
 ///    whose operator is one of `<`, `<=`, `==`, `!=`, `>=`, `>`, where
 ///    one side has the shape `<expr> + 1` (commutative) and the other
-///    side contains an identifier `count`. Catches `i + 1 < count`,
-///    `1 + i < count`, `count == i + 1`, etc.
+///    side contains a member-access expression `<expr>.count`. Catches
+///    `i + 1 < seq.count`, `1 + i < seq.count`, `seq.count == i + 1`, etc.
 ///
-/// Operand-reorder `(count - i - 1)` — uncatchable by regex — is
+/// Bare-identifier `count` in scope (loop variable, local binding
+/// `let count = ...`, function parameter named `count`) is intentionally
+/// out-of-scope: the [INFRA-200] typed-cardinal rationale concerns
+/// Collection-shaped `count`, and member-access form is the access
+/// pattern for `Collection.count`. Bare-token analysis cannot
+/// distinguish a Collection.count escape from an in-scope local that
+/// happens to share the name.
+///
+/// Operand-reorder `(seq.count - i - 1)` — uncatchable by regex — is
 /// caught by predicate 1: left-associativity parses the subexpression
-/// as `((count - i) - 1)`, whose outer `-` has RHS `1` and LHS
-/// `count - i` (which contains `count`).
+/// as `((seq.count - i) - 1)`, whose outer `-` has RHS `1` and LHS
+/// `seq.count - i` (which contains the member-access `seq.count`).
 ///
 /// Comments-as-code is a non-issue at the AST level: comments are
 /// `Trivia`, not part of the expression grammar; the visitor never
@@ -71,14 +81,15 @@ extension Lint.Rule.Cardinal {
 extension Lint.Rule.Cardinal.Count {
     @usableFromInline
     static let message: Swift.String =
-        "`count - 1` (or syntactic equivalents — paren-wrap `(count) - 1`, cast-outside "
-        + "`Double(seq.count) - 1`, algebraic-flip `+ 1 [<=] count`, operand-reorder "
-        + "`count - i - 1`) indicates `count: Int` not `count: Cardinal` (the typed form "
-        + "would not compile per [INFRA-200]). Use `.subtract.saturating(.one)` / "
-        + "`.subtract.exact(.one)` / typed `count - .one` per [INFRA-025], or for "
-        + "stdlib-Int sites where no typed surface is available either (α) use the "
-        + "stdlib's named idiom for the concept (`indices.dropLast()`, `.last`, "
-        + "`endIndex - 1`) or (β) escalate to supervisor and apply "
+        "`<expr>.count - 1` (or syntactic equivalents — paren-wrap `(seq.count) - 1`, "
+        + "cast-outside `Double(seq.count) - 1`, algebraic-flip `+ 1 [<=] seq.count`, "
+        + "operand-reorder `seq.count - i - 1`) indicates `count: Int` not "
+        + "`count: Cardinal` (the typed form would not compile per [INFRA-200]). "
+        + "Use `.subtract.saturating(.one)` / `.subtract.exact(.one)` / typed "
+        + "`count - .one` per [INFRA-025], or for stdlib-Int sites where no typed "
+        + "surface is available either (α) use the stdlib's named idiom for the "
+        + "concept (`indices.dropLast()`, `.last`, `endIndex - 1`) or (β) escalate "
+        + "to supervisor and apply "
         + "`// swiftlint:disable:next cardinal_count_minus_one  // reason: <citation>`."
 
     final class Visitor: SyntaxVisitor {
@@ -102,15 +113,15 @@ extension Lint.Rule.Cardinal.Count {
 
             if opText == "-",
                Self.isLiteralOne(node.rightOperand),
-               Self.containsCountIdentifier(node.leftOperand) {
+               Self.containsCountMemberAccess(node.leftOperand) {
                 report(at: binOp.operator)
                 return .visitChildren
             }
 
             if Self.isComparisonOperator(opText) {
-                if Self.isPlusOne(node.leftOperand), Self.containsCountIdentifier(node.rightOperand) {
+                if Self.isPlusOne(node.leftOperand), Self.containsCountMemberAccess(node.rightOperand) {
                     report(at: binOp.operator)
-                } else if Self.isPlusOne(node.rightOperand), Self.containsCountIdentifier(node.leftOperand) {
+                } else if Self.isPlusOne(node.rightOperand), Self.containsCountMemberAccess(node.leftOperand) {
                     report(at: binOp.operator)
                 }
             }
@@ -153,13 +164,20 @@ extension Lint.Rule.Cardinal.Count {
             return isLiteralOne(infix.leftOperand) || isLiteralOne(infix.rightOperand)
         }
 
-        static func containsCountIdentifier(_ expr: ExprSyntax) -> Bool {
-            for token in expr.tokens(viewMode: .sourceAccurate) {
-                if case .identifier(let name) = token.tokenKind, name == "count" {
-                    return true
+        static func containsCountMemberAccess(_ expr: ExprSyntax) -> Bool {
+            class Finder: SyntaxVisitor {
+                var found = false
+                override func visit(_ node: MemberAccessExprSyntax) -> SyntaxVisitorContinueKind {
+                    if node.declName.baseName.text == "count" {
+                        found = true
+                        return .skipChildren
+                    }
+                    return .visitChildren
                 }
             }
-            return false
+            let finder = Finder(viewMode: .sourceAccurate)
+            finder.walk(expr)
+            return finder.found
         }
     }
 }
