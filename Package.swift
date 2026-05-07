@@ -46,8 +46,8 @@ let package = Package(
             targets: ["Linter Rule Throws"]
         ),
         .library(
-            name: "Linter Rule Var Named Impl",
-            targets: ["Linter Rule Var Named Impl"]
+            name: "Linter Rule Naming",
+            targets: ["Linter Rule Naming"]
         ),
         .library(
             name: "Linter Rule Option Named Flags",
@@ -124,9 +124,9 @@ let package = Package(
             ]
         ),
 
-        // MARK: - Linter Rule Var Named Impl
+        // MARK: - Linter Rule Naming
         .target(
-            name: "Linter Rule Var Named Impl",
+            name: "Linter Rule Naming",
             dependencies: [
                 .product(name: "Linter Primitives", package: "swift-linter-primitives"),
                 .product(name: "SwiftSyntax", package: "swift-syntax"),
@@ -207,9 +207,9 @@ let package = Package(
             ]
         ),
         .testTarget(
-            name: "Linter Rule Var Named Impl Tests",
+            name: "Linter Rule Naming Tests",
             dependencies: [
-                "Linter Rule Var Named Impl",
+                "Linter Rule Naming",
                 .product(name: "SwiftParser", package: "swift-syntax"),
             ]
         ),

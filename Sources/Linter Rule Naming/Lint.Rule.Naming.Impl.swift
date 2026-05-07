@@ -23,8 +23,8 @@ internal import SwiftSyntax
 ///
 /// AST shape: `VariableDeclSyntax` with at least one binding whose
 /// pattern is an `IdentifierPatternSyntax` named `impl` or `_impl`.
-extension Lint.Rule {
-    public struct VarNamedImpl: Lint.Rule.`Protocol` {
+extension Lint.Rule.Naming {
+    public struct Impl: Lint.Rule.`Protocol` {
         public static let id: Lint.Rule.ID = "var_named_impl"
         public static let defaultSeverity: Diagnostic.Severity = .warning
 
@@ -43,7 +43,7 @@ extension Lint.Rule {
     }
 }
 
-extension Lint.Rule.VarNamedImpl {
+extension Lint.Rule.Naming.Impl {
     @usableFromInline
     static let message: Swift.String =
         "[var_named_impl] feedback_no_impl_abbreviation: do not bind a local as `impl` "
@@ -82,8 +82,8 @@ extension Lint.Rule.VarNamedImpl {
                         column: location.column
                     ),
                     severity: severity,
-                    identifier: Lint.Rule.VarNamedImpl.id.underlying,
-                    message: Lint.Rule.VarNamedImpl.message
+                    identifier: Lint.Rule.Naming.Impl.id.underlying,
+                    message: Lint.Rule.Naming.Impl.message
                 ))
             }
             return .visitChildren
