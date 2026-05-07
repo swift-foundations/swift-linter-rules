@@ -25,8 +25,8 @@ internal import SwiftSyntax
 /// AST shape: a `ThrowsClauseSyntax` whose `type` is a
 /// `SomeOrAnyTypeSyntax` with the `any` specifier and constraint type
 /// `Error` or `Swift.Error`.
-extension Lint.Rule {
-    public struct ExistentialThrows: Lint.Rule.`Protocol` {
+extension Lint.Rule.Throws {
+    public struct Existential: Lint.Rule.`Protocol` {
         public static let id: Lint.Rule.ID = "existential_throws"
         public static let defaultSeverity: Diagnostic.Severity = .warning
 
@@ -45,7 +45,7 @@ extension Lint.Rule {
     }
 }
 
-extension Lint.Rule.ExistentialThrows {
+extension Lint.Rule.Throws.Existential {
     @usableFromInline
     static let message: Swift.String =
         "[existential_throws] feedback_no_existential_throws: `throws(any Error)` boxes "
@@ -83,8 +83,8 @@ extension Lint.Rule.ExistentialThrows {
                     column: location.column
                 ),
                 severity: severity,
-                identifier: Lint.Rule.ExistentialThrows.id.underlying,
-                message: Lint.Rule.ExistentialThrows.message
+                identifier: Lint.Rule.Throws.Existential.id.underlying,
+                message: Lint.Rule.Throws.Existential.message
             ))
             return .visitChildren
         }

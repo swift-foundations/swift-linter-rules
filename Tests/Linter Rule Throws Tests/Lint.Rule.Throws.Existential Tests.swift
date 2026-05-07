@@ -13,9 +13,9 @@ import Testing
 import SwiftSyntax
 import SwiftParser
 import Linter_Primitives
-@testable import Linter_Rule_Existential_Throws
+@testable import Linter_Rule_Throws
 
-extension Lint.Rule.ExistentialThrows {
+extension Lint.Rule.Throws.Existential {
     @Suite
     struct Test {
         @Suite struct Unit {}
@@ -23,22 +23,22 @@ extension Lint.Rule.ExistentialThrows {
     }
 }
 
-extension Lint.Rule.ExistentialThrows.Test {
+extension Lint.Rule.Throws.Existential.Test {
     static func findings(in source: String, file: String = "test.swift") -> [Lint.Finding] {
         let tree = Parser.parse(source: source)
         let converter = SourceLocationConverter(fileName: file, tree: tree)
         var manager = Source.Manager()
         let id = manager.register(fileID: file, filePath: file, content: Array(source.utf8))
         let parsed = Lint.Source.Parsed(file: manager.file(for: id), tree: tree, converter: converter)
-        return Lint.Rule.ExistentialThrows().findings(in: parsed)
+        return Lint.Rule.Throws.Existential().findings(in: parsed)
     }
 }
 
-extension Lint.Rule.ExistentialThrows.Test.Unit {
+extension Lint.Rule.Throws.Existential.Test.Unit {
     @Test
     func `throws any Error is flagged`() {
         let source = "func f() throws(any Error) -> Int { 0 }"
-        let findings = Lint.Rule.ExistentialThrows.Test.findings(in: source)
+        let findings = Lint.Rule.Throws.Existential.Test.findings(in: source)
         let count = findings.count
         #expect(count == 1)
         if count == 1 {
@@ -50,7 +50,7 @@ extension Lint.Rule.ExistentialThrows.Test.Unit {
     @Test
     func `throws any Swift dot Error is flagged`() {
         let source = "func f() throws(any Swift.Error) -> Int { 0 }"
-        let findings = Lint.Rule.ExistentialThrows.Test.findings(in: source)
+        let findings = Lint.Rule.Throws.Existential.Test.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -60,14 +60,14 @@ extension Lint.Rule.ExistentialThrows.Test.Unit {
         func a() throws(any Error) {}
         func b() throws(any Swift.Error) {}
         """
-        let findings = Lint.Rule.ExistentialThrows.Test.findings(in: source)
+        let findings = Lint.Rule.Throws.Existential.Test.findings(in: source)
         #expect(findings.count == 2)
     }
 
     @Test
     func `async throws any Error is flagged`() {
         let source = "func f() async throws(any Error) -> Int { 0 }"
-        let findings = Lint.Rule.ExistentialThrows.Test.findings(in: source)
+        let findings = Lint.Rule.Throws.Existential.Test.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -78,33 +78,33 @@ extension Lint.Rule.ExistentialThrows.Test.Unit {
             init() throws(any Error) {}
         }
         """
-        let findings = Lint.Rule.ExistentialThrows.Test.findings(in: source)
+        let findings = Lint.Rule.Throws.Existential.Test.findings(in: source)
         #expect(findings.count == 1)
     }
 
     @Test
     func `closure type with throws any Error is flagged`() {
         let source = "let f: () throws(any Error) -> Int = { 0 }"
-        let findings = Lint.Rule.ExistentialThrows.Test.findings(in: source)
+        let findings = Lint.Rule.Throws.Existential.Test.findings(in: source)
         #expect(findings.count == 1)
     }
 }
 
-extension Lint.Rule.ExistentialThrows.Test.`Edge Case` {
+extension Lint.Rule.Throws.Existential.Test.`Edge Case` {
     @Test
     func `throws(SpecificError) is NOT flagged`() {
         let source = """
         struct E: Swift.Error {}
         func f() throws(E) -> Int { 0 }
         """
-        let findings = Lint.Rule.ExistentialThrows.Test.findings(in: source)
+        let findings = Lint.Rule.Throws.Existential.Test.findings(in: source)
         #expect(findings.isEmpty)
     }
 
     @Test
     func `bare throws is NOT flagged`() {
         let source = "func f() throws -> Int { 0 }"
-        let findings = Lint.Rule.ExistentialThrows.Test.findings(in: source)
+        let findings = Lint.Rule.Throws.Existential.Test.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -114,21 +114,21 @@ extension Lint.Rule.ExistentialThrows.Test.`Edge Case` {
         protocol P {}
         func f() throws(any P) -> Int { 0 }
         """
-        let findings = Lint.Rule.ExistentialThrows.Test.findings(in: source)
+        let findings = Lint.Rule.Throws.Existential.Test.findings(in: source)
         #expect(findings.isEmpty)
     }
 
     @Test
     func `existential throws in a string literal is NOT flagged`() {
         let source = "let s = \"throws(any Error)\""
-        let findings = Lint.Rule.ExistentialThrows.Test.findings(in: source)
+        let findings = Lint.Rule.Throws.Existential.Test.findings(in: source)
         #expect(findings.isEmpty)
     }
 
     @Test
     func `non-throwing function is NOT flagged`() {
         let source = "func f() -> Int { 0 }"
-        let findings = Lint.Rule.ExistentialThrows.Test.findings(in: source)
+        let findings = Lint.Rule.Throws.Existential.Test.findings(in: source)
         #expect(findings.isEmpty)
     }
 }
