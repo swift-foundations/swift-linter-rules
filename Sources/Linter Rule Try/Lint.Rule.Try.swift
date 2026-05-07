@@ -37,7 +37,7 @@ extension Lint.Rule {
             self.severity = severity
         }
 
-        public func findings(in source: Lint.Source.Parsed) -> [Lint.Finding] {
+        public func findings(in source: Lint.Source.Parsed) -> [Diagnostic.Record] {
             let visitor = Visitor(source: source.file, severity: severity, converter: source.converter)
             visitor.walk(source.tree)
             return visitor.matches
@@ -60,7 +60,7 @@ extension Lint.Rule.Try {
         let source: Source.File
         let severity: Diagnostic.Severity
         let converter: SourceLocationConverter
-        var matches: [Lint.Finding] = []
+        var matches: [Diagnostic.Record] = []
 
         init(source: Source.File, severity: Diagnostic.Severity, converter: SourceLocationConverter) {
             self.source = source
@@ -76,7 +76,7 @@ extension Lint.Rule.Try {
                 return .visitChildren
             }
             let location = converter.location(for: mark.positionAfterSkippingLeadingTrivia)
-            matches.append(Lint.Finding(
+            matches.append(Diagnostic.Record(
                 location: Source.Location(
                     fileID: source.fileID,
                     filePath: source.filePath,

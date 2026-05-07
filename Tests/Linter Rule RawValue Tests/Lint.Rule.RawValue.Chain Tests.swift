@@ -26,7 +26,7 @@ extension Lint.Rule.RawValue.Chain {
 }
 
 extension Lint.Rule.RawValue.Chain.Test {
-    static func findings(in source: Swift.String, file: Swift.String = "test.swift") -> [Lint.Finding] {
+    static func findings(in source: Swift.String, file: Swift.String = "test.swift") -> [Diagnostic.Record] {
         let tree = Parser.parse(source: source)
         let converter = SourceLocationConverter(fileName: file, tree: tree)
         var manager = Source.Manager()

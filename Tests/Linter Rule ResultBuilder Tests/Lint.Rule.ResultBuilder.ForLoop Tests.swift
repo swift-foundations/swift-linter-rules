@@ -32,7 +32,7 @@ extension Lint.Rule.ResultBuilder.ForLoop.Test {
         in source: Swift.String,
         rule: Lint.Rule.ResultBuilder.ForLoop = Lint.Rule.ResultBuilder.ForLoop(),
         file: Swift.String = "test.swift"
-    ) -> [Lint.Finding] {
+    ) -> [Diagnostic.Record] {
         let tree = Parser.parse(source: source)
         let converter = SourceLocationConverter(fileName: file, tree: tree)
         var manager = Source.Manager()

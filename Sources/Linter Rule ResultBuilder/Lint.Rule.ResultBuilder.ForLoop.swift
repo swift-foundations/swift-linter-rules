@@ -113,7 +113,7 @@ extension Lint.Rule.ResultBuilder {
             self.allowlist = allowlist
         }
 
-        public func findings(in source: Lint.Source.Parsed) -> [Lint.Finding] {
+        public func findings(in source: Lint.Source.Parsed) -> [Diagnostic.Record] {
             let visitor = Visitor(
                 source: source.file,
                 severity: severity,
@@ -143,7 +143,7 @@ extension Lint.Rule.ResultBuilder.ForLoop {
         let severity: Diagnostic.Severity
         let allowlist: Set<Swift.String>
         let converter: SourceLocationConverter
-        var matches: [Lint.Finding] = []
+        var matches: [Diagnostic.Record] = []
 
         init(
             source: Source.File,
@@ -185,7 +185,7 @@ extension Lint.Rule.ResultBuilder.ForLoop {
         private func emit(at position: AbsolutePosition) {
             let location = converter.location(for: position)
             matches.append(
-                Lint.Finding(
+                Diagnostic.Record(
                     location: Source.Location(
                         fileID: source.fileID,
                         filePath: source.filePath,

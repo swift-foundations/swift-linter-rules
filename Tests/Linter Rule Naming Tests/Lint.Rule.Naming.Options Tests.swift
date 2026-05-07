@@ -24,7 +24,7 @@ extension Lint.Rule.Naming.Options {
 }
 
 extension Lint.Rule.Naming.Options.Test {
-    static func findings(in source: String, file: String = "test.swift") -> [Lint.Finding] {
+    static func findings(in source: String, file: String = "test.swift") -> [Diagnostic.Record] {
         let tree = Parser.parse(source: source)
         let converter = SourceLocationConverter(fileName: file, tree: tree)
         var manager = Source.Manager()
