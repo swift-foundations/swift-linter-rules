@@ -49,10 +49,6 @@ let package = Package(
             name: "Linter Rule Naming",
             targets: ["Linter Rule Naming"]
         ),
-        .library(
-            name: "Linter Rule Tag Suffix",
-            targets: ["Linter Rule Tag Suffix"]
-        ),
     ],
     dependencies: [
         .package(path: "../../swift-primitives/swift-linter-primitives"),
@@ -125,15 +121,6 @@ let package = Package(
             ]
         ),
 
-        // MARK: - Linter Rule Tag Suffix
-        .target(
-            name: "Linter Rule Tag Suffix",
-            dependencies: [
-                .product(name: "Linter Primitives", package: "swift-linter-primitives"),
-                .product(name: "SwiftSyntax", package: "swift-syntax"),
-            ]
-        ),
-
         // MARK: - Tests
         .testTarget(
             name: "Linter Rule Unchecked Tests",
@@ -184,13 +171,6 @@ let package = Package(
             name: "Linter Rule Naming Tests",
             dependencies: [
                 "Linter Rule Naming",
-                .product(name: "SwiftParser", package: "swift-syntax"),
-            ]
-        ),
-        .testTarget(
-            name: "Linter Rule Tag Suffix Tests",
-            dependencies: [
-                "Linter Rule Tag Suffix",
                 .product(name: "SwiftParser", package: "swift-syntax"),
             ]
         ),

@@ -26,8 +26,8 @@ internal import SwiftSyntax
 /// cases (enum). The empty-body heuristic isolates phantom-type markers
 /// from legitimate types that happen to end in `Tag` (e.g., `XMLTag`
 /// would have stored properties for name/attributes/content).
-extension Lint.Rule {
-    public struct TagSuffix: Lint.Rule.`Protocol` {
+extension Lint.Rule.Naming {
+    public struct Tag: Lint.Rule.`Protocol` {
         public static let id: Lint.Rule.ID = "tag_suffix"
         public static let defaultSeverity: Diagnostic.Severity = .warning
 
@@ -46,7 +46,7 @@ extension Lint.Rule {
     }
 }
 
-extension Lint.Rule.TagSuffix {
+extension Lint.Rule.Naming.Tag {
     @usableFromInline
     static let message: Swift.String =
         "[tag_suffix] feedback_no_tag_suffix: phantom-type tags MUST use the concept name "
@@ -122,8 +122,8 @@ extension Lint.Rule.TagSuffix {
                     column: location.column
                 ),
                 severity: severity,
-                identifier: Lint.Rule.TagSuffix.id.underlying,
-                message: Lint.Rule.TagSuffix.message
+                identifier: Lint.Rule.Naming.Tag.id.underlying,
+                message: Lint.Rule.Naming.Tag.message
             ))
         }
     }
