@@ -38,8 +38,8 @@ let package = Package(
 
         // Wave 1 — AI-harness rule encoding (Phase 4).
         .library(
-            name: "Linter Rule Try Optional",
-            targets: ["Linter Rule Try Optional"]
+            name: "Linter Rule Try",
+            targets: ["Linter Rule Try"]
         ),
         .library(
             name: "Linter Rule Untyped Throws",
@@ -110,9 +110,9 @@ let package = Package(
 
         // MARK: - Wave 1 — AI-harness rules (Phase 4)
 
-        // MARK: - Linter Rule Try Optional
+        // MARK: - Linter Rule Try
         .target(
-            name: "Linter Rule Try Optional",
+            name: "Linter Rule Try",
             dependencies: [
                 .product(name: "Linter Primitives", package: "swift-linter-primitives"),
                 .product(name: "SwiftSyntax", package: "swift-syntax"),
@@ -206,9 +206,9 @@ let package = Package(
         // MARK: - Wave 1 Tests (Phase 4)
 
         .testTarget(
-            name: "Linter Rule Try Optional Tests",
+            name: "Linter Rule Try Tests",
             dependencies: [
-                "Linter Rule Try Optional",
+                "Linter Rule Try",
                 .product(name: "SwiftParser", package: "swift-syntax"),
             ]
         ),

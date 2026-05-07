@@ -13,9 +13,9 @@ import Testing
 import SwiftSyntax
 import SwiftParser
 import Linter_Primitives
-@testable import Linter_Rule_Try_Optional
+@testable import Linter_Rule_Try
 
-extension Lint.Rule.TryOptional {
+extension Lint.Rule.Try {
     @Suite
     struct Test {
         @Suite struct Unit {}
@@ -23,22 +23,22 @@ extension Lint.Rule.TryOptional {
     }
 }
 
-extension Lint.Rule.TryOptional.Test {
+extension Lint.Rule.Try.Test {
     static func findings(in source: String, file: String = "test.swift") -> [Lint.Finding] {
         let tree = Parser.parse(source: source)
         let converter = SourceLocationConverter(fileName: file, tree: tree)
         var manager = Source.Manager()
         let id = manager.register(fileID: file, filePath: file, content: Array(source.utf8))
         let parsed = Lint.Source.Parsed(file: manager.file(for: id), tree: tree, converter: converter)
-        return Lint.Rule.TryOptional().findings(in: parsed)
+        return Lint.Rule.Try().findings(in: parsed)
     }
 }
 
-extension Lint.Rule.TryOptional.Test.Unit {
+extension Lint.Rule.Try.Test.Unit {
     @Test
     func `try? at top level is flagged`() {
         let source = "let x = try? throwingCall()"
-        let findings = Lint.Rule.TryOptional.Test.findings(in: source)
+        let findings = Lint.Rule.Try.Test.findings(in: source)
         let count = findings.count
         #expect(count == 1)
         if count == 1 {
@@ -55,7 +55,7 @@ extension Lint.Rule.TryOptional.Test.Unit {
             _ = result
         }
         """
-        let findings = Lint.Rule.TryOptional.Test.findings(in: source)
+        let findings = Lint.Rule.Try.Test.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -66,21 +66,21 @@ extension Lint.Rule.TryOptional.Test.Unit {
         let b = try? g()
         let c = try? h()
         """
-        let findings = Lint.Rule.TryOptional.Test.findings(in: source)
+        let findings = Lint.Rule.Try.Test.findings(in: source)
         #expect(findings.count == 3)
     }
 
     @Test
     func `try? as a discarded expression is flagged`() {
         let source = "_ = try? cleanup()"
-        let findings = Lint.Rule.TryOptional.Test.findings(in: source)
+        let findings = Lint.Rule.Try.Test.findings(in: source)
         #expect(findings.count == 1)
     }
 
     @Test
     func `nested try? inside method chain is flagged`() {
         let source = "let x = (try? loader.load())?.result"
-        let findings = Lint.Rule.TryOptional.Test.findings(in: source)
+        let findings = Lint.Rule.Try.Test.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -92,7 +92,7 @@ extension Lint.Rule.TryOptional.Test.Unit {
         var manager = Source.Manager()
         let id = manager.register(fileID: "test.swift", filePath: "test.swift", content: Array(source.utf8))
         let parsed = Lint.Source.Parsed(file: manager.file(for: id), tree: tree, converter: converter)
-        let rule = Lint.Rule.TryOptional(severity: .error)
+        let rule = Lint.Rule.Try(severity: .error)
         let findings = rule.findings(in: parsed)
         let count = findings.count
         #expect(count == 1)
@@ -102,7 +102,7 @@ extension Lint.Rule.TryOptional.Test.Unit {
     }
 }
 
-extension Lint.Rule.TryOptional.Test.`Edge Case` {
+extension Lint.Rule.Try.Test.`Edge Case` {
     @Test
     func `try without ? or ! is NOT flagged`() {
         let source = """
@@ -113,21 +113,21 @@ extension Lint.Rule.TryOptional.Test.`Edge Case` {
             _ = error
         }
         """
-        let findings = Lint.Rule.TryOptional.Test.findings(in: source)
+        let findings = Lint.Rule.Try.Test.findings(in: source)
         #expect(findings.isEmpty)
     }
 
     @Test
     func `try! is NOT flagged`() {
         let source = "let x = try! f()"
-        let findings = Lint.Rule.TryOptional.Test.findings(in: source)
+        let findings = Lint.Rule.Try.Test.findings(in: source)
         #expect(findings.isEmpty)
     }
 
     @Test
     func `try? in a string literal is NOT flagged`() {
         let source = "let s = \"let x = try? f()\""
-        let findings = Lint.Rule.TryOptional.Test.findings(in: source)
+        let findings = Lint.Rule.Try.Test.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -137,13 +137,13 @@ extension Lint.Rule.TryOptional.Test.`Edge Case` {
         // let x = try? f()
         let y = 42
         """
-        let findings = Lint.Rule.TryOptional.Test.findings(in: source)
+        let findings = Lint.Rule.Try.Test.findings(in: source)
         #expect(findings.isEmpty)
     }
 
     @Test
     func `empty file produces no findings`() {
-        let findings = Lint.Rule.TryOptional.Test.findings(in: "")
+        let findings = Lint.Rule.Try.Test.findings(in: "")
         #expect(findings.isEmpty)
     }
 
@@ -155,7 +155,7 @@ extension Lint.Rule.TryOptional.Test.`Edge Case` {
         }
         _ = action
         """
-        let findings = Lint.Rule.TryOptional.Test.findings(in: source)
+        let findings = Lint.Rule.Try.Test.findings(in: source)
         #expect(findings.count == 1)
     }
 }

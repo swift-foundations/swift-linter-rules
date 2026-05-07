@@ -26,7 +26,7 @@ internal import SwiftSyntax
 /// AST shape: `TryExprSyntax` whose `questionOrExclamationMark.tokenKind`
 /// is `.postfixQuestionMark`.
 extension Lint.Rule {
-    public struct TryOptional: Lint.Rule.`Protocol` {
+    public struct Try: Lint.Rule.`Protocol` {
         public static let id: Lint.Rule.ID = "try_optional"
         public static let defaultSeverity: Diagnostic.Severity = .warning
 
@@ -45,7 +45,7 @@ extension Lint.Rule {
     }
 }
 
-extension Lint.Rule.TryOptional {
+extension Lint.Rule.Try {
     @usableFromInline
     static let message: Swift.String =
         "[try_optional] feedback_prefer_typed_throws_over_try_optional: "
@@ -84,8 +84,8 @@ extension Lint.Rule.TryOptional {
                     column: location.column
                 ),
                 severity: severity,
-                identifier: Lint.Rule.TryOptional.id.underlying,
-                message: Lint.Rule.TryOptional.message
+                identifier: Lint.Rule.Try.id.underlying,
+                message: Lint.Rule.Try.message
             ))
             return .visitChildren
         }
