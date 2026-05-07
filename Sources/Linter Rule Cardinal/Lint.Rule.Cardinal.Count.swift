@@ -10,8 +10,8 @@
 // ===----------------------------------------------------------------------===//
 
 public import Linter_Primitives
-public import SwiftSyntax
-public import SwiftOperators
+internal import SwiftSyntax
+internal import SwiftOperators
 
 /// R1 — `count - 1` and its semantically-equivalent rewrites.
 ///

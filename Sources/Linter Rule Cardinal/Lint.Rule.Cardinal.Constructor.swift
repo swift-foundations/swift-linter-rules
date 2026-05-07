@@ -10,7 +10,7 @@
 // ===----------------------------------------------------------------------===//
 
 public import Linter_Primitives
-public import SwiftSyntax
+internal import SwiftSyntax
 
 /// R2 — `Cardinal(0)` / `Cardinal(1)` constructor calls.
 ///
