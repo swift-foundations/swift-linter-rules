@@ -35,6 +35,36 @@ let package = Package(
             name: "Linter Rule ResultBuilder",
             targets: ["Linter Rule ResultBuilder"]
         ),
+
+        // Wave 1 — AI-harness rule encoding (Phase 4).
+        .library(
+            name: "Linter Rule Try Optional",
+            targets: ["Linter Rule Try Optional"]
+        ),
+        .library(
+            name: "Linter Rule Untyped Throws",
+            targets: ["Linter Rule Untyped Throws"]
+        ),
+        .library(
+            name: "Linter Rule Existential Throws",
+            targets: ["Linter Rule Existential Throws"]
+        ),
+        .library(
+            name: "Linter Rule Var Named Impl",
+            targets: ["Linter Rule Var Named Impl"]
+        ),
+        .library(
+            name: "Linter Rule Option Named Flags",
+            targets: ["Linter Rule Option Named Flags"]
+        ),
+        .library(
+            name: "Linter Rule Compound Identifier",
+            targets: ["Linter Rule Compound Identifier"]
+        ),
+        .library(
+            name: "Linter Rule Tag Suffix",
+            targets: ["Linter Rule Tag Suffix"]
+        ),
     ],
     dependencies: [
         .package(path: "../../swift-primitives/swift-linter-primitives"),
@@ -78,6 +108,71 @@ let package = Package(
             ]
         ),
 
+        // MARK: - Wave 1 — AI-harness rules (Phase 4)
+
+        // MARK: - Linter Rule Try Optional
+        .target(
+            name: "Linter Rule Try Optional",
+            dependencies: [
+                .product(name: "Linter Primitives", package: "swift-linter-primitives"),
+                .product(name: "SwiftSyntax", package: "swift-syntax"),
+            ]
+        ),
+
+        // MARK: - Linter Rule Untyped Throws
+        .target(
+            name: "Linter Rule Untyped Throws",
+            dependencies: [
+                .product(name: "Linter Primitives", package: "swift-linter-primitives"),
+                .product(name: "SwiftSyntax", package: "swift-syntax"),
+            ]
+        ),
+
+        // MARK: - Linter Rule Existential Throws
+        .target(
+            name: "Linter Rule Existential Throws",
+            dependencies: [
+                .product(name: "Linter Primitives", package: "swift-linter-primitives"),
+                .product(name: "SwiftSyntax", package: "swift-syntax"),
+            ]
+        ),
+
+        // MARK: - Linter Rule Var Named Impl
+        .target(
+            name: "Linter Rule Var Named Impl",
+            dependencies: [
+                .product(name: "Linter Primitives", package: "swift-linter-primitives"),
+                .product(name: "SwiftSyntax", package: "swift-syntax"),
+            ]
+        ),
+
+        // MARK: - Linter Rule Option Named Flags
+        .target(
+            name: "Linter Rule Option Named Flags",
+            dependencies: [
+                .product(name: "Linter Primitives", package: "swift-linter-primitives"),
+                .product(name: "SwiftSyntax", package: "swift-syntax"),
+            ]
+        ),
+
+        // MARK: - Linter Rule Compound Identifier
+        .target(
+            name: "Linter Rule Compound Identifier",
+            dependencies: [
+                .product(name: "Linter Primitives", package: "swift-linter-primitives"),
+                .product(name: "SwiftSyntax", package: "swift-syntax"),
+            ]
+        ),
+
+        // MARK: - Linter Rule Tag Suffix
+        .target(
+            name: "Linter Rule Tag Suffix",
+            dependencies: [
+                .product(name: "Linter Primitives", package: "swift-linter-primitives"),
+                .product(name: "SwiftSyntax", package: "swift-syntax"),
+            ]
+        ),
+
         // MARK: - Tests
         .testTarget(
             name: "Linter Rule Unchecked Tests",
@@ -104,6 +199,58 @@ let package = Package(
             name: "Linter Rule ResultBuilder Tests",
             dependencies: [
                 "Linter Rule ResultBuilder",
+                .product(name: "SwiftParser", package: "swift-syntax"),
+            ]
+        ),
+
+        // MARK: - Wave 1 Tests (Phase 4)
+
+        .testTarget(
+            name: "Linter Rule Try Optional Tests",
+            dependencies: [
+                "Linter Rule Try Optional",
+                .product(name: "SwiftParser", package: "swift-syntax"),
+            ]
+        ),
+        .testTarget(
+            name: "Linter Rule Untyped Throws Tests",
+            dependencies: [
+                "Linter Rule Untyped Throws",
+                .product(name: "SwiftParser", package: "swift-syntax"),
+            ]
+        ),
+        .testTarget(
+            name: "Linter Rule Existential Throws Tests",
+            dependencies: [
+                "Linter Rule Existential Throws",
+                .product(name: "SwiftParser", package: "swift-syntax"),
+            ]
+        ),
+        .testTarget(
+            name: "Linter Rule Var Named Impl Tests",
+            dependencies: [
+                "Linter Rule Var Named Impl",
+                .product(name: "SwiftParser", package: "swift-syntax"),
+            ]
+        ),
+        .testTarget(
+            name: "Linter Rule Option Named Flags Tests",
+            dependencies: [
+                "Linter Rule Option Named Flags",
+                .product(name: "SwiftParser", package: "swift-syntax"),
+            ]
+        ),
+        .testTarget(
+            name: "Linter Rule Compound Identifier Tests",
+            dependencies: [
+                "Linter Rule Compound Identifier",
+                .product(name: "SwiftParser", package: "swift-syntax"),
+            ]
+        ),
+        .testTarget(
+            name: "Linter Rule Tag Suffix Tests",
+            dependencies: [
+                "Linter Rule Tag Suffix",
                 .product(name: "SwiftParser", package: "swift-syntax"),
             ]
         ),
