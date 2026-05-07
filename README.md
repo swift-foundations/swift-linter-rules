@@ -67,13 +67,13 @@ Each pack ships as its own SwiftPM product. Activate per-rule via the
 | `Linter Rule RawValue` | `chained_rawvalue_access` | Chained `.rawValue.method()` patterns that escape the typed wrapper |
 | `Linter Rule RawValue` | `bitpattern_rawvalue_chain` | Bit-pattern conversions chaining `.rawValue` |
 | `Linter Rule ResultBuilder` | `result_builder_for_loop` | `for i in 0..<N { i }` style integer loops in builder bodies |
-| `Linter Rule Try Optional` | `try_optional` | `try?` sites that swallow typed-throws errors silently |
-| `Linter Rule Untyped Throws` | `untyped_throws` | `throws` declarations without a typed-throws clause |
-| `Linter Rule Existential Throws` | `existential_throws` | `throws(any Error)` existential-error declarations |
-| `Linter Rule Var Named Impl` | `var_named_impl` | Local bindings named `impl` (use the type's own name) |
-| `Linter Rule Option Named Flags` | `option_named_flags` | `OptionSet` types named `*.Flags` (use `*.Options`) |
-| `Linter Rule Compound Identifier` | `compound_identifier` | Compound type, method, or property names that should decompose into nested forms |
-| `Linter Rule Tag Suffix` | `tag_suffix` | Phantom-type tags suffixed with `Tag` (use the bare concept name) |
+| `Linter Rule Try` | `try_optional` | `try?` sites that swallow typed-throws errors silently |
+| `Linter Rule Throws` | `untyped_throws` | `throws` declarations without a typed-throws clause |
+| `Linter Rule Throws` | `existential_throws` | `throws(any Error)` existential-error declarations |
+| `Linter Rule Naming` | `var_named_impl` | Local bindings named `impl` (use the type's own name) |
+| `Linter Rule Naming` | `option_named_flags` | `OptionSet` types named `*.Flags` (use `*.Options`) |
+| `Linter Rule Naming` | `compound_identifier` | Compound type, method, or property names that should decompose into nested forms |
+| `Linter Rule Naming` | `tag_suffix` | Phantom-type tags suffixed with `Tag` (use the bare concept name) |
 
 Each rule's source carries inline documentation describing its AST
 predicate, the source patterns it covers, and the convention it enforces.
