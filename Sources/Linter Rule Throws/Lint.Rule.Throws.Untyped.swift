@@ -24,8 +24,8 @@ internal import SwiftSyntax
 /// AST shape: a `ThrowsClauseSyntax` whose `type` field (the typed-throws
 /// specifier appearing inside parentheses) is `nil`. This catches both
 /// `func f() throws` and `func g() async throws -> T`.
-extension Lint.Rule {
-    public struct UntypedThrows: Lint.Rule.`Protocol` {
+extension Lint.Rule.Throws {
+    public struct Untyped: Lint.Rule.`Protocol` {
         public static let id: Lint.Rule.ID = "untyped_throws"
         public static let defaultSeverity: Diagnostic.Severity = .warning
 
@@ -44,7 +44,7 @@ extension Lint.Rule {
     }
 }
 
-extension Lint.Rule.UntypedThrows {
+extension Lint.Rule.Throws.Untyped {
     @usableFromInline
     static let message: Swift.String =
         "[untyped_throws] [API-ERR-001]: bare `throws` erases the error type. Use "
@@ -81,8 +81,8 @@ extension Lint.Rule.UntypedThrows {
                     column: location.column
                 ),
                 severity: severity,
-                identifier: Lint.Rule.UntypedThrows.id.underlying,
-                message: Lint.Rule.UntypedThrows.message
+                identifier: Lint.Rule.Throws.Untyped.id.underlying,
+                message: Lint.Rule.Throws.Untyped.message
             ))
             return .visitChildren
         }

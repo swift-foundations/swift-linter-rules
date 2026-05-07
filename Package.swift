@@ -42,8 +42,8 @@ let package = Package(
             targets: ["Linter Rule Try"]
         ),
         .library(
-            name: "Linter Rule Untyped Throws",
-            targets: ["Linter Rule Untyped Throws"]
+            name: "Linter Rule Throws",
+            targets: ["Linter Rule Throws"]
         ),
         .library(
             name: "Linter Rule Existential Throws",
@@ -119,9 +119,9 @@ let package = Package(
             ]
         ),
 
-        // MARK: - Linter Rule Untyped Throws
+        // MARK: - Linter Rule Throws
         .target(
-            name: "Linter Rule Untyped Throws",
+            name: "Linter Rule Throws",
             dependencies: [
                 .product(name: "Linter Primitives", package: "swift-linter-primitives"),
                 .product(name: "SwiftSyntax", package: "swift-syntax"),
@@ -213,9 +213,9 @@ let package = Package(
             ]
         ),
         .testTarget(
-            name: "Linter Rule Untyped Throws Tests",
+            name: "Linter Rule Throws Tests",
             dependencies: [
-                "Linter Rule Untyped Throws",
+                "Linter Rule Throws",
                 .product(name: "SwiftParser", package: "swift-syntax"),
             ]
         ),

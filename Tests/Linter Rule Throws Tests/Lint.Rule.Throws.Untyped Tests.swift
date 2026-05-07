@@ -13,9 +13,9 @@ import Testing
 import SwiftSyntax
 import SwiftParser
 import Linter_Primitives
-@testable import Linter_Rule_Untyped_Throws
+@testable import Linter_Rule_Throws
 
-extension Lint.Rule.UntypedThrows {
+extension Lint.Rule.Throws.Untyped {
     @Suite
     struct Test {
         @Suite struct Unit {}
@@ -23,22 +23,22 @@ extension Lint.Rule.UntypedThrows {
     }
 }
 
-extension Lint.Rule.UntypedThrows.Test {
+extension Lint.Rule.Throws.Untyped.Test {
     static func findings(in source: String, file: String = "test.swift") -> [Lint.Finding] {
         let tree = Parser.parse(source: source)
         let converter = SourceLocationConverter(fileName: file, tree: tree)
         var manager = Source.Manager()
         let id = manager.register(fileID: file, filePath: file, content: Array(source.utf8))
         let parsed = Lint.Source.Parsed(file: manager.file(for: id), tree: tree, converter: converter)
-        return Lint.Rule.UntypedThrows().findings(in: parsed)
+        return Lint.Rule.Throws.Untyped().findings(in: parsed)
     }
 }
 
-extension Lint.Rule.UntypedThrows.Test.Unit {
+extension Lint.Rule.Throws.Untyped.Test.Unit {
     @Test
     func `bare throws is flagged`() {
         let source = "func f() throws -> Int { 0 }"
-        let findings = Lint.Rule.UntypedThrows.Test.findings(in: source)
+        let findings = Lint.Rule.Throws.Untyped.Test.findings(in: source)
         let count = findings.count
         #expect(count == 1)
         if count == 1 {
@@ -50,7 +50,7 @@ extension Lint.Rule.UntypedThrows.Test.Unit {
     @Test
     func `async throws is flagged`() {
         let source = "func f() async throws -> Int { 0 }"
-        let findings = Lint.Rule.UntypedThrows.Test.findings(in: source)
+        let findings = Lint.Rule.Throws.Untyped.Test.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -61,7 +61,7 @@ extension Lint.Rule.UntypedThrows.Test.Unit {
             func f() throws -> Int
         }
         """
-        let findings = Lint.Rule.UntypedThrows.Test.findings(in: source)
+        let findings = Lint.Rule.Throws.Untyped.Test.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -72,7 +72,7 @@ extension Lint.Rule.UntypedThrows.Test.Unit {
         func b() throws -> Int { 0 }
         func c() async throws -> String { "" }
         """
-        let findings = Lint.Rule.UntypedThrows.Test.findings(in: source)
+        let findings = Lint.Rule.Throws.Untyped.Test.findings(in: source)
         #expect(findings.count == 3)
     }
 
@@ -83,33 +83,33 @@ extension Lint.Rule.UntypedThrows.Test.Unit {
             init() throws {}
         }
         """
-        let findings = Lint.Rule.UntypedThrows.Test.findings(in: source)
+        let findings = Lint.Rule.Throws.Untyped.Test.findings(in: source)
         #expect(findings.count == 1)
     }
 
     @Test
     func `closure type with bare throws is flagged`() {
         let source = "let f: () throws -> Int = { 0 }"
-        let findings = Lint.Rule.UntypedThrows.Test.findings(in: source)
+        let findings = Lint.Rule.Throws.Untyped.Test.findings(in: source)
         #expect(findings.count == 1)
     }
 }
 
-extension Lint.Rule.UntypedThrows.Test.`Edge Case` {
+extension Lint.Rule.Throws.Untyped.Test.`Edge Case` {
     @Test
     func `throws(SomeError) is NOT flagged`() {
         let source = """
         struct E: Swift.Error {}
         func f() throws(E) -> Int { 0 }
         """
-        let findings = Lint.Rule.UntypedThrows.Test.findings(in: source)
+        let findings = Lint.Rule.Throws.Untyped.Test.findings(in: source)
         #expect(findings.isEmpty)
     }
 
     @Test
     func `non-throwing function is NOT flagged`() {
         let source = "func f() -> Int { 0 }"
-        let findings = Lint.Rule.UntypedThrows.Test.findings(in: source)
+        let findings = Lint.Rule.Throws.Untyped.Test.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -119,20 +119,20 @@ extension Lint.Rule.UntypedThrows.Test.`Edge Case` {
         // The rule targets `throws` clauses only; the `rethrows` keyword is a different
         // syntax node. The argument-position `() throws -> T` is itself a bare-throws
         // closure type, however, which the rule DOES flag.
-        let findings = Lint.Rule.UntypedThrows.Test.findings(in: source)
+        let findings = Lint.Rule.Throws.Untyped.Test.findings(in: source)
         #expect(findings.count == 1)
     }
 
     @Test
     func `throws keyword in a string literal is NOT flagged`() {
         let source = "let s = \"func f() throws -> Int\""
-        let findings = Lint.Rule.UntypedThrows.Test.findings(in: source)
+        let findings = Lint.Rule.Throws.Untyped.Test.findings(in: source)
         #expect(findings.isEmpty)
     }
 
     @Test
     func `empty file produces no findings`() {
-        let findings = Lint.Rule.UntypedThrows.Test.findings(in: "")
+        let findings = Lint.Rule.Throws.Untyped.Test.findings(in: "")
         #expect(findings.isEmpty)
     }
 
@@ -143,7 +143,7 @@ extension Lint.Rule.UntypedThrows.Test.`Edge Case` {
             func compute() throws -> Int { self }
         }
         """
-        let findings = Lint.Rule.UntypedThrows.Test.findings(in: source)
+        let findings = Lint.Rule.Throws.Untyped.Test.findings(in: source)
         #expect(findings.count == 1)
     }
 }
