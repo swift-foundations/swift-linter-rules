@@ -74,6 +74,7 @@ extension Lint.Rule.CompoundIdentifier {
     static let stdlibIdiomNames: Swift.Set<Swift.String> = [
         "rawValue",
         "customMirror",
+        "description",
         "debugDescription",
         "hashValue",
         "bitPattern",

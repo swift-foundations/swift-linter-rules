@@ -124,6 +124,17 @@ extension Lint.Rule.CompoundIdentifier.Test.`Edge Case` {
     }
 
     @Test
+    func `CustomStringConvertible description is NOT flagged`() {
+        let source = """
+        struct X: CustomStringConvertible {
+            var description: String { "x" }
+        }
+        """
+        let findings = Lint.Rule.CompoundIdentifier.Test.findings(in: source)
+        #expect(findings.isEmpty)
+    }
+
+    @Test
     func `package-scoped compound is NOT flagged`() {
         let source = "package func walkFiles() {}"
         let findings = Lint.Rule.CompoundIdentifier.Test.findings(in: source)
