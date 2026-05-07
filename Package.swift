@@ -50,10 +50,6 @@ let package = Package(
             targets: ["Linter Rule Naming"]
         ),
         .library(
-            name: "Linter Rule Compound Identifier",
-            targets: ["Linter Rule Compound Identifier"]
-        ),
-        .library(
             name: "Linter Rule Tag Suffix",
             targets: ["Linter Rule Tag Suffix"]
         ),
@@ -129,15 +125,6 @@ let package = Package(
             ]
         ),
 
-        // MARK: - Linter Rule Compound Identifier
-        .target(
-            name: "Linter Rule Compound Identifier",
-            dependencies: [
-                .product(name: "Linter Primitives", package: "swift-linter-primitives"),
-                .product(name: "SwiftSyntax", package: "swift-syntax"),
-            ]
-        ),
-
         // MARK: - Linter Rule Tag Suffix
         .target(
             name: "Linter Rule Tag Suffix",
@@ -197,13 +184,6 @@ let package = Package(
             name: "Linter Rule Naming Tests",
             dependencies: [
                 "Linter Rule Naming",
-                .product(name: "SwiftParser", package: "swift-syntax"),
-            ]
-        ),
-        .testTarget(
-            name: "Linter Rule Compound Identifier Tests",
-            dependencies: [
-                "Linter Rule Compound Identifier",
                 .product(name: "SwiftParser", package: "swift-syntax"),
             ]
         ),

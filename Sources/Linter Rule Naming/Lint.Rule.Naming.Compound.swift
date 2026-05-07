@@ -37,8 +37,8 @@ internal import SwiftSyntax
 ///   (compound permitted at package scope for internal impl).
 /// - Function parameter labels (signature ergonomics often require
 ///   compound `at`/`with` style; rule visits decl names only).
-extension Lint.Rule {
-    public struct CompoundIdentifier: Lint.Rule.`Protocol` {
+extension Lint.Rule.Naming {
+    public struct Compound: Lint.Rule.`Protocol` {
         public static let id: Lint.Rule.ID = "compound_identifier"
         public static let defaultSeverity: Diagnostic.Severity = .warning
 
@@ -57,7 +57,7 @@ extension Lint.Rule {
     }
 }
 
-extension Lint.Rule.CompoundIdentifier {
+extension Lint.Rule.Naming.Compound {
     @usableFromInline
     static let message: Swift.String =
         "[compound_identifier] [API-NAME-002]: methods and properties MUST NOT use "
@@ -134,10 +134,10 @@ extension Lint.Rule.CompoundIdentifier {
         }
 
         private func isCompoundIdentifier(_ name: Swift.String) -> Bool {
-            guard !Lint.Rule.CompoundIdentifier.stdlibIdiomNames.contains(name) else {
+            guard !Lint.Rule.Naming.Compound.stdlibIdiomNames.contains(name) else {
                 return false
             }
-            for prefix in Lint.Rule.CompoundIdentifier.booleanPrefixes {
+            for prefix in Lint.Rule.Naming.Compound.booleanPrefixes {
                 if name.hasPrefix(prefix), name.count > prefix.count {
                     let nextIndex = name.index(name.startIndex, offsetBy: prefix.count)
                     if name[nextIndex].isUppercase {
@@ -177,8 +177,8 @@ extension Lint.Rule.CompoundIdentifier {
                     column: location.column
                 ),
                 severity: severity,
-                identifier: Lint.Rule.CompoundIdentifier.id.underlying,
-                message: Lint.Rule.CompoundIdentifier.message
+                identifier: Lint.Rule.Naming.Compound.id.underlying,
+                message: Lint.Rule.Naming.Compound.message
             ))
         }
     }
