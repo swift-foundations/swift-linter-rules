@@ -22,13 +22,13 @@ active:
 ```swift
 // Lint/Sources/Lint/main.swift
 import Linter
-import Linter Rule Unchecked
-import Linter Rule Cardinal
+import Linter_Rule_Unchecked
+import Linter_Rule_Cardinal
 
 let manifest = Lint.Manifest(
     enabledRuleIDs: [
-        Linter.Rule.Unchecked.ruleID,
-        Linter.Rule.Cardinal.ruleID,
+        Lint.Rule.Unchecked.id,
+        Lint.Rule.Cardinal.Count.id,
     ]
 )
 ```
@@ -92,12 +92,19 @@ public import Linter_Primitives
 internal import SwiftSyntax
 
 extension Lint.Rule {
-    public struct MyRule: Lint.Rule.Protocol {
+    public struct MyRule: Lint.Rule.`Protocol` {
         public static let id: Lint.Rule.ID = "my_rule"
         public static let defaultSeverity: Diagnostic.Severity = .warning
 
-        public static func diagnostics(for tree: SourceFileSyntax) -> [Diagnostic] {
-            // Walk the AST, return diagnostics for matching sites.
+        public let severity: Diagnostic.Severity
+
+        public init(severity: Diagnostic.Severity = .warning) {
+            self.severity = severity
+        }
+
+        public func findings(in source: Lint.Source.Parsed) -> [Lint.Finding] {
+            // Walk the AST, return findings for matching sites.
+            return []
         }
     }
 }
@@ -109,12 +116,12 @@ import your rule pack the same way:
 ```swift
 // Lint/Sources/Lint/main.swift
 import Linter
-import Linter Rule Cardinal       // institute-canonical pack
+import Linter_Rule_Cardinal       // institute-canonical pack
 import MyRule                      // third-party pack
 
 let manifest = Lint.Manifest(
     enabledRuleIDs: [
-        Linter.Rule.Cardinal.ruleID,
+        Lint.Rule.Cardinal.Count.id,
         Lint.Rule.MyRule.id,
     ]
 )
