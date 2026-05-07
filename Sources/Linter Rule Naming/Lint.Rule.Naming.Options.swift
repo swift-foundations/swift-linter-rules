@@ -23,8 +23,8 @@ internal import SwiftSyntax
 ///
 /// AST shape: a `StructDeclSyntax` whose name ends in `Flags` AND whose
 /// inheritance clause names `OptionSet` (or `Swift.OptionSet`).
-extension Lint.Rule {
-    public struct OptionNamedFlags: Lint.Rule.`Protocol` {
+extension Lint.Rule.Naming {
+    public struct Options: Lint.Rule.`Protocol` {
         public static let id: Lint.Rule.ID = "option_named_flags"
         public static let defaultSeverity: Diagnostic.Severity = .warning
 
@@ -43,7 +43,7 @@ extension Lint.Rule {
     }
 }
 
-extension Lint.Rule.OptionNamedFlags {
+extension Lint.Rule.Naming.Options {
     @usableFromInline
     static let message: Swift.String =
         "[option_named_flags] feedback_options_not_flags: an `OptionSet` type named with "
@@ -83,8 +83,8 @@ extension Lint.Rule.OptionNamedFlags {
                     column: location.column
                 ),
                 severity: severity,
-                identifier: Lint.Rule.OptionNamedFlags.id.underlying,
-                message: Lint.Rule.OptionNamedFlags.message
+                identifier: Lint.Rule.Naming.Options.id.underlying,
+                message: Lint.Rule.Naming.Options.message
             ))
             return .visitChildren
         }

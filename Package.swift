@@ -50,10 +50,6 @@ let package = Package(
             targets: ["Linter Rule Naming"]
         ),
         .library(
-            name: "Linter Rule Option Named Flags",
-            targets: ["Linter Rule Option Named Flags"]
-        ),
-        .library(
             name: "Linter Rule Compound Identifier",
             targets: ["Linter Rule Compound Identifier"]
         ),
@@ -133,15 +129,6 @@ let package = Package(
             ]
         ),
 
-        // MARK: - Linter Rule Option Named Flags
-        .target(
-            name: "Linter Rule Option Named Flags",
-            dependencies: [
-                .product(name: "Linter Primitives", package: "swift-linter-primitives"),
-                .product(name: "SwiftSyntax", package: "swift-syntax"),
-            ]
-        ),
-
         // MARK: - Linter Rule Compound Identifier
         .target(
             name: "Linter Rule Compound Identifier",
@@ -210,13 +197,6 @@ let package = Package(
             name: "Linter Rule Naming Tests",
             dependencies: [
                 "Linter Rule Naming",
-                .product(name: "SwiftParser", package: "swift-syntax"),
-            ]
-        ),
-        .testTarget(
-            name: "Linter Rule Option Named Flags Tests",
-            dependencies: [
-                "Linter Rule Option Named Flags",
                 .product(name: "SwiftParser", package: "swift-syntax"),
             ]
         ),
