@@ -49,6 +49,10 @@ let package = Package(
             name: "Linter Rule Naming",
             targets: ["Linter Rule Naming"]
         ),
+        .library(
+            name: "Linter Rules Test Support",
+            targets: ["Linter Rules Test Support"]
+        ),
     ],
     dependencies: [
         .package(path: "../../swift-primitives/swift-linter-primitives"),
@@ -121,11 +125,30 @@ let package = Package(
             ]
         ),
 
+        // MARK: - Test Support
+        .target(
+            name: "Linter Rules Test Support",
+            dependencies: [
+                "Linter Rule Cardinal",
+                "Linter Rule Naming",
+                "Linter Rule RawValue",
+                "Linter Rule ResultBuilder",
+                "Linter Rule Throws",
+                "Linter Rule Try",
+                "Linter Rule Unchecked",
+                .product(name: "Linter Primitives Test Support", package: "swift-linter-primitives"),
+                .product(name: "SwiftParser", package: "swift-syntax"),
+                .product(name: "SwiftSyntax", package: "swift-syntax"),
+            ],
+            path: "Tests/Support"
+        ),
+
         // MARK: - Tests
         .testTarget(
             name: "Linter Rule Unchecked Tests",
             dependencies: [
                 "Linter Rule Unchecked",
+                "Linter Rules Test Support",
                 .product(name: "SwiftParser", package: "swift-syntax"),
             ]
         ),
@@ -133,6 +156,7 @@ let package = Package(
             name: "Linter Rule Cardinal Tests",
             dependencies: [
                 "Linter Rule Cardinal",
+                "Linter Rules Test Support",
                 .product(name: "SwiftParser", package: "swift-syntax"),
             ]
         ),
@@ -140,6 +164,7 @@ let package = Package(
             name: "Linter Rule RawValue Tests",
             dependencies: [
                 "Linter Rule RawValue",
+                "Linter Rules Test Support",
                 .product(name: "SwiftParser", package: "swift-syntax"),
             ]
         ),
@@ -147,6 +172,7 @@ let package = Package(
             name: "Linter Rule ResultBuilder Tests",
             dependencies: [
                 "Linter Rule ResultBuilder",
+                "Linter Rules Test Support",
                 .product(name: "SwiftParser", package: "swift-syntax"),
             ]
         ),
@@ -157,6 +183,7 @@ let package = Package(
             name: "Linter Rule Try Tests",
             dependencies: [
                 "Linter Rule Try",
+                "Linter Rules Test Support",
                 .product(name: "SwiftParser", package: "swift-syntax"),
             ]
         ),
@@ -164,6 +191,7 @@ let package = Package(
             name: "Linter Rule Throws Tests",
             dependencies: [
                 "Linter Rule Throws",
+                "Linter Rules Test Support",
                 .product(name: "SwiftParser", package: "swift-syntax"),
             ]
         ),
@@ -171,6 +199,7 @@ let package = Package(
             name: "Linter Rule Naming Tests",
             dependencies: [
                 "Linter Rule Naming",
+                "Linter Rules Test Support",
                 .product(name: "SwiftParser", package: "swift-syntax"),
             ]
         ),

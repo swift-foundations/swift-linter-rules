@@ -1,0 +1,45 @@
+// ===----------------------------------------------------------------------===//
+//
+// This source file is part of the swift-linter-rules open source project
+//
+// Copyright (c) 2026 Coen ten Thije Boonkkamp and the swift-linter-rules project authors
+// Licensed under Apache License v2.0
+//
+// See LICENSE for license information
+//
+// ===----------------------------------------------------------------------===//
+
+import SwiftParser
+import SwiftSyntax
+public import Linter_Primitives
+
+extension Lint.Source {
+    /// Build a `Lint.Source.Parsed` from a Swift source string for use
+    /// in rule unit tests.
+    ///
+    /// Each rule pack's tests currently re-implement this lifting flow
+    /// (`Source.Manager` register → `Parser.parse` → `SourceLocationConverter`).
+    /// This shared factory replaces those copies with one boundary.
+    /// Per `feedback_extension_inits_for_test_fixtures` the factory is
+    /// expressed as an extension init / static method on the type
+    /// being constructed (`Lint.Source.Parsed`) rather than a free
+    /// function, so call sites read `Lint.Source.Parsed.test(...)`.
+    public static func parsed(
+        from source: Swift.String,
+        file: Swift.String = "test.swift"
+    ) -> Lint.Source.Parsed {
+        let tree = Parser.parse(source: source)
+        let converter = SourceLocationConverter(fileName: file, tree: tree)
+        var manager = Source.Manager()
+        let id = manager.register(
+            fileID: file,
+            filePath: file,
+            content: Swift.Array(source.utf8)
+        )
+        return Lint.Source.Parsed(
+            file: manager.file(for: id),
+            tree: tree,
+            converter: converter
+        )
+    }
+}
