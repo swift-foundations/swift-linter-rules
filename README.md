@@ -1,46 +1,137 @@
 # swift-linter-rules
 
-L3-Foundations package shipping the institute-canonical SwiftSyntax-based
-lint rule catalog.
+![Development Status](https://img.shields.io/badge/status-active--development-blue.svg)
 
-## What it is
+Catalog of SwiftSyntax-based AST lint rules consumable by
+[`swift-linter`](https://github.com/swift-foundations/swift-linter) or any
+third-party tool that imports the `Linter Primitives` protocol surface.
+Each rule ships as its own SwiftPM library product so consumers activate
+exactly the rules they want.
 
-A third-party-adoptable rule library: each rule conforms to
-`Linter Primitives` (the L1 protocol surface) and emits diagnostics
-citing the institute skill / memory rule it enforces. Designed to be
-consumed by `swift-linter` (the executable / CLI / reporter shell) AND
-by any third-party tool that wants the same rule predicates without the
-linter shell.
+## Quick Start
 
-## What's here (Phase 3 catalog)
+In your `Lint/` nested SwiftPM package (per `swift-linter`'s adoption
+recipe), depend on this package and import the rule packs you want
+active:
 
-- `Linter Rule Unchecked` — R5: forbids `__unchecked:` at call sites
-  (CONV-016).
-- `Linter Rule Cardinal` — R1: forbids `count - 1` patterns where a
-  typed Cardinal would prevent the underflow (INFRA-200).
-- `Linter Rule RawValue` — chained `.rawValue.method()` patterns that
-  escape the typed system (CONV-016, INFRA-103).
-- `Linter Rule ResultBuilder` — `for i in 0..<N { i }` in builder
-  bodies (carry-forward Phase 2 rule).
+```swift
+// Lint/Package.swift
+.package(url: "https://github.com/swift-foundations/swift-linter-rules.git", from: "0.1.0"),
+```
 
-Phase 4 lands a wave of 7 additional rules encoded against
-institute skills + auto-memory feedback (separate dispatch per
-`HANDOFF-swift-linter-rules-wave-1-encoding.md`).
+```swift
+// Lint/Sources/Lint/main.swift
+import Linter
+import Linter Rule Unchecked
+import Linter Rule Cardinal
 
-## Layer position
+let manifest = Lint.Manifest(
+    enabledRuleIDs: [
+        Linter.Rule.Unchecked.ruleID,
+        Linter.Rule.Cardinal.ruleID,
+    ]
+)
+```
 
-Layer 3 (Foundations). Depends on `swift-linter-primitives` (L1
-protocol surface) and `swift-syntax` (Apple). Foundation-clean per
-`[PRIM-FOUND-001]` cascade.
+`swift run swift-linter <package>` builds the `Lint/` package and runs
+the activated rules against your sources.
+
+## Installation
+
+```swift
+dependencies: [
+    .package(url: "https://github.com/swift-foundations/swift-linter-rules.git", from: "0.1.0"),
+]
+```
+
+```swift
+.target(
+    name: "Lint",
+    dependencies: [
+        .product(name: "Linter Rule Cardinal", package: "swift-linter-rules"),
+        // ... additional rule pack products
+    ]
+)
+```
+
+## Rule catalog
+
+Each pack ships as its own SwiftPM product. Activate per-rule via the
+`Lint.Manifest`'s `enabledRuleIDs` list.
+
+| Pack product | Rule ID | What it catches |
+|---|---|---|
+| `Linter Rule Unchecked` | `unchecked_call_site` | `__unchecked:` argument labels at call sites that bypass the typed-system contract |
+| `Linter Rule Cardinal` | `cardinal_zero_one_constructor` | `Cardinal(0)` / `Cardinal(1)` constructor calls (use the typed `.zero` / `.one` accessors instead) |
+| `Linter Rule Cardinal` | `cardinal_count_minus_one` | `count - 1` and its semantically-equivalent rewrites — operand-reorder, paren-wrap, cast-outside |
+| `Linter Rule RawValue` | `chained_rawvalue_access` | Chained `.rawValue.method()` patterns that escape the typed wrapper |
+| `Linter Rule RawValue` | `bitpattern_rawvalue_chain` | Bit-pattern conversions chaining `.rawValue` |
+| `Linter Rule ResultBuilder` | `result_builder_for_loop` | `for i in 0..<N { i }` style integer loops in builder bodies |
+| `Linter Rule Try Optional` | `try_optional` | `try?` sites that swallow typed-throws errors silently |
+| `Linter Rule Untyped Throws` | `untyped_throws` | `throws` declarations without a typed-throws clause |
+| `Linter Rule Existential Throws` | `existential_throws` | `throws(any Error)` existential-error declarations |
+| `Linter Rule Var Named Impl` | `var_named_impl` | Local bindings named `impl` (use the type's own name) |
+| `Linter Rule Option Named Flags` | `option_named_flags` | `OptionSet` types named `*.Flags` (use `*.Options`) |
+| `Linter Rule Compound Identifier` | `compound_identifier` | Compound type, method, or property names that should decompose into nested forms |
+| `Linter Rule Tag Suffix` | `tag_suffix` | Phantom-type tags suffixed with `Tag` (use the bare concept name) |
+
+Each rule's source carries inline documentation describing its AST
+predicate, the source patterns it covers, and the convention it enforces.
+
+## Authoring third-party rule packs
+
+Every rule pack — institute-canonical or third-party — implements the
+same protocol surface from
+[`swift-linter-primitives`](https://github.com/swift-primitives/swift-linter-primitives).
+A minimal third-party rule pack is one library product with a type
+conforming to `Lint.Rule.Protocol`:
+
+```swift
+// Sources/MyRule/MyRule.swift
+public import Linter_Primitives
+internal import SwiftSyntax
+
+extension Lint.Rule {
+    public struct MyRule: Lint.Rule.Protocol {
+        public static let id: Lint.Rule.ID = "my_rule"
+        public static let defaultSeverity: Diagnostic.Severity = .warning
+
+        public static func diagnostics(for tree: SourceFileSyntax) -> [Diagnostic] {
+            // Walk the AST, return diagnostics for matching sites.
+        }
+    }
+}
+```
+
+Consumers depend on your package alongside `swift-linter-rules` and
+import your rule pack the same way:
+
+```swift
+// Lint/Sources/Lint/main.swift
+import Linter
+import Linter Rule Cardinal       // institute-canonical pack
+import MyRule                      // third-party pack
+
+let manifest = Lint.Manifest(
+    enabledRuleIDs: [
+        Linter.Rule.Cardinal.ruleID,
+        Lint.Rule.MyRule.id,
+    ]
+)
+```
+
+The `swift-linter` driver makes no distinction between canonical and
+third-party packs — both flow through the same `Lint.Manifest`
+activation mechanism.
 
 ## Consumers
 
-- `swift-foundations/swift-linter` — primary consumer; the CLI
-  shell composes rules + reporters + manifest resolution.
-- (Future) third-party tooling — same rule predicates without the
-  linter executable.
+- [`swift-linter`](https://github.com/swift-foundations/swift-linter) —
+  the CLI driver and reporter shell.
+- Any third-party tooling that wants the same rule predicates without the
+  swift-linter executable (the predicates are pure functions over a
+  `SourceFileSyntax`).
 
-## Status
+## License
 
-Pre-1.0. The catalog is structurally stable; rule predicate logic
-is unchanged from Phase 2's pre-extraction state.
+Apache 2.0. See [LICENSE.md](LICENSE.md).
