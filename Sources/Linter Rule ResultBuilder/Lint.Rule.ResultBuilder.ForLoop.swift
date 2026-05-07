@@ -129,14 +129,14 @@ extension Lint.Rule.ResultBuilder {
 extension Lint.Rule.ResultBuilder.ForLoop {
     @usableFromInline
     static let message: Swift.String =
-        "`for`-loop in result-builder body materializes a fresh [Element] per "
-        + "iteration (12-44x slower than imperative under SE-0289). Write the "
-        + "sequence directly: `Builder { 0..<N }` instead of `Builder { for i "
-        + "in 0..<N { i } }`. See "
-        + "swift-institute/Research/result-builder-performance-optimization.md "
-        + "(DECISION v2.0.0). If iteration is genuinely required, escalate to "
-        + "supervisor and apply `// swiftlint:disable:next "
-        + "result_builder_for_loop  // reason: <citation>`."
+        "[result_builder_for_loop] result-builder-performance-optimization.md (DECISION "
+        + "v2.0.0): `for`-loop in result-builder body materializes a fresh [Element] per "
+        + "iteration (12-44x slower than imperative under SE-0289). Write the sequence "
+        + "directly: `Builder { 0..<N }` instead of `Builder { for i in 0..<N { i } }`. "
+        + "See swift-institute/Research/result-builder-performance-optimization.md for "
+        + "the full design rationale. If iteration is genuinely required, escalate to "
+        + "supervisor and apply "
+        + "`// swiftlint:disable:next result_builder_for_loop  // reason: <citation>`."
 
     final class Visitor: SyntaxVisitor {
         let source: Source.File

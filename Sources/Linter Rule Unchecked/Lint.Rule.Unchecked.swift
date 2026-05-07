@@ -50,11 +50,12 @@ extension Lint.Rule {
 extension Lint.Rule.Unchecked {
     @usableFromInline
     static let message: Swift.String =
-        "`__unchecked:` at a call site is a Tier-5 last-resort bypass of the typed system "
-        + "([CONV-016]). Prefer `.retag()` (Tier 1) or `.map()` (Tier 2) before resorting to "
-        + "`__unchecked:`. If this site is the typed-system bottom-out (extension-init "
-        + "internals, [CONV-001] permitted same-package use), escalate to supervisor and "
-        + "apply `// swiftlint:disable:next unchecked_call_site  // reason: <citation>`."
+        "[unchecked_call_site] [CONV-016]: `__unchecked:` at a call site is a Tier-5 "
+        + "last-resort bypass of the typed system. Prefer `.retag()` (Tier 1) or `.map()` "
+        + "(Tier 2) before resorting to `__unchecked:`. If this site is the typed-system "
+        + "bottom-out (extension-init internals, [CONV-001] permitted same-package use), "
+        + "escalate to supervisor and apply "
+        + "`// swiftlint:disable:next unchecked_call_site  // reason: <citation>`."
 
     final class Visitor: SyntaxVisitor {
         let source: Source.File

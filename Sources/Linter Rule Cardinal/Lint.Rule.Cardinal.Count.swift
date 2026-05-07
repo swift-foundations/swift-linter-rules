@@ -81,15 +81,14 @@ extension Lint.Rule.Cardinal {
 extension Lint.Rule.Cardinal.Count {
     @usableFromInline
     static let message: Swift.String =
-        "`<expr>.count - 1` (or syntactic equivalents — paren-wrap `(seq.count) - 1`, "
-        + "cast-outside `Double(seq.count) - 1`, algebraic-flip `+ 1 [<=] seq.count`, "
-        + "operand-reorder `seq.count - i - 1`) indicates `count: Int` not "
-        + "`count: Cardinal` (the typed form would not compile per [INFRA-200]). "
-        + "Use `.subtract.saturating(.one)` / `.subtract.exact(.one)` / typed "
-        + "`count - .one` per [INFRA-025], or for stdlib-Int sites where no typed "
-        + "surface is available either (α) use the stdlib's named idiom for the "
-        + "concept (`indices.dropLast()`, `.last`, `endIndex - 1`) or (β) escalate "
-        + "to supervisor and apply "
+        "[cardinal_count_minus_one] [INFRA-200]: `<expr>.count - 1` (or syntactic "
+        + "equivalents — paren-wrap `(seq.count) - 1`, cast-outside `Double(seq.count) - 1`, "
+        + "algebraic-flip `+ 1 [<=] seq.count`, operand-reorder `seq.count - i - 1`) "
+        + "indicates `count: Int` not `count: Cardinal` (the typed form would not compile). "
+        + "Use `.subtract.saturating(.one)` / `.subtract.exact(.one)` / typed `count - .one` "
+        + "per [INFRA-025], or for stdlib-Int sites where no typed surface is available "
+        + "either (α) use the stdlib's named idiom for the concept (`indices.dropLast()`, "
+        + "`.last`, `endIndex - 1`) or (β) escalate to supervisor and apply "
         + "`// swiftlint:disable:next cardinal_count_minus_one  // reason: <citation>`."
 
     final class Visitor: SyntaxVisitor {

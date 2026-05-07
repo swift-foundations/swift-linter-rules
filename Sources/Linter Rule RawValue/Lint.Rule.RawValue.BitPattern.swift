@@ -53,14 +53,14 @@ extension Lint.Rule.RawValue {
 extension Lint.Rule.RawValue.BitPattern {
     @usableFromInline
     static let message: Swift.String =
-        "`init(bitPattern:)` whose argument chains through `.rawValue` — including "
-        + "`Int(...)`, `UInt(...)`, `Int.init(...)`, `self.init(...)`, and other syntactic "
-        + "equivalents — bypasses the canonical preference hierarchy. Prefer `.retag()` / "
-        + "`.map()` (Tier 1/2 of [CONV-016]) before resorting to the [INFRA-002] "
-        + "integration overload — and when you do use the overload, pass the typed value "
-        + "directly: `Int(bitPattern: foo)` not `Int(bitPattern: foo.rawValue)`. If this "
-        + "site IS the [INFRA-002] integration overload definition itself, escalate to "
-        + "supervisor and apply "
+        "[bitpattern_rawvalue_chain] [CONV-016]: `init(bitPattern:)` whose argument chains "
+        + "through `.rawValue` — including `Int(...)`, `UInt(...)`, `Int.init(...)`, "
+        + "`self.init(...)`, and other syntactic equivalents — bypasses the canonical "
+        + "preference hierarchy. Prefer `.retag()` / `.map()` (Tier 1/2) before resorting "
+        + "to the [INFRA-002] integration overload — and when you do use the overload, "
+        + "pass the typed value directly: `Int(bitPattern: foo)` not "
+        + "`Int(bitPattern: foo.rawValue)`. If this site IS the [INFRA-002] integration "
+        + "overload definition itself, escalate to supervisor and apply "
         + "`// swiftlint:disable:next bitpattern_rawvalue_chain  // reason: <citation>`."
 
     final class Visitor: SyntaxVisitor {

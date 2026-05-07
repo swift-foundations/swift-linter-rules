@@ -53,12 +53,12 @@ extension Lint.Rule.RawValue {
 extension Lint.Rule.RawValue.Chain {
     @usableFromInline
     static let message: Swift.String =
-        "Chaining `.rawValue.method()` (or paren-wrapped `(x.rawValue).method()`, which is "
-        + "semantically identical) escapes the typed system. Prefer `.retag()` (Tier 1) / "
-        + "`.map()` (Tier 2) / `Type.min(a, b)` / a typed accessor exposed by the wrapper, "
-        + "per [CONV-016] [INFRA-103]. If the wrapper IS what this site implements "
-        + "(typed-system bottom-out), escalate to supervisor and apply "
-        + "`// swiftlint:disable:next chained_rawvalue_access  // reason: <citation>`."
+        "[chained_rawvalue_access] [CONV-016]: chaining `.rawValue.method()` (or "
+        + "paren-wrapped `(x.rawValue).method()`, which is semantically identical) escapes "
+        + "the typed system. Prefer `.retag()` (Tier 1) / `.map()` (Tier 2) / `Type.min(a, b)` "
+        + "/ a typed accessor exposed by the wrapper, per [INFRA-103]. If the wrapper IS "
+        + "what this site implements (typed-system bottom-out), escalate to supervisor and "
+        + "apply `// swiftlint:disable:next chained_rawvalue_access  // reason: <citation>`."
 
     final class Visitor: SyntaxVisitor {
         let source: Source.File

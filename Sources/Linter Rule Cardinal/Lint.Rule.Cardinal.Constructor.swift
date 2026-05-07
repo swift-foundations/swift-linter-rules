@@ -46,9 +46,11 @@ extension Lint.Rule.Cardinal {
 extension Lint.Rule.Cardinal.Constructor {
     @usableFromInline
     static let message: Swift.String =
-        "`Cardinal(0)` / `Cardinal(1)` should use the canonical accessors `.zero` / `.one` "
-        + "per [INFRA-101]. Constructor calls with literal `0` or `1` bypass the typed-system "
-        + "literal discipline."
+        "[cardinal_zero_one_constructor] [INFRA-101]: `Cardinal(0)` / `Cardinal(1)` "
+        + "constructor calls with literal `0` or `1` bypass the typed-system literal "
+        + "discipline. Use the canonical accessors `.zero` / `.one` instead. If this site "
+        + "is the typed-system bottom-out, escalate to supervisor and apply "
+        + "`// swiftlint:disable:next cardinal_zero_one_constructor  // reason: <citation>`."
 
     final class Visitor: SyntaxVisitor {
         let source: Source.File
