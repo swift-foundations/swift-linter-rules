@@ -74,6 +74,12 @@ let package = Package(
             targets: ["Linter Rule Testing"]
         ),
 
+        // Wave 1 mechanization (2026-05-10) — platform-architecture rules.
+        .library(
+            name: "Linter Rule Platform",
+            targets: ["Linter Rule Platform"]
+        ),
+
         .library(
             name: "Linter Rules Test Support",
             targets: ["Linter Rules Test Support"]
@@ -186,6 +192,15 @@ let package = Package(
             ]
         ),
 
+        // MARK: - Wave 1 Mechanization — Linter Rule Platform
+        .target(
+            name: "Linter Rule Platform",
+            dependencies: [
+                .product(name: "Linter Primitives", package: "swift-linter-primitives"),
+                .product(name: "SwiftSyntax", package: "swift-syntax"),
+            ]
+        ),
+
         // MARK: - Test Support
         .target(
             name: "Linter Rules Test Support",
@@ -194,6 +209,7 @@ let package = Package(
                 "Linter Rule Closure",
                 "Linter Rule Memory",
                 "Linter Rule Naming",
+                "Linter Rule Platform",
                 "Linter Rule RawValue",
                 "Linter Rule ResultBuilder",
                 "Linter Rule Structure",
@@ -298,6 +314,16 @@ let package = Package(
             name: "Linter Rule Testing Tests",
             dependencies: [
                 "Linter Rule Testing",
+                "Linter Rules Test Support",
+                .product(name: "SwiftParser", package: "swift-syntax"),
+            ]
+        ),
+
+        // MARK: - Wave 1 Mechanization Tests
+        .testTarget(
+            name: "Linter Rule Platform Tests",
+            dependencies: [
+                "Linter Rule Platform",
                 "Linter Rules Test Support",
                 .product(name: "SwiftParser", package: "swift-syntax"),
             ]
