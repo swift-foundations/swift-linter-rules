@@ -180,4 +180,37 @@ extension Lint.Rule.`extension noncopyable constraint Tests`.Unit {
         let findings = Lint.Rule.`extension noncopyable constraint Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
+
+    @Test
+    func `consuming-self method with own generic params on non-generic extended type is not flagged`() {
+        let source = """
+        extension Ownership.Transfer.Erased.Incoming {
+            public consuming func consume<T>(_ type: T.Type) -> T { fatalError() }
+        }
+        """
+        let findings = Lint.Rule.`extension noncopyable constraint Tests`.findings(in: source)
+        #expect(findings.isEmpty)
+    }
+
+    @Test
+    func `borrowing-self method with own generic params on non-generic extended type is not flagged`() {
+        let source = """
+        extension Ownership.Transfer.Erased.Incoming {
+            public borrowing func inspect<T>(_ type: T.Type) -> Bool { false }
+        }
+        """
+        let findings = Lint.Rule.`extension noncopyable constraint Tests`.findings(in: source)
+        #expect(findings.isEmpty)
+    }
+
+    @Test
+    func `consuming-self method without own generic params is still flagged`() {
+        let source = """
+        extension Container {
+            consuming func transfer() {}
+        }
+        """
+        let findings = Lint.Rule.`extension noncopyable constraint Tests`.findings(in: source)
+        #expect(findings.count == 1)
+    }
 }

@@ -161,9 +161,33 @@ private final class MemoryExtensionNoncopyableOwnershipFinder: SyntaxVisitor {
     override func visit(_ node: FunctionDeclSyntax) -> SyntaxVisitorContinueKind {
         // `consuming func` / `borrowing func` modifiers on the func itself
         // (i.e., consuming-self / borrowing-self).
+        //
+        // Method-local-generic exemption (Thread 2 extension): when the
+        // function declares its own generic parameter clause AND its
+        // consuming-self/borrowing-self modifier is paired with a
+        // method-scoped generic surface (typical shape: a non-generic
+        // extended type with method-local generic methods like
+        // `consuming func consume<T>(_ type: T.Type)`), the ownership
+        // signal is method-scoped, not type-scoped. The rule's
+        // "add `where Element: ~Copyable`" prescription is
+        // inexpressible — the extended type has no type-level generic
+        // to constrain — so the rule does not fire.
+        //
+        // The heuristic: own-generic-params on the function paired
+        // with consuming-self is the structural signal. This is more
+        // permissive than strict (would also skip consuming-self on
+        // generic extended types when the method happens to have its
+        // own generics), but the rule already trades precision for
+        // simplicity via the allowlist mechanism, and the alternative
+        // (full-program type-info access) is out of scope for an AST
+        // visitor. Symmetric with Thread 2's parameter-shape
+        // exemption.
         for modifier in node.modifiers {
             let kind = modifier.name.tokenKind
             if kind == .keyword(.consuming) || kind == .keyword(.borrowing) {
+                if node.genericParameterClause != nil {
+                    return .skipChildren
+                }
                 found = true
                 return .skipChildren
             }
