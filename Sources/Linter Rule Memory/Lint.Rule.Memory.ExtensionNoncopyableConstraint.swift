@@ -78,6 +78,30 @@ private final class MemoryExtensionNoncopyableOwnershipFinder: SyntaxVisitor {
     }
 }
 
+/// Detects parameter-pack usage (`each T`, `repeat each T`) anywhere
+/// in an extension's member block. Swift 6.x does not support
+/// `~Copyable each T` at the language level — extensions on
+/// parameter-pack types cannot express the `where Element: ~Copyable`
+/// clause the rule otherwise requires. Treat presence of pack syntax
+/// as an authoritative signal that the rule's normal demand is
+/// inexpressible and exempt the extension.
+///
+/// Sunset: when Swift adopts `~Copyable each T` (swift-evolution; not
+/// imminent as of 2026-05-11), re-examine. Parameter-pack extensions
+/// will then have an expressible constraint and the exemption should
+/// retire so the rule fires legitimately.
+private final class MemoryExtensionPackExpansionFinder: SyntaxVisitor {
+    var found = false
+    override func visit(_ node: PackExpansionTypeSyntax) -> SyntaxVisitorContinueKind {
+        found = true
+        return .skipChildren
+    }
+    override func visit(_ node: PackElementTypeSyntax) -> SyntaxVisitorContinueKind {
+        found = true
+        return .skipChildren
+    }
+}
+
 internal final class MemoryExtensionNoncopyableConstraintVisitor: SyntaxVisitor {
     let source: Source.File
     let severity: Diagnostic.Severity
@@ -101,14 +125,61 @@ internal final class MemoryExtensionNoncopyableConstraintVisitor: SyntaxVisitor 
         return false
     }
 
+    /// Returns true if `clause` carries an explicit positive `Copyable`
+    /// conformance requirement on any generic parameter. The author has
+    /// deliberately scoped the extension to copyable element types — the
+    /// rule's "implicit shrink to Copyable" warning is the opposite of
+    /// the author's intent and should not fire.
+    ///
+    /// Matches `where Base: Copyable` (and any name on the LHS).
+    /// Tilde-prefixed `~Copyable` is excluded by the substring check on
+    /// the right-side trim.
+    private func whereClauseHasPositiveCopyable(_ clause: GenericWhereClauseSyntax?) -> Bool {
+        guard let clause else { return false }
+        for requirement in clause.requirements {
+            guard let conformance = requirement.requirement.as(ConformanceRequirementSyntax.self) else {
+                continue
+            }
+            let rhs = conformance.rightType.trimmedDescription
+            if rhs == "Copyable" || rhs == "Swift.Copyable" {
+                return true
+            }
+        }
+        return false
+    }
+
     override func visit(_ node: ExtensionDeclSyntax) -> SyntaxVisitorContinueKind {
+        // Filename-pattern exemption: `* where *.swift` files use the
+        // [API-IMPL-007] where-clause-discriminator naming convention.
+        // The author has enumerated quadrants via filenames; absence of
+        // a constraint in any one quadrant file is deliberate within
+        // the family. The rule's warning structurally inverts the
+        // author's intent here.
+        if source.filePath.contains(" where ") {
+            return .visitChildren
+        }
         // Walk the extension body for ownership signals.
         let finder = MemoryExtensionNoncopyableOwnershipFinder(viewMode: .sourceAccurate)
         finder.walk(node.memberBlock)
         guard finder.found else {
             return .visitChildren
         }
+        // Parameter-pack exemption: `~Copyable each T` is not language-
+        // expressible in Swift 6.x. If the extension uses pack syntax
+        // anywhere (where clause, body signatures, generic constraints),
+        // the where clause the rule asks for cannot be written.
+        let packFinder = MemoryExtensionPackExpansionFinder(viewMode: .sourceAccurate)
+        packFinder.walk(node)
+        guard !packFinder.found else {
+            return .visitChildren
+        }
         guard !whereClauseHasNoncopyable(node.genericWhereClause) else {
+            return .visitChildren
+        }
+        // Positive-Copyable exemption: author has explicitly scoped to
+        // a Copyable surface; the rule's "silent shrink" premise is
+        // inverted by the explicit conformance.
+        guard !whereClauseHasPositiveCopyable(node.genericWhereClause) else {
             return .visitChildren
         }
         let location = converter.location(for: node.extendedType.positionAfterSkippingLeadingTrivia)
