@@ -39,6 +39,54 @@ extension Lint.Rule {
     )
 }
 
+/// Types where the `where ... ~Copyable` constraint is either
+/// structurally inexpressible or vacuous:
+///
+/// - **Stdlib generic types language-bounded to Copyable**: stdlib type
+///   declarations like `UnsafePointer<Pointee>` and `Array<Element>`
+///   don't suppress Copyable on their parameter; `where Pointee: ~Copyable`
+///   is rejected at type-check.
+/// - **Non-generic institute types**: types with no generic parameters
+///   at all (e.g., `Comparison`, the institute comparison-result enum)
+///   have nothing to constrain. `consuming Self` is fine without any
+///   where clause.
+///
+/// Curated allowlist — adding entries requires verifying that the type
+/// either (a) genuinely rejects `~Copyable` on its parameter at type-check
+/// or (b) has no generic parameter at all.
+@usableFromInline
+internal let memoryExtensionConstraintInexpressibleTypes: Swift.Set<Swift.String> = [
+    // Stdlib generic types whose parameter is Copyable-bounded by the
+    // stdlib declaration.
+    "UnsafePointer",
+    "UnsafeMutablePointer",
+    "UnsafeRawPointer",
+    "UnsafeMutableRawPointer",
+    "UnsafeBufferPointer",
+    "UnsafeMutableBufferPointer",
+    "Array",
+    "ArraySlice",
+    "ContiguousArray",
+    "CollectionOfOne",
+    "EmptyCollection",
+    "KeyValuePairs",
+    "ReversedCollection",
+    "Range",
+    "ClosedRange",
+    "PartialRangeFrom",
+    "PartialRangeThrough",
+    "PartialRangeUpTo",
+    "Optional",
+    // Institute non-generic types — no generic parameter exists to
+    // constrain. Extensions with `consuming`/`borrowing` are valid
+    // without any where clause.
+    "Comparison",
+    "Equation",
+    "Hash",
+    "Ordinal",
+    "Cardinal",
+]
+
 @usableFromInline
 internal let memoryExtensionNoncopyableConstraintMessage: Swift.String =
     "[extension noncopyable constraint] [MEM-COPY-004]: extensions on `~Copyable`-"
@@ -115,6 +163,16 @@ internal final class MemoryExtensionNoncopyableConstraintVisitor: SyntaxVisitor 
         super.init(viewMode: .sourceAccurate)
     }
 
+    private func extendedTypeLeafName(_ type: TypeSyntax) -> Swift.String? {
+        if let identifier = type.as(IdentifierTypeSyntax.self) {
+            return identifier.name.text
+        }
+        if let member = type.as(MemberTypeSyntax.self) {
+            return member.name.text
+        }
+        return nil
+    }
+
     private func whereClauseHasNoncopyable(_ clause: GenericWhereClauseSyntax?) -> Bool {
         guard let clause else { return false }
         for requirement in clause.requirements {
@@ -140,9 +198,33 @@ internal final class MemoryExtensionNoncopyableConstraintVisitor: SyntaxVisitor 
             guard let conformance = requirement.requirement.as(ConformanceRequirementSyntax.self) else {
                 continue
             }
-            let rhs = conformance.rightType.trimmedDescription
-            if rhs == "Copyable" || rhs == "Swift.Copyable" {
+            if typeMentionsPositiveCopyable(conformance.rightType) {
                 return true
+            }
+        }
+        return false
+    }
+
+    /// Detects positive Copyable in either standalone (`Wrapped: Copyable`)
+    /// or composition (`Element: Comparison.Protocol & Copyable`) form.
+    /// Walks into CompositionTypeSyntax members so the constraint is
+    /// recognized regardless of how the author wrote it.
+    private func typeMentionsPositiveCopyable(_ type: TypeSyntax) -> Bool {
+        if let identifier = type.as(IdentifierTypeSyntax.self),
+           identifier.name.text == "Copyable" {
+            return true
+        }
+        if let member = type.as(MemberTypeSyntax.self),
+           member.name.text == "Copyable",
+           let base = member.baseType.as(IdentifierTypeSyntax.self),
+           base.name.text == "Swift" {
+            return true
+        }
+        if let composition = type.as(CompositionTypeSyntax.self) {
+            for element in composition.elements {
+                if typeMentionsPositiveCopyable(element.type) {
+                    return true
+                }
             }
         }
         return false
@@ -156,6 +238,14 @@ internal final class MemoryExtensionNoncopyableConstraintVisitor: SyntaxVisitor 
         // the family. The rule's warning structurally inverts the
         // author's intent here.
         if source.filePath.contains(" where ") {
+            return .visitChildren
+        }
+        // Constraint-inexpressible exemption: the extended type either
+        // rejects `~Copyable` at type-check (stdlib Copyable-bounded
+        // generic) or has no generic parameter at all (non-generic
+        // institute type). The rule's premise doesn't apply.
+        if let leaf = extendedTypeLeafName(node.extendedType),
+           memoryExtensionConstraintInexpressibleTypes.contains(leaf) {
             return .visitChildren
         }
         // Walk the extension body for ownership signals.
