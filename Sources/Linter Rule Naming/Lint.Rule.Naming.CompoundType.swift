@@ -17,7 +17,7 @@ internal import SwiftSyntax
 /// Citation: `[API-NAME-001]` (code-surface skill — Nest.Name pattern).
 extension Lint.Rule {
     public static let `compound type name` = Lint.Rule(
-        id: "compound_type_name",
+        id: "compound type name",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = NamingCompoundTypeVisitor(
@@ -33,7 +33,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let namingCompoundTypeMessage: Swift.String =
-    "[compound_type_name] [API-NAME-001]: types MUST use the `Nest.Name` "
+    "[compound type name] [API-NAME-001]: types MUST use the `Nest.Name` "
     + "pattern. Compound type names like `FileDirectoryWalk` or "
     + "`DirectoryWalk` are forbidden — use the nested form "
     + "(`File.Directory.Walk`). Acronyms (`URL`, `UUID`, `IO`) are "
@@ -94,7 +94,7 @@ internal final class NamingCompoundTypeVisitor: SyntaxVisitor {
                 column: location.column
             ),
             severity: severity,
-            identifier: "compound_type_name",
+            identifier: "compound type name",
             message: namingCompoundTypeMessage
         ))
     }

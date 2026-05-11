@@ -19,7 +19,7 @@ internal import SwiftSyntax
 /// @unchecked Sendable on struct-wrapping-class).
 extension Lint.Rule {
     public static let `sendable struct with class member` = Lint.Rule(
-        id: "struct_sendable_class_member",
+        id: "sendable struct with class member",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = MemoryStructSendableClassMemberVisitor(
@@ -35,7 +35,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let memoryStructSendableClassMemberMessage: Swift.String =
-    "[struct_sendable_class_member] [IMPL-076]: `struct: @unchecked Sendable` "
+    "[sendable struct with class member] [IMPL-076]: `struct: @unchecked Sendable` "
     + "wrapping a class-typed stored property is redundant — if the class is "
     + "itself `Sendable`, plain `Sendable` on the struct suffices. The "
     + "`@unchecked` annotation asserts safety the type system can already "
@@ -139,7 +139,7 @@ internal final class MemoryStructSendableClassMemberVisitor: SyntaxVisitor {
                             column: location.column
                         ),
                         severity: severity,
-                        identifier: "struct_sendable_class_member",
+                        identifier: "sendable struct with class member",
                         message: memoryStructSendableClassMemberMessage
                     ))
                 }

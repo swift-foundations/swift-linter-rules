@@ -42,7 +42,7 @@ extension Lint.Rule.`lifecycle typealias review Tests`.Unit {
         let findings = Lint.Rule.`lifecycle typealias review Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
-            #expect(findings[0].identifier == "lifecycle_typealias_review")
+            #expect(findings[0].identifier == "lifecycle typealias review")
             #expect(findings[0].severity == .warning)
         }
     }

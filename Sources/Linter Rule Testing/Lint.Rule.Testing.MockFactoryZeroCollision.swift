@@ -16,7 +16,7 @@ internal import SwiftSyntax
 /// offset tag input by at least 1. Citation: `[TEST-028]`.
 extension Lint.Rule {
     public static let `mock factory zero collision` = Lint.Rule(
-        id: "mock_factory_zero_collision",
+        id: "mock factory zero collision",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = TestingMockFactoryZeroCollisionVisitor(
@@ -32,7 +32,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let testingMockFactoryZeroCollisionMessage: Swift.String =
-    "[mock_factory_zero_collision] [TEST-028]: `unsafeBitCast(tag, to: T.self)` "
+    "[mock factory zero collision] [TEST-028]: `unsafeBitCast(tag, to: T.self)` "
     + "for pointer-wrapping `BitwiseCopyable` `T` collides with `Optional<T>.none` "
     + "when `tag == 0`. Offset: `unsafeBitCast(tag &+ 1, to: T.self)`."
 
@@ -77,7 +77,7 @@ internal final class TestingMockFactoryZeroCollisionVisitor: SyntaxVisitor {
                 column: location.column
             ),
             severity: severity,
-            identifier: "mock_factory_zero_collision",
+            identifier: "mock factory zero collision",
             message: testingMockFactoryZeroCollisionMessage
         ))
         return .visitChildren

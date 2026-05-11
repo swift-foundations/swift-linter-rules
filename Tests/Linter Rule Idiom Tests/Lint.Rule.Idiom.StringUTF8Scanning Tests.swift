@@ -42,7 +42,7 @@ extension Lint.Rule.`string utf8 scanning Tests`.Unit {
         let findings = Lint.Rule.`string utf8 scanning Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
-            #expect(findings[0].identifier == "string_utf8_scanning")
+            #expect(findings[0].identifier == "string utf8 scanning")
             #expect(findings[0].severity == .warning)
         }
     }

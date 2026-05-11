@@ -24,7 +24,7 @@ internal import SwiftSyntax
 /// between domain parameters, and it hides the configuration's role.
 extension Lint.Rule {
     public static let `configuration before content` = Lint.Rule(
-        id: "configuration_parameter_placement",
+        id: "configuration before content",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = ClosureConfigurationPlacementVisitor(
@@ -40,7 +40,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let closureConfigurationPlacementMessage: Swift.String =
-    "[configuration_parameter_placement] [API-IMPL-014]: "
+    "[configuration before content] [API-IMPL-014]: "
     + "configuration-bearing parameters (`Options`, `Configuration`, "
     + "`Context`) MUST sit at first OR last non-closure position. "
     + "Middle placement breaks SE-0286 forward-scan with trailing "
@@ -99,7 +99,7 @@ internal final class ClosureConfigurationPlacementVisitor: SyntaxVisitor {
                 column: location.column
             ),
             severity: severity,
-            identifier: "configuration_parameter_placement",
+            identifier: "configuration before content",
             message: closureConfigurationPlacementMessage
         ))
     }

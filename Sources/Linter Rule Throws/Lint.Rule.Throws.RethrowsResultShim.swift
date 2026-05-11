@@ -16,7 +16,7 @@ internal import SwiftSyntax
 /// the `Result<T, E>` shim. Citation: `[IMPL-109]`.
 extension Lint.Rule {
     public static let `result wrapper for rethrows shim` = Lint.Rule(
-        id: "result_wrapper_for_rethrows_shim",
+        id: "result wrapper for rethrows shim",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = ThrowsRethrowsResultShimVisitor(
@@ -32,7 +32,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let throwsRethrowsResultShimMessage: Swift.String =
-    "[result_wrapper_for_rethrows_shim] [IMPL-109]: stdlib `rethrows` higher-order "
+    "[result wrapper for rethrows shim] [IMPL-109]: stdlib `rethrows` higher-order "
     + "methods erase typed-throws to `any Error`. Materialise `Result<T, E>` "
     + "inside the closure, return it, and `try result.get()` outside."
 
@@ -105,7 +105,7 @@ internal final class ThrowsRethrowsResultShimVisitor: SyntaxVisitor {
                         column: location.column
                     ),
                     severity: severity,
-                    identifier: "result_wrapper_for_rethrows_shim",
+                    identifier: "result wrapper for rethrows shim",
                     message: throwsRethrowsResultShimMessage
                 ))
             }

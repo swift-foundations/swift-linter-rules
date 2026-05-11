@@ -20,7 +20,7 @@ internal import SwiftSyntax
 /// pattern).
 extension Lint.Rule {
     public static let `compound platform namespace root` = Lint.Rule(
-        id: "namespace_root_compound_platform",
+        id: "compound platform namespace root",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = PlatformNamespaceRootVisitor(
@@ -36,7 +36,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let platformNamespaceRootMessage: Swift.String =
-    "[namespace_root_compound_platform] [PLAT-ARCH-003]: top-level "
+    "[compound platform namespace root] [PLAT-ARCH-003]: top-level "
     + "compound platform-prefix type (e.g., `LinuxKernel`, "
     + "`KqueueEventNotification`) fragments the kernel namespace. Extend "
     + "the shared `Kernel` namespace via `extension Kernel { ... }` so the "
@@ -136,7 +136,7 @@ internal final class PlatformNamespaceRootVisitor: SyntaxVisitor {
                 column: location.column
             ),
             severity: severity,
-            identifier: "namespace_root_compound_platform",
+            identifier: "compound platform namespace root",
             message: platformNamespaceRootMessage
         ))
     }

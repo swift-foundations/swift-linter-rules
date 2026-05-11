@@ -16,7 +16,7 @@ internal import SwiftSyntax
 /// Citation: `[IMPL-EXPR-001]`.
 extension Lint.Rule {
     public static let `intermediate binding then return` = Lint.Rule(
-        id: "intermediate_binding_then_return",
+        id: "intermediate binding then return",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = IdiomIntermediateBindingThenReturnVisitor(
@@ -32,7 +32,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let idiomIntermediateBindingThenReturnMessage: Swift.String =
-    "[intermediate_binding_then_return] [IMPL-EXPR-001]: `let <name> = "
+    "[intermediate binding then return] [IMPL-EXPR-001]: `let <name> = "
     + "<expr>; return <name>` adds mechanism. Return the expression "
     + "directly: `return <expr>`. The binding is justified only when the "
     + "name communicates domain knowledge the expression doesn't, or when "
@@ -81,7 +81,7 @@ internal final class IdiomIntermediateBindingThenReturnVisitor: SyntaxVisitor {
                     column: location.column
                 ),
                 severity: severity,
-                identifier: "intermediate_binding_then_return",
+                identifier: "intermediate binding then return",
                 message: idiomIntermediateBindingThenReturnMessage
             ))
         }

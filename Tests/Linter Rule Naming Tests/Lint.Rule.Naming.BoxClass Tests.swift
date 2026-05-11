@@ -43,7 +43,7 @@ extension Lint.Rule.`ad hoc box class Tests`.Unit {
         let findings = Lint.Rule.`ad hoc box class Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
-            #expect(findings[0].identifier == "ad_hoc_box_class")
+            #expect(findings[0].identifier == "ad hoc box class")
         }
     }
 

@@ -39,7 +39,7 @@ extension Lint.Rule.`swift protocol qualification Tests`.Unit {
         let count = findings.count
         #expect(count == 1)
         if count == 1 {
-            #expect(findings[0].identifier == "swift_protocol_qualification")
+            #expect(findings[0].identifier == "swift protocol qualification")
             #expect(findings[0].severity == .warning)
         }
     }

@@ -42,7 +42,7 @@ extension Lint.Rule.`unsafe assignment granularity Tests`.Unit {
         let findings = Lint.Rule.`unsafe assignment granularity Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
-            #expect(findings[0].identifier == "unsafe_assignment_granularity")
+            #expect(findings[0].identifier == "unsafe assignment granularity")
             #expect(findings[0].severity == .warning)
         }
     }

@@ -20,7 +20,7 @@ internal import SwiftSyntax
 /// path conflict rule).
 extension Lint.Rule {
     public static let `typealiased namespace bridge` = Lint.Rule(
-        id: "typealiased_namespace_bridge",
+        id: "typealiased namespace bridge",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = PlatformTypealiasedNamespaceVisitor(
@@ -36,7 +36,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let platformTypealiasedNamespaceMessage: Swift.String =
-    "[typealiased_namespace_bridge] [PLAT-ARCH-018]: typealias whose "
+    "[typealiased namespace bridge] [PLAT-ARCH-018]: typealias whose "
     + "LHS name matches its RHS member-type leaf silently bridges a "
     + "foreign namespace into the local one. New-type declarations at "
     + "`<local>.<aliased>.<NewName>` resolve to the foreign module — "
@@ -73,7 +73,7 @@ internal final class PlatformTypealiasedNamespaceVisitor: SyntaxVisitor {
                 column: location.column
             ),
             severity: severity,
-            identifier: "typealiased_namespace_bridge",
+            identifier: "typealiased namespace bridge",
             message: platformTypealiasedNamespaceMessage
         ))
         return .visitChildren

@@ -20,7 +20,7 @@ internal import SwiftSyntax
 /// representability pre-check).
 extension Lint.Rule {
     public static let `convention c representability` = Lint.Rule(
-        id: "convention_c_representability",
+        id: "convention c representability",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = PlatformConventionCRepresentabilityVisitor(
@@ -36,7 +36,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let platformConventionCRepresentabilityMessage: Swift.String =
-    "[convention_c_representability] [PLAT-ARCH-005b]: `@convention(c)` "
+    "[convention c representability] [PLAT-ARCH-005b]: `@convention(c)` "
     + "function type takes `UnsafeMutablePointer<<UserType>>?` for a "
     + "qualified type path — pure Swift structs (including @safe "
     + "wrappers) are NOT @objc-representable and the compiler rejects "
@@ -121,7 +121,7 @@ internal final class PlatformConventionCRepresentabilityVisitor: SyntaxVisitor {
                     column: location.column
                 ),
                 severity: severity,
-                identifier: "convention_c_representability",
+                identifier: "convention c representability",
                 message: platformConventionCRepresentabilityMessage
             ))
         }

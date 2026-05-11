@@ -40,7 +40,7 @@ extension Lint.Rule.`configuration before content Tests`.Unit {
         let findings = Lint.Rule.`configuration before content Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
-            #expect(findings[0].identifier == "configuration_parameter_placement")
+            #expect(findings[0].identifier == "configuration before content")
             #expect(findings[0].severity == .warning)
         }
     }

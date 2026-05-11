@@ -44,7 +44,7 @@ extension Lint.Rule.`enumerated with subscript Tests`.Unit {
         let findings = Lint.Rule.`enumerated with subscript Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
-            #expect(findings[0].identifier == "enumerated_subscript_collection")
+            #expect(findings[0].identifier == "enumerated with subscript")
         }
     }
 }

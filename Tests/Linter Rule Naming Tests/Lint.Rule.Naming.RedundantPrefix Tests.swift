@@ -43,7 +43,7 @@ extension Lint.Rule.`redundant prefix Tests`.Unit {
         let count = findings.count
         #expect(count == 1)
         if count == 1 {
-            #expect(findings[0].identifier == "redundant_prefix")
+            #expect(findings[0].identifier == "redundant prefix")
             #expect(findings[0].severity == .warning)
         }
     }

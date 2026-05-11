@@ -29,7 +29,7 @@ internal import SwiftSyntax
 ///   §"Q3 — Deferred AST-rule unblocking matrix" — R5 is unblocked by this tool.
 extension Lint.Rule {
     public static let `unchecked call site` = Lint.Rule(
-        id: "unchecked_call_site",
+        id: "unchecked call site",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = UncheckedVisitor(
@@ -45,7 +45,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let uncheckedCallSiteMessage: Swift.String =
-    "[unchecked_call_site] [CONV-016]: `__unchecked:` at a call site is a Tier-5 "
+    "[unchecked call site] [CONV-016]: `__unchecked:` at a call site is a Tier-5 "
     + "last-resort bypass of the typed system. Prefer `.retag()` (Tier 1) or `.map()` "
     + "(Tier 2) before resorting to `__unchecked:`. If this site is the typed-system "
     + "bottom-out (extension-init internals, [CONV-001] permitted same-package use), "
@@ -78,7 +78,7 @@ internal final class UncheckedVisitor: SyntaxVisitor {
                 column: location.column
             ),
             severity: severity,
-            identifier: "unchecked_call_site",
+            identifier: "unchecked call site",
             message: uncheckedCallSiteMessage
         ))
         return .visitChildren

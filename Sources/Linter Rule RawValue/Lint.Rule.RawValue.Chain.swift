@@ -32,7 +32,7 @@ internal import SwiftSyntax
 ///   §"Q2 — Evasion-class closure matrix" (paren-wrap row)
 extension Lint.Rule {
     public static let `chained rawvalue access` = Lint.Rule(
-        id: "chained_rawvalue_access",
+        id: "chained rawvalue access",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = RawValueChainVisitor(
@@ -48,7 +48,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let chainedRawvalueAccessMessage: Swift.String =
-    "[chained_rawvalue_access] [CONV-016]: chaining `.rawValue.method()` (or "
+    "[chained rawvalue access] [CONV-016]: chaining `.rawValue.method()` (or "
     + "paren-wrapped `(x.rawValue).method()`, which is semantically identical) escapes "
     + "the typed system. Prefer `.retag()` (Tier 1) / `.map()` (Tier 2) / `Type.min(a, b)` "
     + "/ a typed accessor exposed by the wrapper, per [INFRA-103]. If the wrapper IS "
@@ -84,7 +84,7 @@ internal final class RawValueChainVisitor: SyntaxVisitor {
                 column: location.column
             ),
             severity: severity,
-            identifier: "chained_rawvalue_access",
+            identifier: "chained rawvalue access",
             message: chainedRawvalueAccessMessage
         ))
         return .visitChildren

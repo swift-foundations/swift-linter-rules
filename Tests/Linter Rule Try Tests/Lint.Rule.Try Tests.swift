@@ -47,7 +47,7 @@ extension Lint.Rule.`try optional Tests`.Unit {
         let count = findings.count
         #expect(count == 1)
         if count == 1 {
-            #expect(findings[0].identifier == "try_optional")
+            #expect(findings[0].identifier == "try optional")
             #expect(findings[0].severity == .warning)
         }
     }

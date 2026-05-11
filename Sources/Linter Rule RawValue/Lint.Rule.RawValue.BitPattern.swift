@@ -32,7 +32,7 @@ internal import SwiftSyntax
 ///   §"Q2 — Evasion-class closure matrix" (typename-swap row)
 extension Lint.Rule {
     public static let `bitpattern rawvalue chain` = Lint.Rule(
-        id: "bitpattern_rawvalue_chain",
+        id: "bitpattern rawvalue chain",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = RawValueBitPatternVisitor(
@@ -48,7 +48,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let bitpatternRawvalueChainMessage: Swift.String =
-    "[bitpattern_rawvalue_chain] [CONV-016]: `init(bitPattern:)` whose argument chains "
+    "[bitpattern rawvalue chain] [CONV-016]: `init(bitPattern:)` whose argument chains "
     + "through `.rawValue` — including `Int(...)`, `UInt(...)`, `Int.init(...)`, "
     + "`self.init(...)`, and other syntactic equivalents — bypasses the canonical "
     + "preference hierarchy. Prefer `.retag()` / `.map()` (Tier 1/2) before resorting "
@@ -84,7 +84,7 @@ internal final class RawValueBitPatternVisitor: SyntaxVisitor {
                     column: location.column
                 ),
                 severity: severity,
-                identifier: "bitpattern_rawvalue_chain",
+                identifier: "bitpattern rawvalue chain",
                 message: bitpatternRawvalueChainMessage
             ))
         }

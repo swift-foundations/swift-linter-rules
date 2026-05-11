@@ -19,7 +19,7 @@ internal import SwiftSyntax
 /// Citation: `[MEM-SAFE-024]` (memory-safety skill, safety-isolation.md).
 extension Lint.Rule {
     public static let `unchecked sendable categorization` = Lint.Rule(
-        id: "unchecked_sendable_categorized",
+        id: "unchecked sendable categorization",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = MemoryUncheckedSendableCategorizedVisitor(
@@ -35,7 +35,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let memoryUncheckedSendableCategorizedMessage: Swift.String =
-    "[unchecked_sendable_categorized] [MEM-SAFE-024]: `@unchecked Sendable` MUST "
+    "[unchecked sendable categorization] [MEM-SAFE-024]: `@unchecked Sendable` MUST "
     + "be classified into category A (synchronized), B (~Copyable ownership), or D "
     + "(structural workaround) AND paired with `@unsafe` plus a doc-comment safety "
     + "invariant. Category C (thread-confined) should migrate to `~Sendable` per "
@@ -112,7 +112,7 @@ internal final class MemoryUncheckedSendableCategorizedVisitor: SyntaxVisitor {
                     column: location.column
                 ),
                 severity: severity,
-                identifier: "unchecked_sendable_categorized",
+                identifier: "unchecked sendable categorization",
                 message: memoryUncheckedSendableCategorizedMessage
             ))
         }

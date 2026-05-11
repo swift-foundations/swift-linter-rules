@@ -42,7 +42,7 @@ extension Lint.Rule.`wrapper backing exposed Tests`.Unit {
         let findings = Lint.Rule.`wrapper backing exposed Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
-            #expect(findings[0].identifier == "wrapper_backing_exposed")
+            #expect(findings[0].identifier == "wrapper backing exposed")
             #expect(findings[0].severity == .warning)
         }
     }

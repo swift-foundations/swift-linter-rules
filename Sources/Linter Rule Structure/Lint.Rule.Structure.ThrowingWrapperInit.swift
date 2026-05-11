@@ -20,7 +20,7 @@ internal import SwiftSyntax
 /// throwing init on wrapper MUST NOT validate only base invariant).
 extension Lint.Rule {
     public static let `throwing wrapper init` = Lint.Rule(
-        id: "throwing_wrapper_init_no_validation",
+        id: "throwing wrapper init",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = StructureThrowingWrapperInitVisitor(
@@ -36,7 +36,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let structureThrowingWrapperInitMessage: Swift.String =
-    "[throwing_wrapper_init_no_validation] [PATTERN-020]: throwing init body "
+    "[throwing wrapper init] [PATTERN-020]: throwing init body "
     + "is a single `try base.init(...)` forward with no additional validation. "
     + "If the wrapper specializes to a stricter invariant than its base, the "
     + "wrapper's invariant is silently violable. Add the wrapper's validation "
@@ -76,7 +76,7 @@ internal final class StructureThrowingWrapperInitVisitor: SyntaxVisitor {
                 column: location.column
             ),
             severity: severity,
-            identifier: "throwing_wrapper_init_no_validation",
+            identifier: "throwing wrapper init",
             message: structureThrowingWrapperInitMessage
         ))
         return .visitChildren

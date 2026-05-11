@@ -16,7 +16,7 @@ internal import SwiftSyntax
 /// Citation: `[SWIFT-TEST-004]`.
 extension Lint.Rule {
     public static let `performance suite serialized` = Lint.Rule(
-        id: "performance_suite_serialized",
+        id: "performance suite serialized",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = TestingPerformanceSuiteSerializedVisitor(
@@ -32,7 +32,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let testingPerformanceSuiteSerializedMessage: Swift.String =
-    "[performance_suite_serialized] [SWIFT-TEST-004]: performance suites MUST "
+    "[performance suite serialized] [SWIFT-TEST-004]: performance suites MUST "
     + "carry `.serialized` to prevent parallel execution variance from polluting "
     + "timing measurements."
 
@@ -74,7 +74,7 @@ internal final class TestingPerformanceSuiteSerializedVisitor: SyntaxVisitor {
                 column: location.column
             ),
             severity: severity,
-            identifier: "performance_suite_serialized",
+            identifier: "performance suite serialized",
             message: testingPerformanceSuiteSerializedMessage
         ))
         return .visitChildren

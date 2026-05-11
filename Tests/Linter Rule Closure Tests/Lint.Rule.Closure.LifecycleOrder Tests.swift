@@ -40,7 +40,7 @@ extension Lint.Rule.`lifecycle order Tests`.Unit {
         let findings = Lint.Rule.`lifecycle order Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
-            #expect(findings[0].identifier == "multi_closure_lifecycle_order")
+            #expect(findings[0].identifier == "lifecycle order")
             #expect(findings[0].severity == .warning)
         }
     }

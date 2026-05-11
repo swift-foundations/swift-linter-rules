@@ -59,7 +59,7 @@ internal import SwiftOperators
 ///   §"Q3 — Deferred AST-rule unblocking matrix"
 extension Lint.Rule {
     public static let `count minus one` = Lint.Rule(
-        id: "cardinal_count_minus_one",
+        id: "count minus one",
         defaultSeverity: .warning,
         findings: { source, severity in
             let folded = OperatorTable.standardOperators.foldAll(source.tree, errorHandler: { _ in })
@@ -76,7 +76,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let cardinalCountMinusOneMessage: Swift.String =
-    "[cardinal_count_minus_one] [INFRA-200]: `<expr>.count - 1` (or syntactic "
+    "[count minus one] [INFRA-200]: `<expr>.count - 1` (or syntactic "
     + "equivalents — paren-wrap `(seq.count) - 1`, cast-outside `Double(seq.count) - 1`, "
     + "algebraic-flip `+ 1 [<=] seq.count`, operand-reorder `seq.count - i - 1`) "
     + "indicates `count: Int` not `count: Cardinal` (the typed form would not compile). "
@@ -133,7 +133,7 @@ internal final class CardinalCountVisitor: SyntaxVisitor {
                 column: location.column
             ),
             severity: severity,
-            identifier: "cardinal_count_minus_one",
+            identifier: "count minus one",
             message: cardinalCountMinusOneMessage
         ))
     }

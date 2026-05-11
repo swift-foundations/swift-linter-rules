@@ -19,7 +19,7 @@ internal import SwiftSyntax
 /// Citation: `[API-IMPL-008]` (code-surface skill — minimal type body).
 extension Lint.Rule {
     public static let `minimal type body` = Lint.Rule(
-        id: "minimal_type_body",
+        id: "minimal type body",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = StructureMinimalTypeBodyVisitor(
@@ -35,7 +35,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let structureMinimalTypeBodyMessage: Swift.String =
-    "[minimal_type_body] [API-IMPL-008]: type bodies MUST contain "
+    "[minimal type body] [API-IMPL-008]: type bodies MUST contain "
     + "ONLY stored properties, the canonical initializer(s), and "
     + "(for classes / ~Copyable types) `deinit`. Methods, computed "
     + "properties, static members, nested types, and protocol "
@@ -100,7 +100,7 @@ internal final class StructureMinimalTypeBodyVisitor: SyntaxVisitor {
                 column: location.column
             ),
             severity: severity,
-            identifier: "minimal_type_body",
+            identifier: "minimal type body",
             message: structureMinimalTypeBodyMessage
         ))
     }

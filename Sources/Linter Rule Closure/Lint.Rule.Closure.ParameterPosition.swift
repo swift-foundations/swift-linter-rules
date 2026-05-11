@@ -20,7 +20,7 @@ internal import SwiftSyntax
 /// `() throws(E) -> T` — count as closures for this rule.
 extension Lint.Rule {
     public static let `parameter position` = Lint.Rule(
-        id: "closure_param_position",
+        id: "parameter position",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = ClosureParameterPositionVisitor(
@@ -36,7 +36,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let closureParameterPositionMessage: Swift.String =
-    "[closure_param_position] [API-IMPL-012]: closure parameters MUST occupy the "
+    "[parameter position] [API-IMPL-012]: closure parameters MUST occupy the "
     + "final positions of the signature. A non-closure parameter MUST NOT appear "
     + "after a closure parameter — moves the trailing-closure call site. Reorder "
     + "non-closure parameters before all closure parameters; typed-throws thunks "
@@ -85,7 +85,7 @@ internal final class ClosureParameterPositionVisitor: SyntaxVisitor {
                 column: location.column
             ),
             severity: severity,
-            identifier: "closure_param_position",
+            identifier: "parameter position",
             message: closureParameterPositionMessage
         ))
     }

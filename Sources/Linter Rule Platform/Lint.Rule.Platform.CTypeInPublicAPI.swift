@@ -37,7 +37,7 @@ internal import SwiftSyntax
 /// recursively descend so the leaf C-type identifier is still caught.
 extension Lint.Rule {
     public static let `c type in public api` = Lint.Rule(
-        id: "c_type_in_public_api",
+        id: "c type in public api",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = PlatformCTypeInPublicAPIVisitor(
@@ -53,7 +53,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let platformCTypeInPublicAPIMessage: Swift.String =
-    "[c_type_in_public_api] [PLAT-ARCH-005a]: platform C type appears in "
+    "[c type in public api] [PLAT-ARCH-005a]: platform C type appears in "
     + "public API signature. Public APIs in the platform stack MUST wrap "
     + "every C type in an ecosystem type at L1 so consumers never need to "
     + "import the platform C module. The flagged identifier is one of the "
@@ -173,7 +173,7 @@ internal final class PlatformCTypeInPublicAPIVisitor: SyntaxVisitor {
                 column: location.column
             ),
             severity: severity,
-            identifier: "c_type_in_public_api",
+            identifier: "c type in public api",
             message: platformCTypeInPublicAPIMessage
         ))
     }

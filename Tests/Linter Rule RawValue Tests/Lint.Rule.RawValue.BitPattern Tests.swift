@@ -40,7 +40,7 @@ extension Lint.Rule.`bitpattern rawvalue chain Tests`.Unit {
         let count = findings.count
         #expect(count == 1)
         if count == 1 {
-            #expect(findings[0].identifier == "bitpattern_rawvalue_chain")
+            #expect(findings[0].identifier == "bitpattern rawvalue chain")
             #expect(findings[0].severity == .warning)
         }
     }

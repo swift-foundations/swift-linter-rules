@@ -40,7 +40,7 @@ extension Lint.Rule.`compound platform namespace root Tests`.Unit {
         let findings = Lint.Rule.`compound platform namespace root Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
-            #expect(findings[0].identifier == "namespace_root_compound_platform")
+            #expect(findings[0].identifier == "compound platform namespace root")
         }
     }
 

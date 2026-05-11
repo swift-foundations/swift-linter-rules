@@ -19,7 +19,7 @@ internal import SwiftSyntax
 /// Citation: `[PATTERN-056]` (implementation skill, patterns.md).
 extension Lint.Rule {
     public static let `dead case per platform` = Lint.Rule(
-        id: "dead_case_per_platform_enum",
+        id: "dead case per platform",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = PlatformDeadCasePerPlatformVisitor(
@@ -35,7 +35,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let platformDeadCasePerPlatformMessage: Swift.String =
-    "[dead_case_per_platform_enum] [PATTERN-056]: public enum cases "
+    "[dead case per platform] [PATTERN-056]: public enum cases "
     + "enumerate platforms (POSIX / Windows or UTF8 / UTF16). Consumer "
     + "`switch` statements get N-1 dead branches per platform. Replace "
     + "with the ecosystem's existing platform-conditional typealias "
@@ -101,7 +101,7 @@ internal final class PlatformDeadCasePerPlatformVisitor: SyntaxVisitor {
                 column: location.column
             ),
             severity: severity,
-            identifier: "dead_case_per_platform_enum",
+            identifier: "dead case per platform",
             message: platformDeadCasePerPlatformMessage
         ))
         return .visitChildren

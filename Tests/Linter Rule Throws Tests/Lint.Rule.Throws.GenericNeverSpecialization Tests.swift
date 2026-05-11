@@ -42,7 +42,7 @@ extension Lint.Rule.`generic throws missing never Tests`.Unit {
         let findings = Lint.Rule.`generic throws missing never Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
-            #expect(findings[0].identifier == "generic_throws_missing_never_specialization")
+            #expect(findings[0].identifier == "generic throws missing never")
             #expect(findings[0].severity == .warning)
         }
     }

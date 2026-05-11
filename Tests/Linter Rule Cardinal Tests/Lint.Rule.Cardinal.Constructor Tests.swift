@@ -39,7 +39,7 @@ extension Lint.Rule.`zero or one literal Tests`.Unit {
         let count = findings.count
         #expect(count == 1)
         if count == 1 {
-            #expect(findings[0].identifier == "cardinal_zero_one_constructor")
+            #expect(findings[0].identifier == "zero or one literal")
             #expect(findings[0].severity == .warning)
         }
     }

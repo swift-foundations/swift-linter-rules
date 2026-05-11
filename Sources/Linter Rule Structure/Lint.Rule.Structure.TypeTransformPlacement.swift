@@ -19,7 +19,7 @@ internal import SwiftSyntax
 /// Citation: `[PATTERN-012]` (implementation skill, patterns.md).
 extension Lint.Rule {
     public static let `type transform placement` = Lint.Rule(
-        id: "type_transform_placement",
+        id: "type transform placement",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = StructureTypeTransformPlacementVisitor(
@@ -35,7 +35,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let structureTypeTransformPlacementMessage: Swift.String =
-    "[type_transform_placement] [PATTERN-012]: instance method `to<Type>()` "
+    "[type transform placement] [PATTERN-012]: instance method `to<Type>()` "
     + "/ `as<Type>()` returning the matching type is the type-transformation "
     + "anti-pattern. Move the conversion to an `init(_ source: Source)` on the "
     + "target type or a static method (`Target.from(_ source: Source)`) so the "
@@ -117,7 +117,7 @@ internal final class StructureTypeTransformPlacementVisitor: SyntaxVisitor {
                 column: location.column
             ),
             severity: severity,
-            identifier: "type_transform_placement",
+            identifier: "type transform placement",
             message: structureTypeTransformPlacementMessage
         ))
         return .visitChildren

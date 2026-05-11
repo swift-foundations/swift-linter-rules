@@ -25,7 +25,7 @@ internal import SwiftSyntax
 /// extend to a third state without an API break.
 extension Lint.Rule {
     public static let `bool public parameter` = Lint.Rule(
-        id: "bool_parameter_public",
+        id: "bool public parameter",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = NamingBoolParameterVisitor(
@@ -41,7 +41,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let namingBoolParameterMessage: Swift.String =
-    "[bool_parameter_public] [API-IMPL-003]: public function/initializer "
+    "[bool public parameter] [API-IMPL-003]: public function/initializer "
     + "signature has a `Bool` parameter. Use an enum (or named-options "
     + "struct) so additional states can be added without an API break "
     + "and so call sites read as intent (`mode: .strict`) rather than "
@@ -144,7 +144,7 @@ internal final class NamingBoolParameterVisitor: SyntaxVisitor {
                     column: location.column
                 ),
                 severity: severity,
-                identifier: "bool_parameter_public",
+                identifier: "bool public parameter",
                 message: namingBoolParameterMessage
             ))
         }

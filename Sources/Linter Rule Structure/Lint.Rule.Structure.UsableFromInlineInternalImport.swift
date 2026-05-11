@@ -18,7 +18,7 @@ internal import SwiftSyntax
 /// Citation: `[PATTERN-055]` (implementation skill, patterns.md).
 extension Lint.Rule {
     public static let `usable from inline internal import` = Lint.Rule(
-        id: "usable_from_inline_internal_import",
+        id: "usable from inline internal import",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = StructureUsableFromInlineInternalImportVisitor(
@@ -34,7 +34,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let structureUsableFromInlineInternalImportMessage: Swift.String =
-    "[usable_from_inline_internal_import] [PATTERN-055]: file pairs "
+    "[usable from inline internal import] [PATTERN-055]: file pairs "
     + "`@usableFromInline` with `internal import` of a referenced module. "
     + "Swift rejects `@usableFromInline` bodies that reach identifiers in "
     + "internally-imported modules at compile time. Either downgrade the "
@@ -86,7 +86,7 @@ internal final class StructureUsableFromInlineInternalImportVisitor: SyntaxVisit
                     column: location.column
                 ),
                 severity: severity,
-                identifier: "usable_from_inline_internal_import",
+                identifier: "usable from inline internal import",
                 message: structureUsableFromInlineInternalImportMessage
             ))
         }

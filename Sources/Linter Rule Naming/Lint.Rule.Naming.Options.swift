@@ -15,7 +15,7 @@ internal import SwiftSyntax
 /// `OptionSet` type with a `Flags` suffix — the institute uses `.Options`.
 extension Lint.Rule {
     public static let `property named flags` = Lint.Rule(
-        id: "option_named_flags",
+        id: "property named flags",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = NamingOptionsVisitor(
@@ -31,7 +31,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let namingOptionsMessage: Swift.String =
-    "[option_named_flags] feedback_options_not_flags: an `OptionSet` type named with "
+    "[property named flags] feedback_options_not_flags: an `OptionSet` type named with "
     + "the `Flags` suffix uses C-speak. The institute convention is `.Options` "
     + "(e.g., `File.Open.Options`, `Walk.Options`)."
 
@@ -63,7 +63,7 @@ internal final class NamingOptionsVisitor: SyntaxVisitor {
                 column: location.column
             ),
             severity: severity,
-            identifier: "option_named_flags",
+            identifier: "property named flags",
             message: namingOptionsMessage
         ))
         return .visitChildren

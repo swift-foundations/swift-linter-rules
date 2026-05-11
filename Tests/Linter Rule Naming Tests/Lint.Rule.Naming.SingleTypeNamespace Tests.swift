@@ -42,7 +42,7 @@ extension Lint.Rule.`single type namespace Tests`.Unit {
         let findings = Lint.Rule.`single type namespace Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
-            #expect(findings[0].identifier == "single_type_namespace")
+            #expect(findings[0].identifier == "single type namespace")
             #expect(findings[0].severity == .warning)
         }
     }

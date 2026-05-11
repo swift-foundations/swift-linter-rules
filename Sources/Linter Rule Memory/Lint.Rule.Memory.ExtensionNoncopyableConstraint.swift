@@ -25,7 +25,7 @@ internal import SwiftSyntax
 /// that should apply to noncopyable element types.
 extension Lint.Rule {
     public static let `extension noncopyable constraint` = Lint.Rule(
-        id: "extension_noncopyable_constraint",
+        id: "extension noncopyable constraint",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = MemoryExtensionNoncopyableConstraintVisitor(
@@ -41,7 +41,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let memoryExtensionNoncopyableConstraintMessage: Swift.String =
-    "[extension_noncopyable_constraint] [MEM-COPY-004]: extensions on `~Copyable`-"
+    "[extension noncopyable constraint] [MEM-COPY-004]: extensions on `~Copyable`-"
     + "aware generic types MUST include explicit `where ... ~Copyable` constraints. "
     + "Without it, the extension is implicitly `where Element: Copyable` and the "
     + "surface silently shrinks. Add `where Element: ~Copyable` (or the matching "
@@ -120,7 +120,7 @@ internal final class MemoryExtensionNoncopyableConstraintVisitor: SyntaxVisitor 
                 column: location.column
             ),
             severity: severity,
-            identifier: "extension_noncopyable_constraint",
+            identifier: "extension noncopyable constraint",
             message: memoryExtensionNoncopyableConstraintMessage
         ))
         return .visitChildren

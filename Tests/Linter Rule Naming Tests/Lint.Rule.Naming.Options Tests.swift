@@ -43,7 +43,7 @@ extension Lint.Rule.`property named flags Tests`.Unit {
         let count = findings.count
         #expect(count == 1)
         if count == 1 {
-            #expect(findings[0].identifier == "option_named_flags")
+            #expect(findings[0].identifier == "property named flags")
             #expect(findings[0].severity == .warning)
         }
     }

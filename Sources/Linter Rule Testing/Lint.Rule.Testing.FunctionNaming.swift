@@ -16,7 +16,7 @@ internal import SwiftSyntax
 /// identifiers. Citation: `[SWIFT-TEST-005]`.
 extension Lint.Rule {
     public static let `test function naming` = Lint.Rule(
-        id: "test_function_naming",
+        id: "test function naming",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = TestingFunctionNamingVisitor(
@@ -32,7 +32,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let testingFunctionNamingMessage: Swift.String =
-    "[test_function_naming] [SWIFT-TEST-005]: `@Test` functions MUST use a "
+    "[test function naming] [SWIFT-TEST-005]: `@Test` functions MUST use a "
     + "backticked descriptive sentence as the name. CamelCase names are the "
     + "legacy XCTest pattern and don't read as documentation in test reports."
 
@@ -70,7 +70,7 @@ internal final class TestingFunctionNamingVisitor: SyntaxVisitor {
                     column: location.column
                 ),
                 severity: severity,
-                identifier: "test_function_naming",
+                identifier: "test function naming",
                 message: testingFunctionNamingMessage
             ))
         }

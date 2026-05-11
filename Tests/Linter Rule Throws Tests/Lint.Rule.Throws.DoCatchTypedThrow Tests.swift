@@ -46,7 +46,7 @@ extension Lint.Rule.`do throws for typed catch with throw Tests`.Unit {
         let findings = Lint.Rule.`do throws for typed catch with throw Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
-            #expect(findings[0].identifier == "do_throws_e_for_typed_catch_throw")
+            #expect(findings[0].identifier == "do throws for typed catch with throw")
             #expect(findings[0].severity == .warning)
         }
     }

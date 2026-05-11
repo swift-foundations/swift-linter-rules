@@ -19,7 +19,7 @@ internal import SwiftSyntax
 /// Citation: `[MEM-SAFE-023]` (memory-safety skill, safety-isolation.md).
 extension Lint.Rule {
     public static let `unsafe storage visibility` = Lint.Rule(
-        id: "private_unsafe_storage",
+        id: "unsafe storage visibility",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = MemoryPrivateUnsafeStorageVisitor(
@@ -35,7 +35,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let memoryPrivateUnsafeStorageMessage: Swift.String =
-    "[private_unsafe_storage] [MEM-SAFE-023]: public stored properties of unsafe "
+    "[unsafe storage visibility] [MEM-SAFE-023]: public stored properties of unsafe "
     + "pointer types MUST be `private` / `internal`, or annotated `@unsafe` to "
     + "signal a deliberate escape hatch. Public pointer storage on an Escapable "
     + "wrapper leaks dangling-pointer risk past the wrapper's lifetime. Prefer "
@@ -127,7 +127,7 @@ internal final class MemoryPrivateUnsafeStorageVisitor: SyntaxVisitor {
                         column: location.column
                     ),
                     severity: severity,
-                    identifier: "private_unsafe_storage",
+                    identifier: "unsafe storage visibility",
                     message: memoryPrivateUnsafeStorageMessage
                 ))
             }

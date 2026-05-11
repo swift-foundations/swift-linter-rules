@@ -55,7 +55,7 @@ extension Lint.Rule.`for loop in result builder Tests`.PositiveCases {
         let findings = Lint.Rule.`for loop in result builder Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
-            #expect(findings[0].identifier == "result_builder_for_loop")
+            #expect(findings[0].identifier == "for loop in result builder")
             #expect(findings[0].severity == .warning)
         }
     }

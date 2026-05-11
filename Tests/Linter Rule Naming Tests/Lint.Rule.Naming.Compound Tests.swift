@@ -39,7 +39,7 @@ extension Lint.Rule.`compound identifier Tests`.Unit {
         let count = findings.count
         #expect(count == 1)
         if count == 1 {
-            #expect(findings[0].identifier == "compound_identifier")
+            #expect(findings[0].identifier == "compound identifier")
             #expect(findings[0].severity == .warning)
         }
     }

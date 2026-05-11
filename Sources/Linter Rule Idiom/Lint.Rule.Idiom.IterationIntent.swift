@@ -16,7 +16,7 @@ internal import SwiftSyntax
 /// intent. Citation: `[IMPL-033]`.
 extension Lint.Rule {
     public static let `counter loop iteration` = Lint.Rule(
-        id: "iteration_intent_counter_loop",
+        id: "counter loop iteration",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = IdiomIterationIntentVisitor(
@@ -32,7 +32,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let idiomIterationIntentMessage: Swift.String =
-    "[iteration_intent_counter_loop] [IMPL-033]: `for <i> in <a>..<<b>` "
+    "[counter loop iteration] [IMPL-033]: `for <i> in <a>..<<b>` "
     + "counter loop is mechanism, not intent. Climb the iteration "
     + "ladder: `items.forEach { … }` (per-element), `items.indices."
     + "forEach { … }` (when the index is needed), or a typed-while "
@@ -83,7 +83,7 @@ internal final class IdiomIterationIntentVisitor: SyntaxVisitor {
                 column: location.column
             ),
             severity: severity,
-            identifier: "iteration_intent_counter_loop",
+            identifier: "counter loop iteration",
             message: idiomIterationIntentMessage
         ))
         return .visitChildren

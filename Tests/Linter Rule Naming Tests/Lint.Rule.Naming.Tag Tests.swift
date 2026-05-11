@@ -39,7 +39,7 @@ extension Lint.Rule.`tag suffix Tests`.Unit {
         let count = findings.count
         #expect(count == 1)
         if count == 1 {
-            #expect(findings[0].identifier == "tag_suffix")
+            #expect(findings[0].identifier == "tag suffix")
             #expect(findings[0].severity == .warning)
         }
     }

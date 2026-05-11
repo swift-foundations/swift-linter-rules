@@ -42,7 +42,7 @@ extension Lint.Rule.`tagged extension public init Tests`.Unit {
         let findings = Lint.Rule.`tagged extension public init Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
-            #expect(findings[0].identifier == "tagged_rawvalue_extension_public_init")
+            #expect(findings[0].identifier == "tagged extension public init")
         }
     }
 

@@ -36,7 +36,7 @@ internal import SwiftSyntax
 /// authoring time rather than after the compile error.
 extension Lint.Rule {
     public static let `borrowing self short circuit` = Lint.Rule(
-        id: "borrowing_self_short_circuit",
+        id: "borrowing self short circuit",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = MemoryBorrowingSelfShortCircuitVisitor(
@@ -52,7 +52,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let memoryBorrowingSelfShortCircuitMessage: Swift.String =
-    "[borrowing_self_short_circuit] [IMPL-094]: operator overload "
+    "[borrowing self short circuit] [IMPL-094]: operator overload "
     + "with `borrowing Self` parameters uses `&&` / `||` in its body — "
     + "Swift 6.3 rejects chained property access across the short-"
     + "circuit boundary as `borrowed value escapes its borrow scope`. "
@@ -141,7 +141,7 @@ internal final class MemoryBorrowingSelfShortCircuitVisitor: SyntaxVisitor {
                     column: location.column
                 ),
                 severity: severity,
-                identifier: "borrowing_self_short_circuit",
+                identifier: "borrowing self short circuit",
                 message: memoryBorrowingSelfShortCircuitMessage
             ))
         }

@@ -44,7 +44,7 @@ extension Lint.Rule.`optionset shell pattern Tests`.Unit {
         let findings = Lint.Rule.`optionset shell pattern Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
-            #expect(findings[0].identifier == "optionset_shell_pattern")
+            #expect(findings[0].identifier == "optionset shell pattern")
             #expect(findings[0].severity == .warning)
         }
     }

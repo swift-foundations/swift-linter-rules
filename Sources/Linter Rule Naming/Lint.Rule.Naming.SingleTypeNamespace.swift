@@ -16,7 +16,7 @@ internal import SwiftSyntax
 /// variant labels, not namespaces. Citation: `[API-NAME-001a]`.
 extension Lint.Rule {
     public static let `single type namespace` = Lint.Rule(
-        id: "single_type_namespace",
+        id: "single type namespace",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = NamingSingleTypeNamespaceVisitor(
@@ -32,7 +32,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let namingSingleTypeNamespaceMessage: Swift.String =
-    "[single_type_namespace] [API-NAME-001a]: caseless-enum namespace "
+    "[single type namespace] [API-NAME-001a]: caseless-enum namespace "
     + "contains exactly one nested type — that's a *variant label*, "
     + "not a namespace. Promote the inner type and nest the label "
     + "under its parent: `extension <InnerType> { public struct <Label> "
@@ -96,7 +96,7 @@ internal final class NamingSingleTypeNamespaceVisitor: SyntaxVisitor {
                 column: location.column
             ),
             severity: severity,
-            identifier: "single_type_namespace",
+            identifier: "single type namespace",
             message: namingSingleTypeNamespaceMessage
         ))
         return .visitChildren

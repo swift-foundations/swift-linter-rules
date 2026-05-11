@@ -25,7 +25,7 @@ internal import SwiftSyntax
 /// through a copyable handle.
 extension Lint.Rule {
     public static let `noncopyable error` = Lint.Rule(
-        id: "error_noncopyable_check",
+        id: "noncopyable error",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = MemoryErrorNoncopyableVisitor(
@@ -41,7 +41,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let memoryErrorNoncopyableMessage: Swift.String =
-    "[error_noncopyable_check] [MEM-COPY-002]: `Error`-conforming types MUST NOT "
+    "[noncopyable error] [MEM-COPY-002]: `Error`-conforming types MUST NOT "
     + "suppress `Copyable`. `Swift.Error`'s existential boxing requires `Copyable`. "
     + "A `~Copyable` Error type fails to compile or to interoperate with the "
     + "throwing protocol surface. Use a non-throwing `Outcome` enum (`.success`/"
@@ -106,7 +106,7 @@ internal final class MemoryErrorNoncopyableVisitor: SyntaxVisitor {
                 column: location.column
             ),
             severity: severity,
-            identifier: "error_noncopyable_check",
+            identifier: "noncopyable error",
             message: memoryErrorNoncopyableMessage
         ))
     }

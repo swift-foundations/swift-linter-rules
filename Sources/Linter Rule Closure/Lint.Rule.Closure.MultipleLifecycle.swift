@@ -17,7 +17,7 @@ internal import SwiftSyntax
 /// Citation: `[API-IMPL-013]`.
 extension Lint.Rule {
     public static let `unlabeled lifecycle closure` = Lint.Rule(
-        id: "multi_closure_unlabeled",
+        id: "unlabeled lifecycle closure",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = ClosureMultipleLifecycleVisitor(
@@ -33,7 +33,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let closureMultipleLifecycleMessage: Swift.String =
-    "[multi_closure_unlabeled] [API-IMPL-013]: signatures with two or more closure "
+    "[unlabeled lifecycle closure] [API-IMPL-013]: signatures with two or more closure "
     + "parameters MUST label every closure after the primary body closure. The "
     + "secondary closure label names the closure's *role* (`completion:`, "
     + "`onError:`, `progress:`) — not its type. Per [API-NAME-002], roles over "
@@ -62,7 +62,7 @@ internal final class ClosureMultipleLifecycleVisitor: SyntaxVisitor {
                 column: location.column
             ),
             severity: severity,
-            identifier: "multi_closure_unlabeled",
+            identifier: "unlabeled lifecycle closure",
             message: closureMultipleLifecycleMessage
         ))
     }

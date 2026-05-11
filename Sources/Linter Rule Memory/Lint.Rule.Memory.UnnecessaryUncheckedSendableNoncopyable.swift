@@ -19,7 +19,7 @@ internal import SwiftSyntax
 /// Citation: `[MEM-SEND-004]` (memory-safety skill, concurrency.md).
 extension Lint.Rule {
     public static let `unchecked sendable noncopyable` = Lint.Rule(
-        id: "unnecessary_unchecked_sendable_noncopyable",
+        id: "unchecked sendable noncopyable",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = MemoryUnnecessaryUncheckedSendableNoncopyableVisitor(
@@ -35,7 +35,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let memoryUnnecessaryUncheckedSendableNoncopyableMessage: Swift.String =
-    "[unnecessary_unchecked_sendable_noncopyable] [MEM-SEND-004]: `~Copyable` "
+    "[unchecked sendable noncopyable] [MEM-SEND-004]: `~Copyable` "
     + "structs whose stored properties are all `Sendable` MUST use plain `Sendable`. "
     + "The compiler synthesises and checks `Sendable` for `~Copyable` structs the "
     + "same way as for `Copyable` ones — there is no inference gap. `@unchecked "
@@ -112,7 +112,7 @@ internal final class MemoryUnnecessaryUncheckedSendableNoncopyableVisitor: Synta
                 column: location.column
             ),
             severity: severity,
-            identifier: "unnecessary_unchecked_sendable_noncopyable",
+            identifier: "unchecked sendable noncopyable",
             message: memoryUnnecessaryUncheckedSendableNoncopyableMessage
         ))
         return .visitChildren

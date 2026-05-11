@@ -42,7 +42,7 @@ extension Lint.Rule.`canimport conditional Tests`.Unit {
         let findings = Lint.Rule.`canimport conditional Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
-            #expect(findings[0].identifier == "platform_canimport_conditional")
+            #expect(findings[0].identifier == "canimport conditional")
             #expect(findings[0].severity == .warning)
         }
     }

@@ -20,7 +20,7 @@ internal import SwiftSyntax
 /// extends System directly).
 extension Lint.Rule {
     public static let `system subdomain` = Lint.Rule(
-        id: "platform_system_subdomain",
+        id: "system subdomain",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = PlatformSystemSubdomainVisitor(
@@ -36,7 +36,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let platformSystemSubdomainMessage: Swift.String =
-    "[platform_system_subdomain] [PLAT-ARCH-026]: `System` must NOT be "
+    "[system subdomain] [PLAT-ARCH-026]: `System` must NOT be "
     + "a subdomain of `Darwin` / `Linux` / `Windows`. Platform System "
     + "targets extend the cross-platform `System` namespace directly "
     + "— platform-specific discovery (sysctl, /proc/meminfo, WinSDK) "
@@ -86,7 +86,7 @@ internal final class PlatformSystemSubdomainVisitor: SyntaxVisitor {
                 column: location.column
             ),
             severity: severity,
-            identifier: "platform_system_subdomain",
+            identifier: "system subdomain",
             message: platformSystemSubdomainMessage
         ))
     }

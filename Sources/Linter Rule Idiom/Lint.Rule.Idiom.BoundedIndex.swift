@@ -17,7 +17,7 @@ internal import SwiftSyntax
 /// raw `Int`. Citation: `[IMPL-050]`.
 extension Lint.Rule {
     public static let `bounded index static capacity` = Lint.Rule(
-        id: "bounded_index_static_capacity",
+        id: "bounded index static capacity",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = IdiomBoundedIndexVisitor(
@@ -33,7 +33,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let idiomBoundedIndexMessage: Swift.String =
-    "[bounded_index_static_capacity] [IMPL-050]: subscript on a "
+    "[bounded index static capacity] [IMPL-050]: subscript on a "
     + "static-capacity type (`<let N: Int>`) takes a raw `Int` index — "
     + "the capacity bound is dropped from the type system. Use "
     + "`Index<Element>.Bounded<N>` so the index cannot exceed `N` at "
@@ -139,7 +139,7 @@ internal final class IdiomBoundedIndexVisitor: SyntaxVisitor {
                     column: location.column
                 ),
                 severity: severity,
-                identifier: "bounded_index_static_capacity",
+                identifier: "bounded index static capacity",
                 message: idiomBoundedIndexMessage
             ))
         }

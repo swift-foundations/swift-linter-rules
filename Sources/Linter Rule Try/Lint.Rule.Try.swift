@@ -25,7 +25,7 @@ internal import SwiftSyntax
 /// is `.postfixQuestionMark`.
 extension Lint.Rule {
     public static let `try optional` = Lint.Rule(
-        id: "try_optional",
+        id: "try optional",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = TryOptionalVisitor(
@@ -41,7 +41,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let tryOptionalMessage: Swift.String =
-    "[try_optional] feedback_prefer_typed_throws_over_try_optional: "
+    "[try optional] feedback_prefer_typed_throws_over_try_optional: "
     + "`try?` swallows the thrown error and returns `nil`, erasing both the error type "
     + "and the error instance. Prefer typed throws (`throws(E)`) so the error path stays "
     + "explicit and recoverable. Past incident: `try? input.advance()` swallowed `EAGAIN` "
@@ -77,7 +77,7 @@ internal final class TryOptionalVisitor: SyntaxVisitor {
                 column: location.column
             ),
             severity: severity,
-            identifier: "try_optional",
+            identifier: "try optional",
             message: tryOptionalMessage
         ))
         return .visitChildren

@@ -16,7 +16,7 @@ internal import SwiftSyntax
 /// `do throws(E) { try ... } catch { }`. Citation: `[IMPL-075]`.
 extension Lint.Rule {
     public static let `do throws for typed catch` = Lint.Rule(
-        id: "do_throws_e_for_typed_catch",
+        id: "do throws for typed catch",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = ThrowsDoCatchTypedVisitor(
@@ -32,7 +32,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let throwsDoCatchTypedMessage: Swift.String =
-    "[do_throws_e_for_typed_catch] [IMPL-075]: bare `do { try ... } catch { }` "
+    "[do throws for typed catch] [IMPL-075]: bare `do { try ... } catch { }` "
     + "erases the concrete error type. Use `do throws(E) { try ... } catch { }` "
     + "to preserve `E` in the catch binding."
 
@@ -75,7 +75,7 @@ internal final class ThrowsDoCatchTypedVisitor: SyntaxVisitor {
                 column: location.column
             ),
             severity: severity,
-            identifier: "do_throws_e_for_typed_catch",
+            identifier: "do throws for typed catch",
             message: throwsDoCatchTypedMessage
         ))
         return .visitChildren

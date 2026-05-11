@@ -40,7 +40,7 @@ extension Lint.Rule.`c type in public api Tests`.Unit {
         let findings = Lint.Rule.`c type in public api Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
-            #expect(findings[0].identifier == "c_type_in_public_api")
+            #expect(findings[0].identifier == "c type in public api")
         }
     }
 

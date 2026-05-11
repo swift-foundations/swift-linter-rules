@@ -17,7 +17,7 @@ internal import SwiftSyntax
 /// offset. Citation: `[PATTERN-058]`.
 extension Lint.Rule {
     public static let `enumerated with subscript` = Lint.Rule(
-        id: "enumerated_subscript_collection",
+        id: "enumerated with subscript",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = IdiomEnumeratedSubscriptVisitor(
@@ -33,7 +33,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let idiomEnumeratedSubscriptMessage: Swift.String =
-    "[enumerated_subscript_collection] [PATTERN-058]: `for (i, _) in "
+    "[enumerated with subscript] [PATTERN-058]: `for (i, _) in "
     + "<seq>.enumerated() { ... <seq>[i] }` works on Array but silently "
     + "breaks on custom Collections whose `Index` is not a 0-based offset "
     + "(byte position, token offset). Prefer iterator-based comparison or "
@@ -117,7 +117,7 @@ internal final class IdiomEnumeratedSubscriptVisitor: SyntaxVisitor {
                 column: location.column
             ),
             severity: severity,
-            identifier: "enumerated_subscript_collection",
+            identifier: "enumerated with subscript",
             message: idiomEnumeratedSubscriptMessage
         ))
         return .visitChildren

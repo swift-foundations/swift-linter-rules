@@ -16,7 +16,7 @@ internal import SwiftSyntax
 /// specifier. Citation: `[IMPL-075]`.
 extension Lint.Rule {
     public static let `do throws for typed catch with throw` = Lint.Rule(
-        id: "do_throws_e_for_typed_catch_throw",
+        id: "do throws for typed catch with throw",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = ThrowsDoCatchTypedThrowVisitor(
@@ -32,7 +32,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let throwsDoCatchTypedThrowMessage: Swift.String =
-    "[do_throws_e_for_typed_catch_throw] [IMPL-075]: bare `do { throw … } "
+    "[do throws for typed catch with throw] [IMPL-075]: bare `do { throw … } "
     + "catch { … }` erases the concrete error type. Use "
     + "`do throws(E) { throw … } catch { … }`."
 
@@ -87,7 +87,7 @@ internal final class ThrowsDoCatchTypedThrowVisitor: SyntaxVisitor {
                 column: location.column
             ),
             severity: severity,
-            identifier: "do_throws_e_for_typed_catch_throw",
+            identifier: "do throws for typed catch with throw",
             message: throwsDoCatchTypedThrowMessage
         ))
         return .visitChildren

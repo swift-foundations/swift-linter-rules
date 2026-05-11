@@ -43,7 +43,7 @@ extension Lint.Rule.`dead case per platform Tests`.Unit {
         let findings = Lint.Rule.`dead case per platform Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
-            #expect(findings[0].identifier == "dead_case_per_platform_enum")
+            #expect(findings[0].identifier == "dead case per platform")
         }
     }
 

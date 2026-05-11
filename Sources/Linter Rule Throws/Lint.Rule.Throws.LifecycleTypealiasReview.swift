@@ -16,7 +16,7 @@ internal import SwiftSyntax
 /// requires case-coverage review. Citation: `[API-ERR-008]`.
 extension Lint.Rule {
     public static let `lifecycle typealias review` = Lint.Rule(
-        id: "lifecycle_typealias_review",
+        id: "lifecycle typealias review",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = ThrowsLifecycleTypealiasReviewVisitor(
@@ -32,7 +32,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let throwsLifecycleTypealiasReviewMessage: Swift.String =
-    "[lifecycle_typealias_review] [API-ERR-008]: typealias `Error = "
+    "[lifecycle typealias review] [API-ERR-008]: typealias `Error = "
     + "<Domain>.Lifecycle.Error` adopts a SHARED lifecycle-error type. "
     + "Confirm the primitive actually produces EVERY case of the "
     + "lifecycle type."
@@ -75,7 +75,7 @@ internal final class ThrowsLifecycleTypealiasReviewVisitor: SyntaxVisitor {
                 column: location.column
             ),
             severity: severity,
-            identifier: "lifecycle_typealias_review",
+            identifier: "lifecycle typealias review",
             message: throwsLifecycleTypealiasReviewMessage
         ))
         return .visitChildren

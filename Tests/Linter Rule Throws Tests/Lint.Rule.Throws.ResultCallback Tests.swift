@@ -42,7 +42,7 @@ extension Lint.Rule.`callback result over throws thunk Tests`.Unit {
         let findings = Lint.Rule.`callback result over throws thunk Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
-            #expect(findings[0].identifier == "callback_result_over_throws_thunk")
+            #expect(findings[0].identifier == "callback result over throws thunk")
             #expect(findings[0].severity == .warning)
         }
     }

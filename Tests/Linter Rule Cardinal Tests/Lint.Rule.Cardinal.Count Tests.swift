@@ -40,7 +40,7 @@ extension Lint.Rule.`count minus one Tests`.Unit {
         let count = findings.count
         #expect(count == 1)
         if count == 1 {
-            #expect(findings[0].identifier == "cardinal_count_minus_one")
+            #expect(findings[0].identifier == "count minus one")
             #expect(findings[0].severity == .warning)
         }
     }

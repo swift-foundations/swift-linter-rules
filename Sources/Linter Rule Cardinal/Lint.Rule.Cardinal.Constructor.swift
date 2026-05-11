@@ -25,7 +25,7 @@ internal import SwiftSyntax
 ///   §"R2. `Cardinal(0)` and `Cardinal(1)`"
 extension Lint.Rule {
     public static let `zero or one literal` = Lint.Rule(
-        id: "cardinal_zero_one_constructor",
+        id: "zero or one literal",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = CardinalConstructorVisitor(
@@ -41,7 +41,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let cardinalZeroOneConstructorMessage: Swift.String =
-    "[cardinal_zero_one_constructor] [INFRA-101]: `Cardinal(0)` / `Cardinal(1)` "
+    "[zero or one literal] [INFRA-101]: `Cardinal(0)` / `Cardinal(1)` "
     + "constructor calls with literal `0` or `1` bypass the typed-system literal "
     + "discipline. Use the canonical accessors `.zero` / `.one` instead. If this site "
     + "is the typed-system bottom-out, escalate to supervisor and apply "
@@ -84,7 +84,7 @@ internal final class CardinalConstructorVisitor: SyntaxVisitor {
                 column: location.column
             ),
             severity: severity,
-            identifier: "cardinal_zero_one_constructor",
+            identifier: "zero or one literal",
             message: cardinalZeroOneConstructorMessage
         ))
         return .visitChildren

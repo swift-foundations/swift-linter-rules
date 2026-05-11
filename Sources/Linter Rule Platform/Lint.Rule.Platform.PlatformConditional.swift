@@ -19,7 +19,7 @@ internal import SwiftSyntax
 /// conditionals).
 extension Lint.Rule {
     public static let `canimport conditional` = Lint.Rule(
-        id: "platform_canimport_conditional",
+        id: "canimport conditional",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = PlatformPlatformConditionalVisitor(
@@ -35,7 +35,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let platformPlatformConditionalMessage: Swift.String =
-    "[platform_canimport_conditional] [PATTERN-004a]: platform "
+    "[canimport conditional] [PATTERN-004a]: platform "
     + "identity check uses `#if canImport(...)` on a platform-prefixed "
     + "module — `canImport` evaluates against module resolution (varies "
     + "by build system); platform identity is what `#if os(...)` is "
@@ -100,7 +100,7 @@ internal final class PlatformPlatformConditionalVisitor: SyntaxVisitor {
                                 column: location.column
                             ),
                             severity: severity,
-                            identifier: "platform_canimport_conditional",
+                            identifier: "canimport conditional",
                             message: platformPlatformConditionalMessage
                         ))
                     }

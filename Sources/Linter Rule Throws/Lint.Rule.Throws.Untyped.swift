@@ -17,7 +17,7 @@ internal import SwiftSyntax
 /// Citation: [API-ERR-001].
 extension Lint.Rule {
     public static let `untyped throws` = Lint.Rule(
-        id: "untyped_throws",
+        id: "untyped throws",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = ThrowsUntypedVisitor(
@@ -33,7 +33,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let throwsUntypedMessage: Swift.String =
-    "[untyped_throws] [API-ERR-001]: bare `throws` erases the error type. Use "
+    "[untyped throws] [API-ERR-001]: bare `throws` erases the error type. Use "
     + "`throws(SpecificError)` so callers know which errors are possible at compile "
     + "time and the error path stays exhaustive. Untyped throws boxes the error as "
     + "`any Error`, which the institute convention forbids."
@@ -67,7 +67,7 @@ internal final class ThrowsUntypedVisitor: SyntaxVisitor {
                 column: location.column
             ),
             severity: severity,
-            identifier: "untyped_throws",
+            identifier: "untyped throws",
             message: throwsUntypedMessage
         ))
         return .visitChildren

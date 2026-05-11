@@ -20,7 +20,7 @@ internal import SwiftSyntax
 /// with nested typealias).
 extension Lint.Rule {
     public static let `hoisted protocol alias` = Lint.Rule(
-        id: "hoisted_protocol_self_conformance",
+        id: "hoisted protocol alias",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = StructureHoistedProtocolAliasVisitor(
@@ -36,7 +36,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let structureHoistedProtocolAliasMessage: Swift.String =
-    "[hoisted_protocol_self_conformance] [API-IMPL-009]: declaring-"
+    "[hoisted protocol alias] [API-IMPL-009]: declaring-"
     + "module conformance via the `.Protocol` typealias path is a "
     + "self-referential cycle. Use the hoisted protocol name "
     + "(`_FooProtocol`) directly in the declaring module. The "
@@ -110,7 +110,7 @@ internal final class StructureHoistedProtocolAliasVisitor: SyntaxVisitor {
                     column: location.column
                 ),
                 severity: severity,
-                identifier: "hoisted_protocol_self_conformance",
+                identifier: "hoisted protocol alias",
                 message: structureHoistedProtocolAliasMessage
             ))
         }

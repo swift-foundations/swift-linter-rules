@@ -16,7 +16,7 @@ internal import SwiftSyntax
 /// `throws(E)` annotation when they contain `try`. Citation: `[API-ERR-004]`.
 extension Lint.Rule {
     public static let `closure typed throws annotation` = Lint.Rule(
-        id: "closure_typed_throws_annotation",
+        id: "closure typed throws annotation",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = ThrowsClosureAnnotationVisitor(
@@ -32,7 +32,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let throwsClosureAnnotationMessage: Swift.String =
-    "[closure_typed_throws_annotation] [API-ERR-004]: closure inside a "
+    "[closure typed throws annotation] [API-ERR-004]: closure inside a "
     + "`throws(E)` context contains `try` but lacks an explicit "
     + "`throws(E)` annotation — Swift 6.2 infers `any Error` and erases "
     + "the typed throw."
@@ -77,7 +77,7 @@ internal final class ThrowsClosureAnnotationVisitor: SyntaxVisitor {
                 column: location.column
             ),
             severity: severity,
-            identifier: "closure_typed_throws_annotation",
+            identifier: "closure typed throws annotation",
             message: throwsClosureAnnotationMessage
         ))
     }

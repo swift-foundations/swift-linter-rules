@@ -44,7 +44,7 @@ extension Lint.Rule.`throwing wrapper init Tests`.Unit {
         let findings = Lint.Rule.`throwing wrapper init Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
-            #expect(findings[0].identifier == "throwing_wrapper_init_no_validation")
+            #expect(findings[0].identifier == "throwing wrapper init")
         }
     }
 }

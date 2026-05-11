@@ -61,19 +61,19 @@ Each pack ships as its own SwiftPM product. Activate per-rule via the
 
 | Pack product | Rule ID | What it catches |
 |---|---|---|
-| `Linter Rule Unchecked` | `unchecked_call_site` | `__unchecked:` argument labels at call sites that bypass the typed-system contract |
-| `Linter Rule Cardinal` | `cardinal_zero_one_constructor` | `Cardinal(0)` / `Cardinal(1)` constructor calls (use the typed `.zero` / `.one` accessors instead) |
-| `Linter Rule Cardinal` | `cardinal_count_minus_one` | `count - 1` and its semantically-equivalent rewrites — operand-reorder, paren-wrap, cast-outside |
-| `Linter Rule RawValue` | `chained_rawvalue_access` | Chained `.rawValue.method()` patterns that escape the typed wrapper |
-| `Linter Rule RawValue` | `bitpattern_rawvalue_chain` | Bit-pattern conversions chaining `.rawValue` |
-| `Linter Rule ResultBuilder` | `result_builder_for_loop` | `for i in 0..<N { i }` style integer loops in builder bodies |
-| `Linter Rule Try` | `try_optional` | `try?` sites that swallow typed-throws errors silently |
-| `Linter Rule Throws` | `untyped_throws` | `throws` declarations without a typed-throws clause |
-| `Linter Rule Throws` | `existential_throws` | `throws(any Error)` existential-error declarations |
-| `Linter Rule Naming` | `var_named_impl` | Local bindings named `impl` (use the type's own name) |
-| `Linter Rule Naming` | `option_named_flags` | `OptionSet` types named `*.Flags` (use `*.Options`) |
-| `Linter Rule Naming` | `compound_identifier` | Compound type, method, or property names that should decompose into nested forms |
-| `Linter Rule Naming` | `tag_suffix` | Phantom-type tags suffixed with `Tag` (use the bare concept name) |
+| `Linter Rule Unchecked` | `` `unchecked call site` `` | `__unchecked:` argument labels at call sites that bypass the typed-system contract |
+| `Linter Rule Cardinal` | `` `zero or one literal` `` | `Cardinal(0)` / `Cardinal(1)` constructor calls (use the typed `.zero` / `.one` accessors instead) |
+| `Linter Rule Cardinal` | `` `count minus one` `` | `count - 1` and its semantically-equivalent rewrites — operand-reorder, paren-wrap, cast-outside |
+| `Linter Rule RawValue` | `` `chained rawvalue access` `` | Chained `.rawValue.method()` patterns that escape the typed wrapper |
+| `Linter Rule RawValue` | `` `bitpattern rawvalue chain` `` | Bit-pattern conversions chaining `.rawValue` |
+| `Linter Rule ResultBuilder` | `` `for loop in result builder` `` | `for i in 0..<N { i }` style integer loops in builder bodies |
+| `Linter Rule Try` | `` `try optional` `` | `try?` sites that swallow typed-throws errors silently |
+| `Linter Rule Throws` | `` `untyped throws` `` | `throws` declarations without a typed-throws clause |
+| `Linter Rule Throws` | `` `existential throws` `` | `throws(any Error)` existential-error declarations |
+| `Linter Rule Naming` | `` `variable named impl` `` | Local bindings named `impl` (use the type's own name) |
+| `Linter Rule Naming` | `` `property named flags` `` | `OptionSet` types named `*.Flags` (use `*.Options`) |
+| `Linter Rule Naming` | `` `compound identifier` `` | Compound type, method, or property names that should decompose into nested forms |
+| `Linter Rule Naming` | `` `tag suffix` `` | Phantom-type tags suffixed with `Tag` (use the bare concept name) |
 
 Each rule's source carries inline documentation describing its AST
 predicate, the source patterns it covers, and the convention it enforces.

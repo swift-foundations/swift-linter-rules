@@ -43,7 +43,7 @@ extension Lint.Rule.`pointer advanced by Tests`.Unit {
         let findings = Lint.Rule.`pointer advanced by Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
-            #expect(findings[0].identifier == "pointer_advanced_by")
+            #expect(findings[0].identifier == "pointer advanced by")
         }
     }
 

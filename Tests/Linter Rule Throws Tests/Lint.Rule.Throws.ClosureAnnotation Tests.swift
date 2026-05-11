@@ -42,7 +42,7 @@ extension Lint.Rule.`closure typed throws annotation Tests`.Unit {
         let findings = Lint.Rule.`closure typed throws annotation Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
-            #expect(findings[0].identifier == "closure_typed_throws_annotation")
+            #expect(findings[0].identifier == "closure typed throws annotation")
             #expect(findings[0].severity == .warning)
         }
     }

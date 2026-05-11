@@ -15,7 +15,7 @@ internal import SwiftSyntax
 /// Hoisted error types in public-API throws clauses. Citation: `[API-ERR-007]`.
 extension Lint.Rule {
     public static let `hoisted error in public throws` = Lint.Rule(
-        id: "hoisted_error_in_public_throws",
+        id: "hoisted error in public throws",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = ThrowsHoistedErrorVisitor(
@@ -31,7 +31,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let throwsHoistedErrorMessage: Swift.String =
-    "[hoisted_error_in_public_throws] [API-ERR-007]: public-API "
+    "[hoisted error in public throws] [API-ERR-007]: public-API "
     + "`throws(T)` clauses MUST reference the canonical public path, "
     + "never the `__`-prefixed hoisted internal type."
 
@@ -93,7 +93,7 @@ internal final class ThrowsHoistedErrorVisitor: SyntaxVisitor {
                 column: location.column
             ),
             severity: severity,
-            identifier: "hoisted_error_in_public_throws",
+            identifier: "hoisted error in public throws",
             message: throwsHoistedErrorMessage
         ))
     }

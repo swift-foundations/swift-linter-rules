@@ -16,7 +16,7 @@ internal import SwiftSyntax
 /// Citation: `[API-NAME-004]`.
 extension Lint.Rule {
     public static let `unification typealias` = Lint.Rule(
-        id: "unification_bridge_typealias",
+        id: "unification typealias",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = NamingUnificationTypealiasVisitor(
@@ -32,7 +32,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let namingUnificationTypealiasMessage: Swift.String =
-    "[unification_bridge_typealias] [API-NAME-004]: typealias renames a "
+    "[unification typealias] [API-NAME-004]: typealias renames a "
     + "member type to a different local name. Type unification MUST use the "
     + "canonical type at all call sites; a typealias bridge adds indirection "
     + "without domain value."
@@ -87,7 +87,7 @@ internal final class NamingUnificationTypealiasVisitor: SyntaxVisitor {
                 column: location.column
             ),
             severity: severity,
-            identifier: "unification_bridge_typealias",
+            identifier: "unification typealias",
             message: namingUnificationTypealiasMessage
         ))
         return .visitChildren

@@ -17,7 +17,7 @@ internal import SwiftSyntax
 /// Citation: `[API-IMPL-005]` (code-surface skill).
 extension Lint.Rule {
     public static let `single type per file` = Lint.Rule(
-        id: "single_type_per_file",
+        id: "single type per file",
         defaultSeverity: .warning,
         findings: { source, severity in
             // Scope-exclusion per Decision 2: skip files whose path has a
@@ -44,7 +44,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let structureSingleTypePerFileMessage: Swift.String =
-    "[single_type_per_file] [API-IMPL-005]: each `.swift` source file MUST contain "
+    "[single type per file] [API-IMPL-005]: each `.swift` source file MUST contain "
     + "exactly one type declaration (`struct`, `class`, `enum`, `actor`, `protocol`). "
     + "Multiple `extension` declarations of the enclosing type are permitted. "
     + "Move additional types to their own files; the file naming convention "
@@ -78,7 +78,7 @@ internal final class StructureSingleTypePerFileVisitor: SyntaxVisitor {
                 column: location.column
             ),
             severity: severity,
-            identifier: "single_type_per_file",
+            identifier: "single type per file",
             message: structureSingleTypePerFileMessage
         ))
     }

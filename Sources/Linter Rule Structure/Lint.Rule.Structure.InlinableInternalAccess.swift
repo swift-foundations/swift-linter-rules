@@ -17,7 +17,7 @@ internal import SwiftSyntax
 /// Citation: `[PATTERN-052]` (implementation skill, patterns.md).
 extension Lint.Rule {
     public static let `inlinable internal access` = Lint.Rule(
-        id: "inlinable_internal_access",
+        id: "inlinable internal access",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = StructureInlinableInternalAccessVisitor(
@@ -33,7 +33,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let structureInlinableInternalAccessMessage: Swift.String =
-    "[inlinable_internal_access] [PATTERN-052]: `@inlinable` cross-module access "
+    "[inlinable internal access] [PATTERN-052]: `@inlinable` cross-module access "
     + "requires `@usableFromInline` (or `public` / `package`), not bare `internal`. "
     + "An `@inlinable` decl whose body references an `internal` identifier fails to "
     + "compile across the module boundary; pair the attribute with `@usableFromInline "
@@ -94,7 +94,7 @@ internal final class StructureInlinableInternalAccessVisitor: SyntaxVisitor {
                 column: location.column
             ),
             severity: severity,
-            identifier: "inlinable_internal_access",
+            identifier: "inlinable internal access",
             message: structureInlinableInternalAccessMessage
         ))
     }

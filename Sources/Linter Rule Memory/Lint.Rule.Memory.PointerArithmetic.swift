@@ -19,7 +19,7 @@ internal import SwiftSyntax
 /// Citation: `[IMPL-011]` (implementation skill, infrastructure.md).
 extension Lint.Rule {
     public static let `pointer advanced by` = Lint.Rule(
-        id: "pointer_advanced_by",
+        id: "pointer advanced by",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = MemoryPointerArithmeticVisitor(
@@ -35,7 +35,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let memoryPointerArithmeticMessage: Swift.String =
-    "[pointer_advanced_by] [IMPL-011]: raw pointer arithmetic via "
+    "[pointer advanced by] [IMPL-011]: raw pointer arithmetic via "
     + "`.advanced(by:)` is mechanism. Types managing memory SHOULD expose "
     + "a typed `pointer(at: Index<Element>)` primitive that encapsulates "
     + "the offset computation. Either (a) add the typed primitive to the "
@@ -80,7 +80,7 @@ internal final class MemoryPointerArithmeticVisitor: SyntaxVisitor {
                 column: location.column
             ),
             severity: severity,
-            identifier: "pointer_advanced_by",
+            identifier: "pointer advanced by",
             message: memoryPointerArithmeticMessage
         ))
         return .visitChildren

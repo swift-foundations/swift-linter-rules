@@ -18,7 +18,7 @@ internal import SwiftSyntax
 /// Citation: `[IMPL-010]` (implementation skill — Push Int to the Edge).
 extension Lint.Rule {
     public static let `int public parameter` = Lint.Rule(
-        id: "int_parameter_public",
+        id: "int public parameter",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = NamingIntParameterVisitor(
@@ -34,7 +34,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let namingIntParameterMessageParameter: Swift.String =
-    "[int_parameter_public] [IMPL-010]: public function/initializer "
+    "[int public parameter] [IMPL-010]: public function/initializer "
     + "signature has a bare `Int` parameter. Push the stdlib boundary "
     + "out — use a typed wrapper (`Index<T>`, `Ordinal`, `Cardinal`, "
     + "`Count<T>`, `Offset<T>`) at the public surface; convert via a "
@@ -43,7 +43,7 @@ internal let namingIntParameterMessageParameter: Swift.String =
 
 @usableFromInline
 internal let namingIntParameterMessageReturn: Swift.String =
-    "[int_parameter_public] [IMPL-010]: public function returns a bare "
+    "[int public parameter] [IMPL-010]: public function returns a bare "
     + "`Int`. Push the stdlib boundary out — return a typed wrapper "
     + "(`Cardinal`, `Count<T>`, `Offset<T>`) so consumers see typed "
     + "intent rather than a raw machine integer."
@@ -150,7 +150,7 @@ internal final class NamingIntParameterVisitor: SyntaxVisitor {
                 column: location.column
             ),
             severity: severity,
-            identifier: "int_parameter_public",
+            identifier: "int public parameter",
             message: message
         ))
     }

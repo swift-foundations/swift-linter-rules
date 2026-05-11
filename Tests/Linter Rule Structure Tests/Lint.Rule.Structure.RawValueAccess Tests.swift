@@ -43,7 +43,7 @@ extension Lint.Rule.`raw value access Tests`.Unit {
         let findings = Lint.Rule.`raw value access Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
-            #expect(findings[0].identifier == "raw_value_access")
+            #expect(findings[0].identifier == "raw value access")
         }
     }
 

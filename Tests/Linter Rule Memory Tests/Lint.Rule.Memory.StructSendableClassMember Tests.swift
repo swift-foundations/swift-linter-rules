@@ -42,7 +42,7 @@ extension Lint.Rule.`sendable struct with class member Tests`.Unit {
         let findings = Lint.Rule.`sendable struct with class member Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
-            #expect(findings[0].identifier == "struct_sendable_class_member")
+            #expect(findings[0].identifier == "sendable struct with class member")
         }
     }
 

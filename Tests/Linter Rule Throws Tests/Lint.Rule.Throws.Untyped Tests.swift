@@ -39,7 +39,7 @@ extension Lint.Rule.`untyped throws Tests`.Unit {
         let count = findings.count
         #expect(count == 1)
         if count == 1 {
-            #expect(findings[0].identifier == "untyped_throws")
+            #expect(findings[0].identifier == "untyped throws")
             #expect(findings[0].severity == .warning)
         }
     }

@@ -72,7 +72,7 @@ extension Lint.Rule.`single type per file Tests`.Unit {
         let findings = Lint.Rule.`single type per file Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
-            #expect(findings[0].identifier == "single_type_per_file")
+            #expect(findings[0].identifier == "single type per file")
             #expect(findings[0].severity == .warning)
         }
     }

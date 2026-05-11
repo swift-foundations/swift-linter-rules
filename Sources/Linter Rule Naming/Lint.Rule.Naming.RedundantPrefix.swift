@@ -16,7 +16,7 @@ internal import SwiftSyntax
 /// with the enclosing namespace. Citation: `[API-NAME-013]`.
 extension Lint.Rule {
     public static let `redundant prefix` = Lint.Rule(
-        id: "redundant_prefix",
+        id: "redundant prefix",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = NamingRedundantPrefixVisitor(
@@ -32,7 +32,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let namingRedundantPrefixMessage: Swift.String =
-    "[redundant_prefix] [API-NAME-013]: nested declaration name has a "
+    "[redundant prefix] [API-NAME-013]: nested declaration name has a "
     + "redundant prefix that matches the enclosing namespace. Drop the "
     + "prefix — the containing type already supplies the context."
 
@@ -109,7 +109,7 @@ internal final class NamingRedundantPrefixVisitor: SyntaxVisitor {
                 column: location.column
             ),
             severity: severity,
-            identifier: "redundant_prefix",
+            identifier: "redundant prefix",
             message: namingRedundantPrefixMessage
         ))
     }

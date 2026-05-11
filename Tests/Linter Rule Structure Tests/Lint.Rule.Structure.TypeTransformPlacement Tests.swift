@@ -42,7 +42,7 @@ extension Lint.Rule.`type transform placement Tests`.Unit {
         let findings = Lint.Rule.`type transform placement Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
-            #expect(findings[0].identifier == "type_transform_placement")
+            #expect(findings[0].identifier == "type transform placement")
         }
     }
 

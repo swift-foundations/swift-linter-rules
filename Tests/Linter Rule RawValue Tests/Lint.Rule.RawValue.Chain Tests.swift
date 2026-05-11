@@ -40,7 +40,7 @@ extension Lint.Rule.`chained rawvalue access Tests`.Unit {
         let count = findings.count
         #expect(count == 1)
         if count == 1 {
-            #expect(findings[0].identifier == "chained_rawvalue_access")
+            #expect(findings[0].identifier == "chained rawvalue access")
             #expect(findings[0].severity == .warning)
         }
     }

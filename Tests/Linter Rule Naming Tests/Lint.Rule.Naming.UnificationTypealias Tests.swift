@@ -40,7 +40,7 @@ extension Lint.Rule.`unification typealias Tests`.Unit {
         let findings = Lint.Rule.`unification typealias Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
-            #expect(findings[0].identifier == "unification_bridge_typealias")
+            #expect(findings[0].identifier == "unification typealias")
         }
     }
 }

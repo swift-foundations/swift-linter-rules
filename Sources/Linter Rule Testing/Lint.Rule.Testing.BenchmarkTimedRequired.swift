@@ -16,7 +16,7 @@ internal import SwiftSyntax
 /// Citation: `[BENCH-003]`.
 extension Lint.Rule {
     public static let `benchmark timed required` = Lint.Rule(
-        id: "benchmark_timed_required",
+        id: "benchmark timed required",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = TestingBenchmarkTimedRequiredVisitor(
@@ -32,7 +32,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let testingBenchmarkTimedRequiredMessage: Swift.String =
-    "[benchmark_timed_required] [BENCH-003]: `@Test` functions inside a "
+    "[benchmark timed required] [BENCH-003]: `@Test` functions inside a "
     + "`Performance` suite MUST carry the `.timed()` trait. Without it, the "
     + "performance test runs once with no measurement structure."
 
@@ -91,7 +91,7 @@ internal final class TestingBenchmarkTimedRequiredVisitor: SyntaxVisitor {
                     column: location.column
                 ),
                 severity: severity,
-                identifier: "benchmark_timed_required",
+                identifier: "benchmark timed required",
                 message: testingBenchmarkTimedRequiredMessage
             ))
         }

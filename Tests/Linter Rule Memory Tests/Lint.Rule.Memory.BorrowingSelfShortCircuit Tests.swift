@@ -43,7 +43,7 @@ extension Lint.Rule.`borrowing self short circuit Tests`.Unit {
         // Two operators in the body: `||` and `&&` — both flagged.
         #expect(findings.count == 2)
         if findings.count >= 1 {
-            #expect(findings[0].identifier == "borrowing_self_short_circuit")
+            #expect(findings[0].identifier == "borrowing self short circuit")
             #expect(findings[0].severity == .warning)
         }
     }

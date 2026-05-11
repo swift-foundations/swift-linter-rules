@@ -19,7 +19,7 @@ internal import SwiftSyntax
 /// Citation: `[API-NAME-004a]` (code-surface skill, naming).
 extension Lint.Rule {
     public static let `namespace adoption typealias` = Lint.Rule(
-        id: "namespace_adoption_typealias",
+        id: "namespace adoption typealias",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = NamingNamespaceAdoptionVisitor(
@@ -35,7 +35,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let namingNamespaceAdoptionMessage: Swift.String =
-    "[namespace_adoption_typealias] [API-NAME-004a]: same-leaf typealias is "
+    "[namespace adoption typealias] [API-NAME-004a]: same-leaf typealias is "
     + "the namespace-adoption shape. Confirm the higher-layer namespace "
     + "declares ≥ 5 sibling types / extensions / methods on the adopted "
     + "concept — otherwise this is a rename bridge per [API-NAME-004]. "
@@ -82,7 +82,7 @@ internal final class NamingNamespaceAdoptionVisitor: SyntaxVisitor {
                 column: location.column
             ),
             severity: severity,
-            identifier: "namespace_adoption_typealias",
+            identifier: "namespace adoption typealias",
             message: namingNamespaceAdoptionMessage
         ))
         return .visitChildren

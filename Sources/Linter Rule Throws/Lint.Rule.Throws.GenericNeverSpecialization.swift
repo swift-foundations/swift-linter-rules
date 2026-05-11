@@ -16,7 +16,7 @@ internal import SwiftSyntax
 /// consider a non-throwing specialization. Citation: `[IMPL-042]`.
 extension Lint.Rule {
     public static let `generic throws missing never` = Lint.Rule(
-        id: "generic_throws_missing_never_specialization",
+        id: "generic throws missing never",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = ThrowsGenericNeverSpecializationVisitor(
@@ -32,7 +32,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let throwsGenericNeverSpecializationMessage: Swift.String =
-    "[generic_throws_missing_never_specialization] [IMPL-042]: public "
+    "[generic throws missing never] [IMPL-042]: public "
     + "generic API throws a generic-parameter-typed error. Even when "
     + "callers bind the parameter to `Never`, the generic outer type "
     + "hides the binding from codegen. Consider adding a non-throwing "
@@ -104,7 +104,7 @@ internal final class ThrowsGenericNeverSpecializationVisitor: SyntaxVisitor {
                 column: location.column
             ),
             severity: severity,
-            identifier: "generic_throws_missing_never_specialization",
+            identifier: "generic throws missing never",
             message: throwsGenericNeverSpecializationMessage
         ))
     }

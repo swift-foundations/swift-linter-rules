@@ -40,7 +40,7 @@ extension Lint.Rule.`convention c representability Tests`.Unit {
         let findings = Lint.Rule.`convention c representability Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
-            #expect(findings[0].identifier == "convention_c_representability")
+            #expect(findings[0].identifier == "convention c representability")
             #expect(findings[0].severity == .warning)
         }
     }

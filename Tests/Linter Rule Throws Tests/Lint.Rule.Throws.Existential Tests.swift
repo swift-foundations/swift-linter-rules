@@ -39,7 +39,7 @@ extension Lint.Rule.`existential throws Tests`.Unit {
         let count = findings.count
         #expect(count == 1)
         if count == 1 {
-            #expect(findings[0].identifier == "existential_throws")
+            #expect(findings[0].identifier == "existential throws")
             #expect(findings[0].severity == .warning)
         }
     }

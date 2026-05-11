@@ -43,7 +43,7 @@ extension Lint.Rule.`usable from inline internal import Tests`.Unit {
         let findings = Lint.Rule.`usable from inline internal import Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
-            #expect(findings[0].identifier == "usable_from_inline_internal_import")
+            #expect(findings[0].identifier == "usable from inline internal import")
             #expect(findings[0].severity == .warning)
         }
     }

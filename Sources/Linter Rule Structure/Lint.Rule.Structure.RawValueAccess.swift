@@ -18,7 +18,7 @@ internal import SwiftSyntax
 /// Citation: `[PATTERN-017]` (implementation skill, patterns.md).
 extension Lint.Rule {
     public static let `raw value access` = Lint.Rule(
-        id: "raw_value_access",
+        id: "raw value access",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = StructureRawValueAccessVisitor(
@@ -34,7 +34,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let structureRawValueAccessMessage: Swift.String =
-    "[raw_value_access] [PATTERN-017]: `.rawValue` / `.position` at a "
+    "[raw value access] [PATTERN-017]: `.rawValue` / `.position` at a "
     + "consumer call site bypasses the typed-conversion ladder. These "
     + "accessors are reserved for extension initializers (the brand-newtype's "
     + "own boundary) and same-package implementations. Prefer the typed "
@@ -103,7 +103,7 @@ internal final class StructureRawValueAccessVisitor: SyntaxVisitor {
                 column: location.column
             ),
             severity: severity,
-            identifier: "raw_value_access",
+            identifier: "raw value access",
             message: structureRawValueAccessMessage
         ))
         return .visitChildren

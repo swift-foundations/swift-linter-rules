@@ -21,7 +21,7 @@ internal import SwiftSyntax
 /// OptionSet pattern).
 extension Lint.Rule {
     public static let `optionset shell pattern` = Lint.Rule(
-        id: "optionset_shell_pattern",
+        id: "optionset shell pattern",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = PlatformOptionSetShellVisitor(
@@ -37,7 +37,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let platformOptionSetShellMessage: Swift.String =
-    "[optionset_shell_pattern] [PLAT-ARCH-013]: OptionSet type body "
+    "[optionset shell pattern] [PLAT-ARCH-013]: OptionSet type body "
     + "contains a `static let X = Self(rawValue: …)` platform-constant "
     + "declaration. Move platform constants to an extension to preserve "
     + "the shell + values shape: L1 (or shared) declares the empty "
@@ -124,7 +124,7 @@ internal final class PlatformOptionSetShellVisitor: SyntaxVisitor {
                             column: location.column
                         ),
                         severity: severity,
-                        identifier: "optionset_shell_pattern",
+                        identifier: "optionset shell pattern",
                         message: platformOptionSetShellMessage
                     ))
                     break

@@ -16,7 +16,7 @@ internal import SwiftSyntax
 /// parameters, not as `Result<T, E>` values. Citation: `[IMPL-092]`.
 extension Lint.Rule {
     public static let `callback result over throws thunk` = Lint.Rule(
-        id: "callback_result_over_throws_thunk",
+        id: "callback result over throws thunk",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = ThrowsResultCallbackVisitor(
@@ -32,7 +32,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let throwsResultCallbackMessage: Swift.String =
-    "[callback_result_over_throws_thunk] [IMPL-092]: callback closure "
+    "[callback result over throws thunk] [IMPL-092]: callback closure "
     + "parameters MUST deliver outcomes via a `() throws(E) -> T` thunk, "
     + "not a `Result<T, E>` value."
 
@@ -77,7 +77,7 @@ internal final class ThrowsResultCallbackVisitor: SyntaxVisitor {
                         column: location.column
                     ),
                     severity: severity,
-                    identifier: "callback_result_over_throws_thunk",
+                    identifier: "callback result over throws thunk",
                     message: throwsResultCallbackMessage
                 ))
             }

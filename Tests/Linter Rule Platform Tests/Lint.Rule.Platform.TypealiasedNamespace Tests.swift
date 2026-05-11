@@ -42,7 +42,7 @@ extension Lint.Rule.`typealiased namespace bridge Tests`.Unit {
         let findings = Lint.Rule.`typealiased namespace bridge Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
-            #expect(findings[0].identifier == "typealiased_namespace_bridge")
+            #expect(findings[0].identifier == "typealiased namespace bridge")
             #expect(findings[0].severity == .warning)
         }
     }

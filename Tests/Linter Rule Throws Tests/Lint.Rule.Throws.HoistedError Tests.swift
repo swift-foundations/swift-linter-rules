@@ -39,7 +39,7 @@ extension Lint.Rule.`hoisted error in public throws Tests`.Unit {
         let count = findings.count
         #expect(count == 1)
         if count == 1 {
-            #expect(findings[0].identifier == "hoisted_error_in_public_throws")
+            #expect(findings[0].identifier == "hoisted error in public throws")
             #expect(findings[0].severity == .warning)
         }
     }

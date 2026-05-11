@@ -39,7 +39,7 @@ extension Lint.Rule.`unchecked call site Tests`.Unit {
         let count = findings.count
         #expect(count == 1)
         if count == 1 {
-            #expect(findings[0].identifier == "unchecked_call_site")
+            #expect(findings[0].identifier == "unchecked call site")
             #expect(findings[0].severity == .warning)
         }
     }

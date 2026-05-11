@@ -39,7 +39,7 @@ extension Lint.Rule.`variable named impl Tests`.Unit {
         let count = findings.count
         #expect(count == 1)
         if count == 1 {
-            #expect(findings[0].identifier == "var_named_impl")
+            #expect(findings[0].identifier == "variable named impl")
             #expect(findings[0].severity == .warning)
         }
     }

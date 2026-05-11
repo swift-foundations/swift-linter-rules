@@ -39,7 +39,7 @@ extension Lint.Rule.`bool public parameter Tests`.Unit {
         let count = findings.count
         #expect(count == 1)
         if count == 1 {
-            #expect(findings[0].identifier == "bool_parameter_public")
+            #expect(findings[0].identifier == "bool public parameter")
             #expect(findings[0].severity == .warning)
         }
     }

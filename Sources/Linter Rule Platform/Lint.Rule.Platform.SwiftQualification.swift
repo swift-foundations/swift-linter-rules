@@ -18,7 +18,7 @@ internal import SwiftSyntax
 /// Citation: `[PLAT-ARCH-022]` (platform skill).
 extension Lint.Rule {
     public static let `swift protocol qualification` = Lint.Rule(
-        id: "swift_protocol_qualification",
+        id: "swift protocol qualification",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = PlatformSwiftQualificationVisitor(
@@ -41,7 +41,7 @@ internal let platformSwiftQualificationShadowedProtocols: Swift.Set<Swift.String
 
 @usableFromInline
 internal let platformSwiftQualificationMessage: Swift.String =
-    "[swift_protocol_qualification] [PLAT-ARCH-022]: stdlib-shadowing "
+    "[swift protocol qualification] [PLAT-ARCH-022]: stdlib-shadowing "
     + "protocol reference is unqualified. Use `Swift.<Protocol>` form "
     + "(e.g., `some Swift.Sequence<UInt8>` not `some Sequence<UInt8>`; "
     + "`<E: Swift.Error>` not `<E: Error>`). Shadowing namespaces "
@@ -112,7 +112,7 @@ internal final class PlatformSwiftQualificationVisitor: SyntaxVisitor {
                 column: location.column
             ),
             severity: severity,
-            identifier: "swift_protocol_qualification",
+            identifier: "swift protocol qualification",
             message: platformSwiftQualificationMessage
         ))
     }

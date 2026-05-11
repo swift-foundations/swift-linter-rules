@@ -40,7 +40,7 @@ extension Lint.Rule.`namespace adoption typealias Tests`.Unit {
         let findings = Lint.Rule.`namespace adoption typealias Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
-            #expect(findings[0].identifier == "namespace_adoption_typealias")
+            #expect(findings[0].identifier == "namespace adoption typealias")
         }
     }
 

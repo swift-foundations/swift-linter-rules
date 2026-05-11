@@ -51,7 +51,7 @@ extension Lint.Rule.`typed throws cannot use self error Tests`.Unit {
         let count = findings.count
         #expect(count == 1)
         if count == 1 {
-            #expect(findings[0].identifier == "typed_throws_cannot_use_self_error")
+            #expect(findings[0].identifier == "typed throws cannot use self error")
             #expect(findings[0].severity == .warning)
         }
     }

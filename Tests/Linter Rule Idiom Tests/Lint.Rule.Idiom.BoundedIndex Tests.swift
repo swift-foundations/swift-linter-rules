@@ -42,7 +42,7 @@ extension Lint.Rule.`bounded index static capacity Tests`.Unit {
         let findings = Lint.Rule.`bounded index static capacity Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
-            #expect(findings[0].identifier == "bounded_index_static_capacity")
+            #expect(findings[0].identifier == "bounded index static capacity")
             #expect(findings[0].severity == .warning)
         }
     }

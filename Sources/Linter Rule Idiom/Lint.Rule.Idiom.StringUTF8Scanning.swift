@@ -16,7 +16,7 @@ internal import SwiftSyntax
 /// byte view, not `unicodeScalars`. Citation: `[IMPL-089]`.
 extension Lint.Rule {
     public static let `string utf8 scanning` = Lint.Rule(
-        id: "string_utf8_scanning",
+        id: "string utf8 scanning",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = IdiomStringUTF8ScanningVisitor(
@@ -32,7 +32,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let idiomStringUTF8ScanningMessage: Swift.String =
-    "[string_utf8_scanning] [IMPL-089]: `.unicodeScalars` access is "
+    "[string utf8 scanning] [IMPL-089]: `.unicodeScalars` access is "
     + "the wrong code-unit view for Foundation-free string scanning. "
     + "Use `.utf8` — byte-literal matching is O(n), no Unicode table "
     + "dependency, and the correct semantics for newline discovery, "
@@ -64,7 +64,7 @@ internal final class IdiomStringUTF8ScanningVisitor: SyntaxVisitor {
                 column: location.column
             ),
             severity: severity,
-            identifier: "string_utf8_scanning",
+            identifier: "string utf8 scanning",
             message: idiomStringUTF8ScanningMessage
         ))
         return .visitChildren

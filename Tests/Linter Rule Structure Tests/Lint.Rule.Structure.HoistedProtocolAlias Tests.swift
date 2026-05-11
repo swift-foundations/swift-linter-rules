@@ -40,7 +40,7 @@ extension Lint.Rule.`hoisted protocol alias Tests`.Unit {
         let findings = Lint.Rule.`hoisted protocol alias Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
-            #expect(findings[0].identifier == "hoisted_protocol_self_conformance")
+            #expect(findings[0].identifier == "hoisted protocol alias")
             #expect(findings[0].severity == .warning)
         }
     }

@@ -16,7 +16,7 @@ internal import SwiftSyntax
 /// identical to untyped `throws`. Citation: `feedback_no_existential_throws`.
 extension Lint.Rule {
     public static let `existential throws` = Lint.Rule(
-        id: "existential_throws",
+        id: "existential throws",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = ThrowsExistentialVisitor(
@@ -32,7 +32,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let throwsExistentialMessage: Swift.String =
-    "[existential_throws] feedback_no_existential_throws: `throws(any Error)` boxes "
+    "[existential throws] feedback_no_existential_throws: `throws(any Error)` boxes "
     + "the error as an existential — semantically identical to untyped `throws`. "
     + "Use a concrete error type or make the container generic over the error type."
 
@@ -61,7 +61,7 @@ internal final class ThrowsExistentialVisitor: SyntaxVisitor {
                 column: location.column
             ),
             severity: severity,
-            identifier: "existential_throws",
+            identifier: "existential throws",
             message: throwsExistentialMessage
         ))
         return .visitChildren

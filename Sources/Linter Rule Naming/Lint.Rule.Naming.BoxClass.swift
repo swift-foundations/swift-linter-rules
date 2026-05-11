@@ -18,7 +18,7 @@ internal import SwiftSyntax
 /// Citation: `[IMPL-107]` (implementation skill, ownership.md).
 extension Lint.Rule {
     public static let `ad hoc box class` = Lint.Rule(
-        id: "ad_hoc_box_class",
+        id: "ad hoc box class",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = NamingBoxClassVisitor(
@@ -34,7 +34,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let namingBoxClassMessage: Swift.String =
-    "[ad_hoc_box_class] [IMPL-107]: ad-hoc `_Box` / `_Storage` reference "
+    "[ad hoc box class] [IMPL-107]: ad-hoc `_Box` / `_Storage` reference "
     + "wrapper duplicates ecosystem primitives. Prefer `Reference<T>` "
     + "(shared mutable indirection) or `Owned<T>` (unique-owner indirection) "
     + "from `swift-ownership-primitives` so the wrapper's ownership story "
@@ -87,7 +87,7 @@ internal final class NamingBoxClassVisitor: SyntaxVisitor {
                 column: location.column
             ),
             severity: severity,
-            identifier: "ad_hoc_box_class",
+            identifier: "ad hoc box class",
             message: namingBoxClassMessage
         ))
         return .visitChildren

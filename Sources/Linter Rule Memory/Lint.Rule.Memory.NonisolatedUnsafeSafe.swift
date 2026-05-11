@@ -24,7 +24,7 @@ internal import SwiftSyntax
 /// safety story is implicit and easy to silently violate.
 extension Lint.Rule {
     public static let `nonisolated unsafe without safe` = Lint.Rule(
-        id: "nonisolated_unsafe_safe",
+        id: "nonisolated unsafe without safe",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = MemoryNonisolatedUnsafeSafeVisitor(
@@ -40,7 +40,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let memoryNonisolatedUnsafeSafeMessage: Swift.String =
-    "[nonisolated_unsafe_safe] [MEM-SAFE-025]: `nonisolated(unsafe)` globals MUST "
+    "[nonisolated unsafe without safe] [MEM-SAFE-025]: `nonisolated(unsafe)` globals MUST "
     + "carry `@safe` to assert the encapsulation invariant (allocated once, never "
     + "mutated post-init, only used as sentinel / constant). Without `@safe` the "
     + "safety story is implicit. Concurrently-mutated `nonisolated(unsafe)` is a "
@@ -99,7 +99,7 @@ internal final class MemoryNonisolatedUnsafeSafeVisitor: SyntaxVisitor {
                 column: location.column
             ),
             severity: severity,
-            identifier: "nonisolated_unsafe_safe",
+            identifier: "nonisolated unsafe without safe",
             message: memoryNonisolatedUnsafeSafeMessage
         ))
         return .visitChildren

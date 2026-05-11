@@ -42,7 +42,7 @@ extension Lint.Rule.`system subdomain Tests`.Unit {
         let findings = Lint.Rule.`system subdomain Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
-            #expect(findings[0].identifier == "platform_system_subdomain")
+            #expect(findings[0].identifier == "system subdomain")
             #expect(findings[0].severity == .warning)
         }
     }

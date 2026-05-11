@@ -16,7 +16,7 @@ internal import SwiftSyntax
 /// names. Citation: `[SWIFT-TEST-002]`.
 extension Lint.Rule {
     public static let `compound suite name` = Lint.Rule(
-        id: "compound_test_suite_name",
+        id: "compound suite name",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = TestingCompoundSuiteNameVisitor(
@@ -32,7 +32,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let testingCompoundSuiteNameMessage: Swift.String =
-    "[compound_test_suite_name] [SWIFT-TEST-002]: `@Suite` types MUST use the "
+    "[compound suite name] [SWIFT-TEST-002]: `@Suite` types MUST use the "
     + "extension-pattern nested name (`extension Foo { @Suite struct Test {} }`), "
     + "not a compound name like `FooTests`."
 
@@ -85,7 +85,7 @@ internal final class TestingCompoundSuiteNameVisitor: SyntaxVisitor {
                 column: location.column
             ),
             severity: severity,
-            identifier: "compound_test_suite_name",
+            identifier: "compound suite name",
             message: testingCompoundSuiteNameMessage
         ))
         return .visitChildren

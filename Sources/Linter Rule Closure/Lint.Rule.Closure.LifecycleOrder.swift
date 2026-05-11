@@ -16,7 +16,7 @@ internal import SwiftSyntax
 /// setup → body → completion / teardown. Citation: `[API-IMPL-013]`.
 extension Lint.Rule {
     public static let `lifecycle order` = Lint.Rule(
-        id: "multi_closure_lifecycle_order",
+        id: "lifecycle order",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = ClosureLifecycleOrderVisitor(
@@ -32,7 +32,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let closureLifecycleOrderMessage: Swift.String =
-    "[multi_closure_lifecycle_order] [API-IMPL-013]: closure parameters "
+    "[lifecycle order] [API-IMPL-013]: closure parameters "
     + "MUST follow lifecycle order setup → body → completion / teardown. "
     + "A completion-tier closure (`completion:`, `onError:`, `cleanup:`, "
     + "`teardown:`, `finalize:`) appears BEFORE the primary body closure "
@@ -105,7 +105,7 @@ internal final class ClosureLifecycleOrderVisitor: SyntaxVisitor {
                 column: location.column
             ),
             severity: severity,
-            identifier: "multi_closure_lifecycle_order",
+            identifier: "lifecycle order",
             message: closureLifecycleOrderMessage
         ))
     }

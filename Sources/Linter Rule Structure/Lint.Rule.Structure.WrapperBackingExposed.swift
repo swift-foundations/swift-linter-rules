@@ -19,7 +19,7 @@ internal import SwiftSyntax
 /// Citation: `[API-IMPL-011]` (code-surface skill — wrapper completeness).
 extension Lint.Rule {
     public static let `wrapper backing exposed` = Lint.Rule(
-        id: "wrapper_backing_exposed",
+        id: "wrapper backing exposed",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = StructureWrapperBackingExposedVisitor(
@@ -35,7 +35,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let structureWrapperBackingExposedMessage: Swift.String =
-    "[wrapper_backing_exposed] [API-IMPL-011]: wrapper backing property "
+    "[wrapper backing exposed] [API-IMPL-011]: wrapper backing property "
     + "(`_backing` / `_wrapped` / `_underlying`) is exposed at non-private "
     + "visibility — consumers will reach through (`wrapper._backing.run { … }`) "
     + "for any operation the wrapper itself doesn't surface, and the wrapper "
@@ -128,7 +128,7 @@ internal final class StructureWrapperBackingExposedVisitor: SyntaxVisitor {
                     column: location.column
                 ),
                 severity: severity,
-                identifier: "wrapper_backing_exposed",
+                identifier: "wrapper backing exposed",
                 message: structureWrapperBackingExposedMessage
             ))
             break

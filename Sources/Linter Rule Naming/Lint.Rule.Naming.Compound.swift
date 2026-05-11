@@ -23,7 +23,7 @@ internal import SwiftSyntax
 /// targets only the lower-risk method / property compound case.
 extension Lint.Rule {
     public static let `compound identifier` = Lint.Rule(
-        id: "compound_identifier",
+        id: "compound identifier",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = NamingCompoundVisitor(
@@ -39,7 +39,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let namingCompoundMessage: Swift.String =
-    "[compound_identifier] [API-NAME-002]: methods and properties MUST NOT use "
+    "[compound identifier] [API-NAME-002]: methods and properties MUST NOT use "
     + "compound names. Use nested accessors instead (e.g., `instance.open.write { }` "
     + "not `instance.openWrite { }`; `dir.walk.files()` not `dir.walkFiles()`). "
     + "Boolean prefixes (`is`, `has`, `should`, `will`, `did`, `can`, `must`) are "
@@ -163,7 +163,7 @@ internal final class NamingCompoundVisitor: SyntaxVisitor {
                 column: location.column
             ),
             severity: severity,
-            identifier: "compound_identifier",
+            identifier: "compound identifier",
             message: namingCompoundMessage
         ))
     }

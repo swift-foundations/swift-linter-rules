@@ -44,7 +44,7 @@ extension Lint.Rule.`counter loop iteration Tests`.Unit {
         let findings = Lint.Rule.`counter loop iteration Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
-            #expect(findings[0].identifier == "iteration_intent_counter_loop")
+            #expect(findings[0].identifier == "counter loop iteration")
             #expect(findings[0].severity == .warning)
         }
     }

@@ -16,7 +16,7 @@ internal import SwiftSyntax
 /// directly. Citation: `feedback_no_tag_suffix`.
 extension Lint.Rule {
     public static let `tag suffix` = Lint.Rule(
-        id: "tag_suffix",
+        id: "tag suffix",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = NamingTagVisitor(
@@ -32,7 +32,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let namingTagMessage: Swift.String =
-    "[tag_suffix] feedback_no_tag_suffix: phantom-type tags MUST use the concept name "
+    "[tag suffix] feedback_no_tag_suffix: phantom-type tags MUST use the concept name "
     + "directly (`enum Cardinal {}`, `struct Millimeter {}`), never a `Tag` suffix."
 
 internal final class NamingTagVisitor: SyntaxVisitor {
@@ -74,7 +74,7 @@ internal final class NamingTagVisitor: SyntaxVisitor {
                 column: location.column
             ),
             severity: severity,
-            identifier: "tag_suffix",
+            identifier: "tag suffix",
             message: namingTagMessage
         ))
     }

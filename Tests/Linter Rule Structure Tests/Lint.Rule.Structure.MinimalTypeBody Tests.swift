@@ -43,7 +43,7 @@ extension Lint.Rule.`minimal type body Tests`.Unit {
         let findings = Lint.Rule.`minimal type body Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
-            #expect(findings[0].identifier == "minimal_type_body")
+            #expect(findings[0].identifier == "minimal type body")
             #expect(findings[0].severity == .warning)
         }
     }

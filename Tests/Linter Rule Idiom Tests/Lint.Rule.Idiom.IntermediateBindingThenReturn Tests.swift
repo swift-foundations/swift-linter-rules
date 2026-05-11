@@ -43,7 +43,7 @@ extension Lint.Rule.`intermediate binding then return Tests`.Unit {
         let findings = Lint.Rule.`intermediate binding then return Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
-            #expect(findings[0].identifier == "intermediate_binding_then_return")
+            #expect(findings[0].identifier == "intermediate binding then return")
         }
     }
 }

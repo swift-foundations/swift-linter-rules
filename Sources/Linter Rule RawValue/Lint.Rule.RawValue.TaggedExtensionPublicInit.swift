@@ -30,7 +30,7 @@ internal import SwiftSyntax
 /// modifier. Each public init in the extension is flagged.
 extension Lint.Rule {
     public static let `tagged extension public init` = Lint.Rule(
-        id: "tagged_rawvalue_extension_public_init",
+        id: "tagged extension public init",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = RawValueTaggedExtensionPublicInitVisitor(
@@ -46,7 +46,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let taggedExtensionPublicInitMessage: Swift.String =
-    "[tagged_rawvalue_extension_public_init] [PATTERN-019]: extensions on `Tagged` "
+    "[tagged extension public init] [PATTERN-019]: extensions on `Tagged` "
     + "MUST NOT provide `public init` — bypasses the brand's bounded invariants. "
     + "Callers reaching through an extension init never cross the validation gate "
     + "the tag owner controls. Drop the init, or move construction behind a "
@@ -112,7 +112,7 @@ internal final class RawValueTaggedExtensionPublicInitVisitor: SyntaxVisitor {
                     column: location.column
                 ),
                 severity: severity,
-                identifier: "tagged_rawvalue_extension_public_init",
+                identifier: "tagged extension public init",
                 message: taggedExtensionPublicInitMessage
             ))
         }

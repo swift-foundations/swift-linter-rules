@@ -18,7 +18,7 @@ internal import SwiftSyntax
 /// fully-nested error type. Citation: `[API-ERR-002]`.
 extension Lint.Rule {
     public static let `typed throws cannot use self error` = Lint.Rule(
-        id: "typed_throws_cannot_use_self_error",
+        id: "typed throws cannot use self error",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = ThrowsSelfErrorInTypedThrowsVisitor(
@@ -34,7 +34,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let throwsSelfErrorInTypedThrowsMessage: Swift.String =
-    "[typed_throws_cannot_use_self_error] [API-ERR-002]: `throws(Self.Error)` "
+    "[typed throws cannot use self error] [API-ERR-002]: `throws(Self.Error)` "
     + "resolves only inside a protocol declaration with `associatedtype Error`. "
     + "In a struct, class, enum, or extension on a concrete type, write the "
     + "fully-nested error type — `throws(Random.Error)`, "
@@ -67,7 +67,7 @@ internal final class ThrowsSelfErrorInTypedThrowsVisitor: SyntaxVisitor {
                 column: location.column
             ),
             severity: severity,
-            identifier: "typed_throws_cannot_use_self_error",
+            identifier: "typed throws cannot use self error",
             message: throwsSelfErrorInTypedThrowsMessage
         ))
         return .visitChildren

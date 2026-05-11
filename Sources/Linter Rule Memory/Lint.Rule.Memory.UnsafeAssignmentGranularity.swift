@@ -21,7 +21,7 @@ internal import SwiftSyntax
 /// safety skill — expression granularity of unsafe).
 extension Lint.Rule {
     public static let `unsafe assignment granularity` = Lint.Rule(
-        id: "unsafe_assignment_granularity",
+        id: "unsafe assignment granularity",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = MemoryUnsafeAssignmentGranularityVisitor(
@@ -37,7 +37,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let memoryUnsafeAssignmentGranularityMessage: Swift.String =
-    "[unsafe_assignment_granularity] [PATTERN-005b]/[MEM-SAFE-002]: "
+    "[unsafe assignment granularity] [PATTERN-005b]/[MEM-SAFE-002]: "
     + "`<lvalue> = unsafe <expr>` marks only the RHS as unsafe — the "
     + "assignment to `<lvalue>` is uncovered. Wrap the entire "
     + "expression: `unsafe (<lvalue> = <expr>)`. Each unsafe operation "
@@ -73,7 +73,7 @@ internal final class MemoryUnsafeAssignmentGranularityVisitor: SyntaxVisitor {
                     column: location.column
                 ),
                 severity: severity,
-                identifier: "unsafe_assignment_granularity",
+                identifier: "unsafe assignment granularity",
                 message: memoryUnsafeAssignmentGranularityMessage
             ))
         }

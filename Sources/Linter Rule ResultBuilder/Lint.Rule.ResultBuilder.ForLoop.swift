@@ -12,7 +12,7 @@
 public import Linter_Primitives
 internal import SwiftSyntax
 
-/// `result_builder_for_loop` — `for`-in-loop appearing directly inside the
+/// `for loop in result builder` — `for`-in-loop appearing directly inside the
 /// trailing closure of a known result-builder constructor (Array, Set,
 /// Dictionary, Buffer.Linear, Stack, Heap, Tree.Binary, etc.).
 ///
@@ -40,7 +40,7 @@ internal import SwiftSyntax
 /// + 5 standard-library-extensions Builders. Consumers extend it via the
 /// `Lint.Rule.\`for loop in result builder\`(allowlist:)` factory.
 ///
-/// **Exemption**: `// swiftlint:disable:next result_builder_for_loop  //
+/// **Exemption**: `// swiftlint:disable:next for loop in result builder  //
 /// reason: <citation>`. Per institute discipline, the regex-evasion
 /// pattern (paren-wrap, typename-swap) is forbidden — escalate to
 /// supervisor at typed-system bottom-out sites.
@@ -61,7 +61,7 @@ extension Lint.Rule {
         allowlist: Set<Swift.String>
     ) -> Lint.Rule {
         Lint.Rule(
-            id: "result_builder_for_loop",
+            id: "for loop in result builder",
             defaultSeverity: .warning,
             findings: { source, severity in
                 let visitor = ResultBuilderForLoopVisitor(
@@ -111,14 +111,14 @@ public let resultBuilderForLoopDefaultAllowlist: Set<Swift.String> = [
 
 @usableFromInline
 internal let resultBuilderForLoopMessage: Swift.String =
-    "[result_builder_for_loop] result-builder-performance-optimization.md (DECISION "
+    "[for loop in result builder] result-builder-performance-optimization.md (DECISION "
     + "v2.0.0): `for`-loop in result-builder body materializes a fresh [Element] per "
     + "iteration (12-44x slower than imperative under SE-0289). Write the sequence "
     + "directly: `Builder { 0..<N }` instead of `Builder { for i in 0..<N { i } }`. "
     + "See swift-institute/Research/result-builder-performance-optimization.md for "
     + "the full design rationale. If iteration is genuinely required, escalate to "
     + "supervisor and apply "
-    + "`// swiftlint:disable:next result_builder_for_loop  // reason: <citation>`."
+    + "`// swiftlint:disable:next for loop in result builder  // reason: <citation>`."
 
 internal final class ResultBuilderForLoopVisitor: SyntaxVisitor {
     let source: Source.File
@@ -175,7 +175,7 @@ internal final class ResultBuilderForLoopVisitor: SyntaxVisitor {
                     column: location.column
                 ),
                 severity: severity,
-                identifier: "result_builder_for_loop",
+                identifier: "for loop in result builder",
                 message: resultBuilderForLoopMessage
             )
         )

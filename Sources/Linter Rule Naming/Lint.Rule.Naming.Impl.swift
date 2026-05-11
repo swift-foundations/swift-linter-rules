@@ -17,7 +17,7 @@ internal import SwiftSyntax
 /// Citation: `feedback_no_impl_abbreviation`.
 extension Lint.Rule {
     public static let `variable named impl` = Lint.Rule(
-        id: "var_named_impl",
+        id: "variable named impl",
         defaultSeverity: .warning,
         findings: { source, severity in
             let visitor = NamingImplVisitor(
@@ -33,7 +33,7 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let namingImplMessage: Swift.String =
-    "[var_named_impl] feedback_no_impl_abbreviation: do not bind a local as `impl` "
+    "[variable named impl] feedback_no_impl_abbreviation: do not bind a local as `impl` "
     + "or `_impl` — it hides the type's identity. Use the type's own name lowercased "
     + "(e.g., `let actor = IO.Blocking.Actor(...)`, `let resolver = Manifest.Resolver(...)`) "
     + "so each read site reveals what the binding actually holds."
@@ -69,7 +69,7 @@ internal final class NamingImplVisitor: SyntaxVisitor {
                     column: location.column
                 ),
                 severity: severity,
-                identifier: "var_named_impl",
+                identifier: "variable named impl",
                 message: namingImplMessage
             ))
         }
