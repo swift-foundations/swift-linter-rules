@@ -64,10 +64,38 @@ internal final class TestingMockFactoryZeroCollisionVisitor: SyntaxVisitor {
         return true
     }
 
+    /// The rule targets mock-factory hygiene: tag-pointer collision with
+    /// `Optional<T>.none` only occurs when the bitcast source is a small
+    /// integer literal / variable being cast to a pointer-wrapping
+    /// `BitwiseCopyable` type. Function references being reshaped
+    /// (e.g., `unsafeBitCast(Type.init(arrayLiteral:) as ..., to: ...)`)
+    /// have no such collision shape.
+    private func firstArgumentLooksLikeIntegerTag(_ argument: LabeledExprSyntax) -> Swift.Bool {
+        // Reject function-reference forms (the swift-tagged Tagged+Literals
+        // case): `Underlying.init(arrayLiteral:) as (...) -> Underlying`.
+        // These are AsExprSyntax wrapping a member-access of `init`.
+        if argument.expression.is(AsExprSyntax.self) {
+            return false
+        }
+        // Reject member-access expressions (function references like
+        // `Foo.method` or `Type.init`).
+        if argument.expression.is(MemberAccessExprSyntax.self) {
+            return false
+        }
+        return true
+    }
+
     override func visit(_ node: FunctionCallExprSyntax) -> SyntaxVisitorContinueKind {
+        // Scope-limit: the rule targets mock-factory hygiene in test
+        // code. Source-tree paths don't host mock factories — firing
+        // there is rule-scope leakage.
+        if !source.filePath.contains("/Tests/") {
+            return .visitChildren
+        }
         guard isUnsafeBitCast(node.calledExpression) else { return .visitChildren }
         guard let firstArgument = node.arguments.first else { return .visitChildren }
         guard firstArgumentLooksRaw(firstArgument) else { return .visitChildren }
+        guard firstArgumentLooksLikeIntegerTag(firstArgument) else { return .visitChildren }
         let location = converter.location(for: node.positionAfterSkippingLeadingTrivia)
         matches.append(Diagnostic.Record(
             location: Source.Location(
