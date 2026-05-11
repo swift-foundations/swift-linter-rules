@@ -28,10 +28,6 @@ let package = Package(
             targets: ["Linter Rule Cardinal"]
         ),
         .library(
-            name: "Linter Rule RawValue",
-            targets: ["Linter Rule RawValue"]
-        ),
-        .library(
             name: "Linter Rule ResultBuilder",
             targets: ["Linter Rule ResultBuilder"]
         ),
@@ -44,10 +40,6 @@ let package = Package(
         .library(
             name: "Linter Rule Throws",
             targets: ["Linter Rule Throws"]
-        ),
-        .library(
-            name: "Linter Rule Naming",
-            targets: ["Linter Rule Naming"]
         ),
 
         // Wave 2b finalization (2026-05-10) — file-structure rules.
@@ -90,6 +82,16 @@ let package = Package(
             name: "Linter Rules Test Support",
             targets: ["Linter Rules Test Support"]
         ),
+
+        // Aggregate bundle — re-exports every pack in this package and
+        // publishes `Lint.Rule.Bundle.universal` for consumers that
+        // want the full universal-tier rule set without enumerating
+        // individual rules. See
+        // `swift-institute/Research/three-tier-linter-rules-partition.md`.
+        .library(
+            name: "Linter Rules",
+            targets: ["Linter Rules"]
+        ),
     ],
     dependencies: [
         .package(path: "../../swift-primitives/swift-linter-primitives"),
@@ -112,15 +114,6 @@ let package = Package(
                 .product(name: "Linter Primitives", package: "swift-linter-primitives"),
                 .product(name: "SwiftSyntax", package: "swift-syntax"),
                 .product(name: "SwiftOperators", package: "swift-syntax"),
-            ]
-        ),
-
-        // MARK: - Linter Rule RawValue
-        .target(
-            name: "Linter Rule RawValue",
-            dependencies: [
-                .product(name: "Linter Primitives", package: "swift-linter-primitives"),
-                .product(name: "SwiftSyntax", package: "swift-syntax"),
             ]
         ),
 
@@ -147,15 +140,6 @@ let package = Package(
         // MARK: - Linter Rule Throws
         .target(
             name: "Linter Rule Throws",
-            dependencies: [
-                .product(name: "Linter Primitives", package: "swift-linter-primitives"),
-                .product(name: "SwiftSyntax", package: "swift-syntax"),
-            ]
-        ),
-
-        // MARK: - Linter Rule Naming
-        .target(
-            name: "Linter Rule Naming",
             dependencies: [
                 .product(name: "Linter Primitives", package: "swift-linter-primitives"),
                 .product(name: "SwiftSyntax", package: "swift-syntax"),
@@ -216,6 +200,25 @@ let package = Package(
             ]
         ),
 
+        // MARK: - Universal Bundle (aggregate)
+        .target(
+            name: "Linter Rules",
+            dependencies: [
+                .product(name: "Linter Primitives", package: "swift-linter-primitives"),
+                "Linter Rule Cardinal",
+                "Linter Rule Closure",
+                "Linter Rule Idiom",
+                "Linter Rule Memory",
+                "Linter Rule Platform",
+                "Linter Rule ResultBuilder",
+                "Linter Rule Structure",
+                "Linter Rule Testing",
+                "Linter Rule Throws",
+                "Linter Rule Try",
+                "Linter Rule Unchecked",
+            ]
+        ),
+
         // MARK: - Test Support
         .target(
             name: "Linter Rules Test Support",
@@ -248,14 +251,6 @@ let package = Package(
             ]
         ),
         .testTarget(
-            name: "Linter Rule RawValue Tests",
-            dependencies: [
-                "Linter Rule RawValue",
-                "Linter Rules Test Support",
-                .product(name: "SwiftParser", package: "swift-syntax"),
-            ]
-        ),
-        .testTarget(
             name: "Linter Rule ResultBuilder Tests",
             dependencies: [
                 "Linter Rule ResultBuilder",
@@ -282,15 +277,6 @@ let package = Package(
                 .product(name: "SwiftParser", package: "swift-syntax"),
             ]
         ),
-        .testTarget(
-            name: "Linter Rule Naming Tests",
-            dependencies: [
-                "Linter Rule Naming",
-                "Linter Rules Test Support",
-                .product(name: "SwiftParser", package: "swift-syntax"),
-            ]
-        ),
-
         // MARK: - Wave 2b Finalization Tests
         .testTarget(
             name: "Linter Rule Structure Tests",
