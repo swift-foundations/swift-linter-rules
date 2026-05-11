@@ -136,4 +136,48 @@ extension Lint.Rule.`extension noncopyable constraint Tests`.Unit {
         let findings = Lint.Rule.`extension noncopyable constraint Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
+
+    @Test
+    func `extension on non-generic type with method-local generic consuming parameter is not flagged`() {
+        let source = """
+        extension Ownership.Transfer.Erased.Incoming {
+            func consume<T>(_ value: consuming T) {}
+        }
+        """
+        let findings = Lint.Rule.`extension noncopyable constraint Tests`.findings(in: source)
+        #expect(findings.isEmpty)
+    }
+
+    @Test
+    func `extension on non-generic type with method-local generic borrowing parameter is not flagged`() {
+        let source = """
+        extension Ownership.Transfer.Erased.Incoming {
+            func inspect<T>(_ value: borrowing T) {}
+        }
+        """
+        let findings = Lint.Rule.`extension noncopyable constraint Tests`.findings(in: source)
+        #expect(findings.isEmpty)
+    }
+
+    @Test
+    func `extension with method-local generic init consuming parameter is not flagged`() {
+        let source = """
+        extension Box {
+            init<T>(consuming value: consuming T) {}
+        }
+        """
+        let findings = Lint.Rule.`extension noncopyable constraint Tests`.findings(in: source)
+        #expect(findings.isEmpty)
+    }
+
+    @Test
+    func `extension with consuming parameter whose type is not method-local is still flagged`() {
+        let source = """
+        extension Pool {
+            func take<T>(_ resource: consuming Resource) {}
+        }
+        """
+        let findings = Lint.Rule.`extension noncopyable constraint Tests`.findings(in: source)
+        #expect(findings.count == 1)
+    }
 }

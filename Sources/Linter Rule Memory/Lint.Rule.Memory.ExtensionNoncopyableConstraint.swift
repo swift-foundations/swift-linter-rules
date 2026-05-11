@@ -102,6 +102,14 @@ internal let memoryExtensionNoncopyableConstraintMessage: Swift.String =
 
 private final class MemoryExtensionNoncopyableOwnershipFinder: SyntaxVisitor {
     var found = false
+    /// Stack of method-local generic parameter names for the current
+    /// function / initializer / subscript context. Parameters whose
+    /// type is a single identifier matching a method-local generic
+    /// carry method-scoped ownership, not type-scoped — the rule's
+    /// "add `where Element: ~Copyable` to the extension" requirement
+    /// does not apply when the consumed type is not a type-level
+    /// generic of the extended type.
+    private var genericsStack: [Swift.Set<Swift.String>] = []
     // Skip nested type declarations: ownership modifiers on a nested
     // type's members belong to that nested type, not to the enclosing
     // extension's namespace. Without this skip, an extension on a
@@ -128,6 +136,20 @@ private final class MemoryExtensionNoncopyableOwnershipFinder: SyntaxVisitor {
                 if let simple = specifier.as(SimpleTypeSpecifierSyntax.self) {
                     let kind = simple.specifier.tokenKind
                     if kind == .keyword(.consuming) || kind == .keyword(.borrowing) {
+                        // Method-local-generic exemption: a `consuming T`
+                        // parameter where T is a method-local generic
+                        // (declared by the enclosing function / init /
+                        // subscript, not by the extended type) is
+                        // method-scoped ownership. The rule's premise —
+                        // that the extension needs a `where Element:
+                        // ~Copyable` constraint — does not apply: there
+                        // is no type-level generic to constrain.
+                        if let identifier = attributed.baseType.as(IdentifierTypeSyntax.self),
+                           identifier.genericArgumentClause == nil,
+                           let top = genericsStack.last,
+                           top.contains(identifier.name.text) {
+                            return .skipChildren
+                        }
                         found = true
                         return .skipChildren
                     }
@@ -146,7 +168,33 @@ private final class MemoryExtensionNoncopyableOwnershipFinder: SyntaxVisitor {
                 return .skipChildren
             }
         }
+        genericsStack.append(MemoryExtensionNoncopyableOwnershipFinder.genericNames(node.genericParameterClause))
         return .visitChildren
+    }
+    override func visitPost(_ node: FunctionDeclSyntax) {
+        if !genericsStack.isEmpty { genericsStack.removeLast() }
+    }
+    override func visit(_ node: InitializerDeclSyntax) -> SyntaxVisitorContinueKind {
+        genericsStack.append(MemoryExtensionNoncopyableOwnershipFinder.genericNames(node.genericParameterClause))
+        return .visitChildren
+    }
+    override func visitPost(_ node: InitializerDeclSyntax) {
+        if !genericsStack.isEmpty { genericsStack.removeLast() }
+    }
+    override func visit(_ node: SubscriptDeclSyntax) -> SyntaxVisitorContinueKind {
+        genericsStack.append(MemoryExtensionNoncopyableOwnershipFinder.genericNames(node.genericParameterClause))
+        return .visitChildren
+    }
+    override func visitPost(_ node: SubscriptDeclSyntax) {
+        if !genericsStack.isEmpty { genericsStack.removeLast() }
+    }
+    private static func genericNames(_ clause: GenericParameterClauseSyntax?) -> Swift.Set<Swift.String> {
+        guard let clause else { return [] }
+        var names: Swift.Set<Swift.String> = []
+        for parameter in clause.parameters {
+            names.insert(parameter.name.text)
+        }
+        return names
     }
 }
 
