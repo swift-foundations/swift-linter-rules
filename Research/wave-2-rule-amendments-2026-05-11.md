@@ -312,12 +312,17 @@ Empirical: 1 finding cleared.
 stdlib with-helper / Result / Dictionary / uniqued entries to
 `namingCompoundSwiftNativeIdiomCitations`.
 
-### #15 — IMPL-010 Tier-0 stdlib-boundary opt-out (DEFERRED)
+### #15 — IMPL-010 Tier-0 stdlib-boundary opt-out
 
-**Status**: DEFERRED to follow-up. Requires Lint.Rule.Configuration.override
-mechanism (verify exists in Linter Primitives; add if missing) plus
-swift-standard-library-extensions main.swift transition from `Lint.run(bundle:)`
-to `Lint.run(configuration: ...)` form. 17 findings pending.
+**Status**: LANDED 2026-05-11 (UNCOMMITTED — Lint/ scaffold gitignored per
+HANDOFF Open Q1). No Linter Primitives change needed — `Lint.Rule.Configuration.disable(_:)`
+already existed. swift-standard-library-extensions's `Lint/Sources/Lint/main.swift`
+switched from `Lint.run(bundle: ...)` to `Lint.run(configuration: ...)` with
+`Lint.Rule.Configuration.disable(.\`int public parameter\`)`.
+
+**Empirical**: swift-standard-library-extensions 17 → 0. Wave 2 complete:
+every leaf in the original triage order is either at 0 findings or holding
+the 1 AMBIGUOUS finding pending [MEM-SAFE-025] reconciliation.
 
 ### #12 — Borrowing-self-short-circuit — operand-identifier root tracing
 
@@ -345,7 +350,7 @@ Walk up to enclosing `FunctionDeclSyntax`; if name matches, exempt the
 
 ## Acceptance Criteria (Post-Dispatch)
 
-**ALL 12 AMENDMENTS LANDED 2026-05-11.** Empirical verification across 8 leaves:
+**ALL 19 AMENDMENTS LANDED 2026-05-11.** Empirical verification across 10 leaves:
 
 | Leaf | Pre-amendment | Expected | Actual | Status |
 |---|---:|---:|---:|---|
@@ -357,12 +362,12 @@ Walk up to enclosing `FunctionDeclSyntax`; if name matches, exempt the
 | swift-comparison-primitives | 44 | 0 | **0** | ✓ (surfaced composition-Copyable + constraint-inexpressible refinements) |
 | swift-hash-primitives | 46 | 0 | **0** | ✓ (zero new amendments — full coverage by queued threads) |
 | swift-equation-primitives | 55 | 0 | **0** | ✓ (surfaced #12 borrowing-self-short-circuit) |
+| swift-ownership-primitives | 39 | (SOURCE pending) | (subordinate queue) | partial — 19 SOURCE-WRONG in subordinate's queue |
+| swift-standard-library-extensions | 620 → 321 → 22 | 0 | **0** | ✓ (#14 / #16 / #17-ext / #18 / #19 / #2-ext / #15 + 5 SOURCE-WRONG committed by subordinate) |
 
-**Aggregate**: 215 findings across 8 leaves → 1 finding (the [MEM-SAFE-025]
-ambiguity). **99.5% reduction.** Source fixes accounted for: swift-property
-commit `7de1f5c` (2 Cluster C extractions + Cluster D :116 unsafe wrap),
-swift-property commit `099125c` (Property.Consume.State explicit
-Copyable scoping), swift-tagged Cluster G pending in subordinate's queue.
+**Aggregate**: ~878 findings across 10 leaves → **0** (excluding the 1 [MEM-SAFE-025]
+AMBIGUOUS held finding + the 19 SOURCE-WRONG in the subordinate's ownership queue).
+**~99.9% reduction across the rule-amendable surface.**
 
 **Held**: swift-property-primitives Property.Consume.State.swift:54
 unchecked sendable categorization — entangled with [MEM-SAFE-025] policy
