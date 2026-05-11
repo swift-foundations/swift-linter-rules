@@ -140,18 +140,22 @@ internal final class StructureMinimalTypeBodyVisitor: SyntaxVisitor {
                 continue
             }
             if let nested = decl.as(StructDeclSyntax.self) {
+                if hasResultBuilderAttribute(nested.attributes) { continue }
                 emit(at: nested.structKeyword.positionAfterSkippingLeadingTrivia)
                 continue
             }
             if let nested = decl.as(ClassDeclSyntax.self) {
+                if hasResultBuilderAttribute(nested.attributes) { continue }
                 emit(at: nested.classKeyword.positionAfterSkippingLeadingTrivia)
                 continue
             }
             if let nested = decl.as(EnumDeclSyntax.self) {
+                if hasResultBuilderAttribute(nested.attributes) { continue }
                 emit(at: nested.enumKeyword.positionAfterSkippingLeadingTrivia)
                 continue
             }
             if let nested = decl.as(ActorDeclSyntax.self) {
+                if hasResultBuilderAttribute(nested.attributes) { continue }
                 emit(at: nested.actorKeyword.positionAfterSkippingLeadingTrivia)
                 continue
             }
@@ -162,22 +166,53 @@ internal final class StructureMinimalTypeBodyVisitor: SyntaxVisitor {
         }
     }
 
+    /// Returns true if the attribute list contains `@resultBuilder`.
+    /// Types marked `@resultBuilder` are protocol-witness-shaped — their
+    /// static methods (buildBlock, buildExpression, etc.) are dictated
+    /// by Swift's `@resultBuilder` informal protocol contract, not by
+    /// discretionary author choice. Forcing extraction yields
+    /// empty-body + extension-with-only-witnesses for zero semantic
+    /// gain. Inline detection (parallel to the rule's own pattern;
+    /// `namingHasResultBuilderAttribute` lives in the institute
+    /// Naming pack and isn't cross-target visible).
+    private func hasResultBuilderAttribute(_ attributes: AttributeListSyntax) -> Swift.Bool {
+        for attribute in attributes {
+            guard let attr = attribute.as(AttributeSyntax.self) else { continue }
+            if attr.attributeName.trimmedDescription == "resultBuilder" {
+                return true
+            }
+        }
+        return false
+    }
+
     override func visit(_ node: StructDeclSyntax) -> SyntaxVisitorContinueKind {
+        if hasResultBuilderAttribute(node.attributes) {
+            return .visitChildren
+        }
         checkMembers(node.memberBlock.members)
         return .visitChildren
     }
 
     override func visit(_ node: ClassDeclSyntax) -> SyntaxVisitorContinueKind {
+        if hasResultBuilderAttribute(node.attributes) {
+            return .visitChildren
+        }
         checkMembers(node.memberBlock.members)
         return .visitChildren
     }
 
     override func visit(_ node: ActorDeclSyntax) -> SyntaxVisitorContinueKind {
+        if hasResultBuilderAttribute(node.attributes) {
+            return .visitChildren
+        }
         checkMembers(node.memberBlock.members)
         return .visitChildren
     }
 
     override func visit(_ node: EnumDeclSyntax) -> SyntaxVisitorContinueKind {
+        if hasResultBuilderAttribute(node.attributes) {
+            return .visitChildren
+        }
         checkMembers(node.memberBlock.members)
         return .visitChildren
     }
