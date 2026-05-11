@@ -77,6 +77,11 @@ internal let memoryExtensionConstraintInexpressibleTypes: Swift.Set<Swift.String
     "PartialRangeThrough",
     "PartialRangeUpTo",
     "Optional",
+    "Dictionary",
+    "Set",
+    "String",
+    "Substring",
+    "Result",
     // Institute non-generic types — no generic parameter exists to
     // constrain. Extensions with `consuming`/`borrowing` are valid
     // without any where clause.
