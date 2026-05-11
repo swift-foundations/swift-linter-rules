@@ -102,6 +102,25 @@ internal let memoryExtensionNoncopyableConstraintMessage: Swift.String =
 
 private final class MemoryExtensionNoncopyableOwnershipFinder: SyntaxVisitor {
     var found = false
+    // Skip nested type declarations: ownership modifiers on a nested
+    // type's members belong to that nested type, not to the enclosing
+    // extension's namespace. Without this skip, an extension on a
+    // non-generic namespace (e.g., `extension Ownership { struct
+    // Indirect<Value: ~Copyable> { init(consuming Value) } }`) is
+    // mis-flagged as needing `where ... ~Copyable` on `Ownership`,
+    // which has no generic parameter to constrain.
+    override func visit(_ node: StructDeclSyntax) -> SyntaxVisitorContinueKind {
+        return .skipChildren
+    }
+    override func visit(_ node: ClassDeclSyntax) -> SyntaxVisitorContinueKind {
+        return .skipChildren
+    }
+    override func visit(_ node: EnumDeclSyntax) -> SyntaxVisitorContinueKind {
+        return .skipChildren
+    }
+    override func visit(_ node: ActorDeclSyntax) -> SyntaxVisitorContinueKind {
+        return .skipChildren
+    }
     override func visit(_ node: FunctionParameterSyntax) -> SyntaxVisitorContinueKind {
         // Look for `consuming` / `borrowing` modifier on the type.
         if let attributed = node.type.as(AttributedTypeSyntax.self) {

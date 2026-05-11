@@ -96,4 +96,44 @@ extension Lint.Rule.`extension noncopyable constraint Tests`.Unit {
         let findings = Lint.Rule.`extension noncopyable constraint Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
+
+    @Test
+    func `extension on namespace containing nested type with consuming init is not flagged`() {
+        let source = """
+        extension Ownership {
+            struct Indirect<Value: ~Copyable>: ~Copyable {
+                init(consuming value: consuming Value) {}
+            }
+        }
+        """
+        let findings = Lint.Rule.`extension noncopyable constraint Tests`.findings(in: source)
+        #expect(findings.isEmpty)
+    }
+
+    @Test
+    func `extension on namespace containing nested type with consuming method is not flagged`() {
+        let source = """
+        extension Ownership {
+            struct Latch<Value: ~Copyable>: ~Copyable {
+                consuming func take() -> Value { fatalError() }
+            }
+        }
+        """
+        let findings = Lint.Rule.`extension noncopyable constraint Tests`.findings(in: source)
+        #expect(findings.isEmpty)
+    }
+
+    @Test
+    func `extension on namespace with both nested type and own consuming method flags only the latter`() {
+        let source = """
+        extension Container {
+            struct Inner<T: ~Copyable>: ~Copyable {
+                init(consuming value: consuming T) {}
+            }
+            consuming func transfer() {}
+        }
+        """
+        let findings = Lint.Rule.`extension noncopyable constraint Tests`.findings(in: source)
+        #expect(findings.count == 1)
+    }
 }
