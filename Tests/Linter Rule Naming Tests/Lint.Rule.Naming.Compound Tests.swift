@@ -160,4 +160,54 @@ extension Lint.Rule.`compound identifier Tests`.`Edge Case` {
         let findings = Lint.Rule.`compound identifier Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
+
+    @Test
+    func `buildExpression inside @resultBuilder enum is NOT flagged`() {
+        let source = """
+        @resultBuilder
+        public enum Builder {
+            public static func buildExpression(_ x: Int) -> [Int] { [x] }
+        }
+        """
+        let findings = Lint.Rule.`compound identifier Tests`.findings(in: source)
+        #expect(findings.isEmpty)
+    }
+
+    @Test
+    func `buildPartialBlock inside @resultBuilder enum is NOT flagged`() {
+        let source = """
+        @resultBuilder
+        public enum Builder {
+            public static func buildPartialBlock(first: Int) -> [Int] { [first] }
+            public static func buildPartialBlock(accumulated: [Int], next: Int) -> [Int] {
+                accumulated + [next]
+            }
+        }
+        """
+        let findings = Lint.Rule.`compound identifier Tests`.findings(in: source)
+        #expect(findings.isEmpty)
+    }
+
+    @Test
+    func `buildExpression OUTSIDE @resultBuilder IS flagged`() {
+        let source = """
+        public enum NotABuilder {
+            public static func buildExpression(_ x: Int) -> [Int] { [x] }
+        }
+        """
+        let findings = Lint.Rule.`compound identifier Tests`.findings(in: source)
+        #expect(findings.count == 1)
+    }
+
+    @Test
+    func `non-protocol compound method inside @resultBuilder IS flagged`() {
+        let source = """
+        @resultBuilder
+        public enum Builder {
+            public static func openWrite() {}
+        }
+        """
+        let findings = Lint.Rule.`compound identifier Tests`.findings(in: source)
+        #expect(findings.count == 1)
+    }
 }

@@ -106,6 +106,14 @@ internal final class NamingIntParameterVisitor: SyntaxVisitor {
         guard namingIntParameterIsPublicOrOpen(node.modifiers) else {
             return .visitChildren
         }
+        // Exempt result-builder protocol methods inside an `@resultBuilder`
+        // type — `buildExpression`, `buildPartialBlock`, etc. take and
+        // return whatever scalar the builder accumulates (often `Int`),
+        // and the signature is dictated by the builder protocol.
+        if namingResultBuilderProtocolMethods.contains(node.name.text),
+           namingIsInsideResultBuilderType(Syntax(node)) {
+            return .visitChildren
+        }
         checkParameters(node.signature.parameterClause.parameters)
         // Return type.
         if let returnClause = node.signature.returnClause,

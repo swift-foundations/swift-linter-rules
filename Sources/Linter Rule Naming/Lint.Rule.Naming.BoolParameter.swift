@@ -109,6 +109,15 @@ internal final class NamingBoolParameterVisitor: SyntaxVisitor {
         guard namingBoolParameterIsPublicOrOpen(node.modifiers) else {
             return .visitChildren
         }
+        // Exempt result-builder protocol methods inside an `@resultBuilder`
+        // type — `buildExpression(_ expression: Bool)`,
+        // `buildPartialBlock(first: Bool)`, etc. take `Bool` because the
+        // builder accumulates Bool; the signature is dictated by the
+        // builder protocol, not by an [API-IMPL-003] flag choice.
+        if namingResultBuilderProtocolMethods.contains(node.name.text),
+           namingIsInsideResultBuilderType(Syntax(node)) {
+            return .visitChildren
+        }
         checkParameters(node.signature.parameterClause.parameters)
         return .visitChildren
     }

@@ -82,6 +82,13 @@ internal final class NamingCompoundVisitor: SyntaxVisitor {
         guard isCompoundIdentifier(name) else {
             return .visitChildren
         }
+        // Exempt result-builder protocol methods inside an `@resultBuilder`
+        // type — `buildExpression`, `buildPartialBlock`, etc. read as
+        // compound only because the protocol mandates camelCase names.
+        if namingResultBuilderProtocolMethods.contains(name),
+           namingIsInsideResultBuilderType(Syntax(node)) {
+            return .visitChildren
+        }
         emit(at: node.name.positionAfterSkippingLeadingTrivia)
         return .visitChildren
     }

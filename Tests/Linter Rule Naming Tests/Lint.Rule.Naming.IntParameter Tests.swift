@@ -190,4 +190,56 @@ extension Lint.Rule.`int public parameter Tests`.`Edge Case` {
         let findings = Lint.Rule.`int public parameter Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
+
+    @Test
+    func `buildExpression Int return inside @resultBuilder is NOT flagged`() {
+        let source = """
+        @resultBuilder
+        public enum Count {
+            public static func buildExpression(_ expression: Bool) -> Int {
+                expression ? 1 : 0
+            }
+        }
+        """
+        let findings = Lint.Rule.`int public parameter Tests`.findings(in: source)
+        #expect(findings.isEmpty)
+    }
+
+    @Test
+    func `buildPartialBlock Int param inside @resultBuilder is NOT flagged`() {
+        let source = """
+        @resultBuilder
+        public enum Count {
+            public static func buildPartialBlock(first: Int) -> Int { first }
+            public static func buildPartialBlock(accumulated: Int, next: Int) -> Int {
+                accumulated + next
+            }
+        }
+        """
+        let findings = Lint.Rule.`int public parameter Tests`.findings(in: source)
+        #expect(findings.isEmpty)
+    }
+
+    @Test
+    func `buildExpression with Int return OUTSIDE @resultBuilder IS flagged`() {
+        let source = """
+        public enum NotABuilder {
+            public static func buildExpression(_ expression: String) -> Int { 0 }
+        }
+        """
+        let findings = Lint.Rule.`int public parameter Tests`.findings(in: source)
+        #expect(findings.count == 1)
+    }
+
+    @Test
+    func `non-protocol Int-taking method inside @resultBuilder IS flagged`() {
+        let source = """
+        @resultBuilder
+        public enum Builder {
+            public static func helper(_ x: Int) -> Int { x }
+        }
+        """
+        let findings = Lint.Rule.`int public parameter Tests`.findings(in: source)
+        #expect(findings.count == 2)
+    }
 }

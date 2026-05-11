@@ -171,4 +171,54 @@ extension Lint.Rule.`bool public parameter Tests`.`Edge Case` {
         let findings = Lint.Rule.`bool public parameter Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
+
+    @Test
+    func `buildExpression Bool param inside @resultBuilder is NOT flagged`() {
+        let source = """
+        @resultBuilder
+        public enum All {
+            public static func buildExpression(_ expression: Bool) -> Bool { expression }
+        }
+        """
+        let findings = Lint.Rule.`bool public parameter Tests`.findings(in: source)
+        #expect(findings.isEmpty)
+    }
+
+    @Test
+    func `buildPartialBlock Bool params inside @resultBuilder is NOT flagged`() {
+        let source = """
+        @resultBuilder
+        public enum All {
+            public static func buildPartialBlock(first: Bool) -> Bool { first }
+            public static func buildPartialBlock(accumulated: Bool, next: Bool) -> Bool {
+                accumulated && next
+            }
+        }
+        """
+        let findings = Lint.Rule.`bool public parameter Tests`.findings(in: source)
+        #expect(findings.isEmpty)
+    }
+
+    @Test
+    func `buildExpression with Bool param OUTSIDE @resultBuilder IS flagged`() {
+        let source = """
+        public enum NotABuilder {
+            public static func buildExpression(_ expression: Bool) -> Int { 0 }
+        }
+        """
+        let findings = Lint.Rule.`bool public parameter Tests`.findings(in: source)
+        #expect(findings.count == 1)
+    }
+
+    @Test
+    func `non-protocol Bool-taking method inside @resultBuilder IS flagged`() {
+        let source = """
+        @resultBuilder
+        public enum Builder {
+            public static func configure(strict: Bool) {}
+        }
+        """
+        let findings = Lint.Rule.`bool public parameter Tests`.findings(in: source)
+        #expect(findings.count == 1)
+    }
 }
