@@ -31,12 +31,20 @@ extension Lint.Rule.`typed throws cannot use self error Tests` {
     }
 }
 
+// MARK: - Unit: protocol-context flagging
+//
+// The rule fires only for `throws(Self.Error)` inside a protocol declaration
+// that does NOT declare `associatedtype Error`. In every other context
+// (struct/class/enum/actor body, extension on a concrete type, protocol with
+// associatedtype Error) `Self.Error` resolves correctly to a nested or
+// associated type and the rule stays silent.
+
 extension Lint.Rule.`typed throws cannot use self error Tests`.Unit {
     @Test
-    func `throws Self dot Error in extension on concrete type is flagged`() {
+    func `throws Self dot Error inside protocol WITHOUT associatedtype Error is flagged`() {
         let source = """
-        extension Random {
-            func generate() throws(Self.Error) -> UInt64 { 0 }
+        protocol P {
+            func f() throws(Self.Error)
         }
         """
         let findings = Lint.Rule.`typed throws cannot use self error Tests`.findings(in: source)
@@ -49,44 +57,11 @@ extension Lint.Rule.`typed throws cannot use self error Tests`.Unit {
     }
 
     @Test
-    func `throws Self dot Error in struct body is flagged`() {
+    func `multiple Self dot Error sites in a bare protocol are all flagged`() {
         let source = """
-        struct S {
-            func f() throws(Self.Error) -> Int { 0 }
-        }
-        """
-        let findings = Lint.Rule.`typed throws cannot use self error Tests`.findings(in: source)
-        #expect(findings.count == 1)
-    }
-
-    @Test
-    func `throws Self dot Error in class body is flagged`() {
-        let source = """
-        class C {
-            func f() throws(Self.Error) -> Int { 0 }
-        }
-        """
-        let findings = Lint.Rule.`typed throws cannot use self error Tests`.findings(in: source)
-        #expect(findings.count == 1)
-    }
-
-    @Test
-    func `throws Self dot Error in enum body is flagged`() {
-        let source = """
-        enum E {
-            func f() throws(Self.Error) -> Int { 0 }
-        }
-        """
-        let findings = Lint.Rule.`typed throws cannot use self error Tests`.findings(in: source)
-        #expect(findings.count == 1)
-    }
-
-    @Test
-    func `multiple Self dot Error throws are all flagged`() {
-        let source = """
-        struct S {
-            func a() throws(Self.Error) {}
-            func b() throws(Self.Error) {}
+        protocol P {
+            func a() throws(Self.Error)
+            func b() throws(Self.Error)
         }
         """
         let findings = Lint.Rule.`typed throws cannot use self error Tests`.findings(in: source)
@@ -94,10 +69,10 @@ extension Lint.Rule.`typed throws cannot use self error Tests`.Unit {
     }
 
     @Test
-    func `async throws Self dot Error is flagged`() {
+    func `async throws Self dot Error inside bare protocol is flagged`() {
         let source = """
-        struct S {
-            func f() async throws(Self.Error) -> Int { 0 }
+        protocol P {
+            func f() async throws(Self.Error)
         }
         """
         let findings = Lint.Rule.`typed throws cannot use self error Tests`.findings(in: source)
@@ -105,27 +80,18 @@ extension Lint.Rule.`typed throws cannot use self error Tests`.Unit {
     }
 
     @Test
-    func `init throws Self dot Error is flagged`() {
+    func `init throws Self dot Error inside bare protocol is flagged`() {
         let source = """
-        struct S {
-            init() throws(Self.Error) {}
-        }
-        """
-        let findings = Lint.Rule.`typed throws cannot use self error Tests`.findings(in: source)
-        #expect(findings.count == 1)
-    }
-
-    @Test
-    func `noncopyable consuming method with Self dot Error throws is flagged`() {
-        let source = """
-        extension Storage.Pool {
-            consuming func release() throws(Self.Error) { }
+        protocol P {
+            init() throws(Self.Error)
         }
         """
         let findings = Lint.Rule.`typed throws cannot use self error Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 }
+
+// MARK: - Edge Case: contexts where Self.Error is well-defined
 
 extension Lint.Rule.`typed throws cannot use self error Tests`.`Edge Case` {
     @Test
@@ -141,14 +107,69 @@ extension Lint.Rule.`typed throws cannot use self error Tests`.`Edge Case` {
     }
 
     @Test
-    func `throws Self dot Error inside protocol WITHOUT associatedtype Error is flagged`() {
+    func `throws Self dot Error in struct body is NOT flagged`() {
         let source = """
-        protocol P {
-            func f() throws(Self.Error)
+        struct S {
+            func f() throws(Self.Error) -> Int { 0 }
         }
         """
         let findings = Lint.Rule.`typed throws cannot use self error Tests`.findings(in: source)
-        #expect(findings.count == 1)
+        #expect(findings.isEmpty)
+    }
+
+    @Test
+    func `throws Self dot Error in class body is NOT flagged`() {
+        let source = """
+        class C {
+            func f() throws(Self.Error) -> Int { 0 }
+        }
+        """
+        let findings = Lint.Rule.`typed throws cannot use self error Tests`.findings(in: source)
+        #expect(findings.isEmpty)
+    }
+
+    @Test
+    func `throws Self dot Error in enum body is NOT flagged`() {
+        let source = """
+        enum E {
+            func f() throws(Self.Error) -> Int { 0 }
+        }
+        """
+        let findings = Lint.Rule.`typed throws cannot use self error Tests`.findings(in: source)
+        #expect(findings.isEmpty)
+    }
+
+    @Test
+    func `throws Self dot Error in actor body is NOT flagged`() {
+        let source = """
+        actor A {
+            func f() throws(Self.Error) -> Int { 0 }
+        }
+        """
+        let findings = Lint.Rule.`typed throws cannot use self error Tests`.findings(in: source)
+        #expect(findings.isEmpty)
+    }
+
+    @Test
+    func `throws Self dot Error in extension on concrete type is NOT flagged`() {
+        let source = """
+        extension Random {
+            func generate() throws(Self.Error) -> UInt64 { 0 }
+        }
+        """
+        let findings = Lint.Rule.`typed throws cannot use self error Tests`.findings(in: source)
+        #expect(findings.isEmpty)
+    }
+
+    @Test
+    func `throws Self dot Error in noncopyable consuming method is NOT flagged`() {
+        let source = """
+        extension Storage.Pool {
+            consuming func release() throws(Self.Error) { }
+        }
+        """
+        let findings = Lint.Rule.`typed throws cannot use self error Tests`.findings(in: source)
+        #expect(findings.isEmpty)
     }
 
     @Test

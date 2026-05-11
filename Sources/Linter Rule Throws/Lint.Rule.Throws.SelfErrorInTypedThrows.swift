@@ -57,9 +57,7 @@ internal final class ThrowsSelfErrorInTypedThrowsVisitor: SyntaxVisitor {
     override func visit(_ node: ThrowsClauseSyntax) -> SyntaxVisitorContinueKind {
         guard let typed = node.type else { return .visitChildren }
         guard isSelfError(typed) else { return .visitChildren }
-        guard !isInsideProtocolWithAssociatedError(Syntax(node)) else {
-            return .visitChildren
-        }
+        guard shouldFlag(Syntax(node)) else { return .visitChildren }
         let location = converter.location(for: typed.positionAfterSkippingLeadingTrivia)
         matches.append(Diagnostic.Record(
             location: Source.Location(
@@ -84,11 +82,26 @@ internal final class ThrowsSelfErrorInTypedThrowsVisitor: SyntaxVisitor {
         return true
     }
 
-    private func isInsideProtocolWithAssociatedError(_ node: Syntax) -> Swift.Bool {
+    /// Returns true iff `throws(Self.Error)` at this node is invalid per
+    /// institute convention. Concrete-type contexts (`struct`/`class`/`enum`/
+    /// `actor` bodies, and extensions on concrete types) resolve `Self.Error`
+    /// to the nested error member and are exempt. Protocol declarations are
+    /// flagged unless they declare `associatedtype Error`. Extensions are not
+    /// flagged here — distinguishing a protocol extension from a concrete-type
+    /// extension requires symbol resolution the linter does not have.
+    private func shouldFlag(_ node: Syntax) -> Swift.Bool {
         var current: Syntax? = node.parent
         while let parent = current {
             if let proto = parent.as(ProtocolDeclSyntax.self) {
-                return declaresAssociatedError(proto)
+                return !declaresAssociatedError(proto)
+            }
+            if parent.is(StructDeclSyntax.self)
+                || parent.is(ClassDeclSyntax.self)
+                || parent.is(EnumDeclSyntax.self)
+                || parent.is(ActorDeclSyntax.self)
+                || parent.is(ExtensionDeclSyntax.self)
+            {
+                return false
             }
             current = parent.parent
         }
