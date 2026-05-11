@@ -64,6 +64,17 @@ internal final class PlatformTypealiasedNamespaceVisitor: SyntaxVisitor {
             return .visitChildren
         }
         guard member.name.text == aliasName else { return .visitChildren }
+        // Associatedtype-satisfaction exemption: a typealias inside an
+        // extension whose inheritance clause names a protocol satisfies
+        // the protocol's associatedtype requirement, not a foreign-
+        // namespace bridge. The shape `typealias Index = Underlying.Index`
+        // inside `extension Tagged: Collection` provides
+        // `Collection.Index`, not silent namespace re-pointing.
+        // Parallels Wave 1 TIGHTEN on unification_typealias /
+        // namespace_adoption_typealias.
+        if isInsideConformingExtension(Syntax(node)) {
+            return .visitChildren
+        }
         let location = converter.location(for: node.name.positionAfterSkippingLeadingTrivia)
         matches.append(Diagnostic.Record(
             location: Source.Location(
@@ -77,5 +88,23 @@ internal final class PlatformTypealiasedNamespaceVisitor: SyntaxVisitor {
             message: platformTypealiasedNamespaceMessage
         ))
         return .visitChildren
+    }
+
+    private func isInsideConformingExtension(_ node: Syntax) -> Swift.Bool {
+        var current: Syntax? = node.parent
+        while let candidate = current {
+            if let ext = candidate.as(ExtensionDeclSyntax.self) {
+                return ext.inheritanceClause != nil
+            }
+            if candidate.is(StructDeclSyntax.self)
+                || candidate.is(ClassDeclSyntax.self)
+                || candidate.is(EnumDeclSyntax.self)
+                || candidate.is(ActorDeclSyntax.self)
+                || candidate.is(ProtocolDeclSyntax.self) {
+                return false
+            }
+            current = candidate.parent
+        }
+        return false
     }
 }
