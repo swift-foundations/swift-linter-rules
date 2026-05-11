@@ -80,6 +80,12 @@ let package = Package(
             targets: ["Linter Rule Platform"]
         ),
 
+        // Wave 3 mechanization (2026-05-11) — implementation-idiom rules.
+        .library(
+            name: "Linter Rule Idiom",
+            targets: ["Linter Rule Idiom"]
+        ),
+
         .library(
             name: "Linter Rules Test Support",
             targets: ["Linter Rules Test Support"]
@@ -201,12 +207,22 @@ let package = Package(
             ]
         ),
 
+        // MARK: - Wave 3 Mechanization — Linter Rule Idiom
+        .target(
+            name: "Linter Rule Idiom",
+            dependencies: [
+                .product(name: "Linter Primitives", package: "swift-linter-primitives"),
+                .product(name: "SwiftSyntax", package: "swift-syntax"),
+            ]
+        ),
+
         // MARK: - Test Support
         .target(
             name: "Linter Rules Test Support",
             dependencies: [
                 "Linter Rule Cardinal",
                 "Linter Rule Closure",
+                "Linter Rule Idiom",
                 "Linter Rule Memory",
                 "Linter Rule Naming",
                 "Linter Rule Platform",
@@ -324,6 +340,16 @@ let package = Package(
             name: "Linter Rule Platform Tests",
             dependencies: [
                 "Linter Rule Platform",
+                "Linter Rules Test Support",
+                .product(name: "SwiftParser", package: "swift-syntax"),
+            ]
+        ),
+
+        // MARK: - Wave 3 Mechanization Tests
+        .testTarget(
+            name: "Linter Rule Idiom Tests",
+            dependencies: [
+                "Linter Rule Idiom",
                 "Linter Rules Test Support",
                 .product(name: "SwiftParser", package: "swift-syntax"),
             ]
