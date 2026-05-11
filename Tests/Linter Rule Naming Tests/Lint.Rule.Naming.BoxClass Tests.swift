@@ -13,28 +13,25 @@ import Testing
 import SwiftSyntax
 import SwiftParser
 import Linter_Primitives
+import Linter_Rules_Test_Support
 @testable import Linter_Rule_Naming
 
-extension Lint.Rule.Naming.BoxClass {
+extension Lint.Rule {
     @Suite
-    struct Test {
+    struct `ad hoc box class Tests` {
         @Suite struct Unit {}
         @Suite struct `Edge Case` {}
     }
 }
 
-extension Lint.Rule.Naming.BoxClass.Test {
+extension Lint.Rule.`ad hoc box class Tests` {
     static func findings(in source: String, file: String = "test.swift") -> [Diagnostic.Record] {
-        let tree = Parser.parse(source: source)
-        let converter = SourceLocationConverter(fileName: file, tree: tree)
-        var manager = Source.Manager()
-        let id = manager.register(fileID: file, filePath: file, content: Array(source.utf8))
-        let parsed = Lint.Source.Parsed(file: manager.file(for: id), tree: tree, converter: converter)
-        return Lint.Rule.Naming.BoxClass().findings(in: parsed)
+        let parsed = Lint.Source.parsed(from: source, file: file)
+        return Lint.Rule.`ad hoc box class`.findings(parsed, .warning)
     }
 }
 
-extension Lint.Rule.Naming.BoxClass.Test.Unit {
+extension Lint.Rule.`ad hoc box class Tests`.Unit {
     @Test
     func `_Box class is flagged`() {
         let source = """
@@ -43,7 +40,7 @@ extension Lint.Rule.Naming.BoxClass.Test.Unit {
             init(_ value: T) { self.value = value }
         }
         """
-        let findings = Lint.Rule.Naming.BoxClass.Test.findings(in: source)
+        let findings = Lint.Rule.`ad hoc box class Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
             #expect(findings[0].identifier == "ad_hoc_box_class")
@@ -57,18 +54,18 @@ extension Lint.Rule.Naming.BoxClass.Test.Unit {
             var buffer: [Int] = []
         }
         """
-        let findings = Lint.Rule.Naming.BoxClass.Test.findings(in: source)
+        let findings = Lint.Rule.`ad hoc box class Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 }
 
-extension Lint.Rule.Naming.BoxClass.Test.`Edge Case` {
+extension Lint.Rule.`ad hoc box class Tests`.`Edge Case` {
     @Test
     func `class with inheritance is NOT flagged`() {
         let source = """
         final class _Storage: ManagedBuffer<Int, Element> { }
         """
-        let findings = Lint.Rule.Naming.BoxClass.Test.findings(in: source)
+        let findings = Lint.Rule.`ad hoc box class Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -79,7 +76,7 @@ extension Lint.Rule.Naming.BoxClass.Test.`Edge Case` {
             var items: [Int] = []
         }
         """
-        let findings = Lint.Rule.Naming.BoxClass.Test.findings(in: source)
+        let findings = Lint.Rule.`ad hoc box class Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 }

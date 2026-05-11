@@ -13,28 +13,25 @@ import Testing
 import SwiftSyntax
 import SwiftParser
 import Linter_Primitives
+import Linter_Rules_Test_Support
 @testable import Linter_Rule_Platform
 
-extension Lint.Rule.Platform.PlatformConditional {
+extension Lint.Rule {
     @Suite
-    struct Test {
+    struct `canimport conditional Tests` {
         @Suite struct Unit {}
         @Suite struct `Edge Case` {}
     }
 }
 
-extension Lint.Rule.Platform.PlatformConditional.Test {
-    static func findings(in source: String, file: String = "test.swift") -> [Diagnostic.Record] {
-        let tree = Parser.parse(source: source)
-        let converter = SourceLocationConverter(fileName: file, tree: tree)
-        var manager = Source.Manager()
-        let id = manager.register(fileID: file, filePath: file, content: Array(source.utf8))
-        let parsed = Lint.Source.Parsed(file: manager.file(for: id), tree: tree, converter: converter)
-        return Lint.Rule.Platform.PlatformConditional().findings(in: parsed)
+extension Lint.Rule.`canimport conditional Tests` {
+    static func findings(in source: Swift.String, file: Swift.String = "test.swift") -> [Diagnostic.Record] {
+        let parsed = Lint.Source.parsed(from: source, file: file)
+        return Lint.Rule.`canimport conditional`.findings(parsed, .warning)
     }
 }
 
-extension Lint.Rule.Platform.PlatformConditional.Test.Unit {
+extension Lint.Rule.`canimport conditional Tests`.Unit {
     @Test
     func `canImport Darwin Kernel Standard is flagged`() {
         let source = """
@@ -42,7 +39,7 @@ extension Lint.Rule.Platform.PlatformConditional.Test.Unit {
         import Darwin_Kernel_Standard
         #endif
         """
-        let findings = Lint.Rule.Platform.PlatformConditional.Test.findings(in: source)
+        let findings = Lint.Rule.`canimport conditional Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
             #expect(findings[0].identifier == "platform_canimport_conditional")
@@ -57,7 +54,7 @@ extension Lint.Rule.Platform.PlatformConditional.Test.Unit {
         import Darwin
         #endif
         """
-        let findings = Lint.Rule.Platform.PlatformConditional.Test.findings(in: source)
+        let findings = Lint.Rule.`canimport conditional Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -68,7 +65,7 @@ extension Lint.Rule.Platform.PlatformConditional.Test.Unit {
         import Linux_Kernel
         #endif
         """
-        let findings = Lint.Rule.Platform.PlatformConditional.Test.findings(in: source)
+        let findings = Lint.Rule.`canimport conditional Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -79,7 +76,7 @@ extension Lint.Rule.Platform.PlatformConditional.Test.Unit {
         import Glibc
         #endif
         """
-        let findings = Lint.Rule.Platform.PlatformConditional.Test.findings(in: source)
+        let findings = Lint.Rule.`canimport conditional Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -92,12 +89,12 @@ extension Lint.Rule.Platform.PlatformConditional.Test.Unit {
         import Windows_Kernel
         #endif
         """
-        let findings = Lint.Rule.Platform.PlatformConditional.Test.findings(in: source)
+        let findings = Lint.Rule.`canimport conditional Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 }
 
-extension Lint.Rule.Platform.PlatformConditional.Test.`Edge Case` {
+extension Lint.Rule.`canimport conditional Tests`.`Edge Case` {
     @Test
     func `if os macOS is NOT flagged`() {
         let source = """
@@ -105,7 +102,7 @@ extension Lint.Rule.Platform.PlatformConditional.Test.`Edge Case` {
         let x = 1
         #endif
         """
-        let findings = Lint.Rule.Platform.PlatformConditional.Test.findings(in: source)
+        let findings = Lint.Rule.`canimport conditional Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -116,7 +113,7 @@ extension Lint.Rule.Platform.PlatformConditional.Test.`Edge Case` {
         import SwiftUI
         #endif
         """
-        let findings = Lint.Rule.Platform.PlatformConditional.Test.findings(in: source)
+        let findings = Lint.Rule.`canimport conditional Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -127,7 +124,7 @@ extension Lint.Rule.Platform.PlatformConditional.Test.`Edge Case` {
         import Combine
         #endif
         """
-        let findings = Lint.Rule.Platform.PlatformConditional.Test.findings(in: source)
+        let findings = Lint.Rule.`canimport conditional Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -138,7 +135,7 @@ extension Lint.Rule.Platform.PlatformConditional.Test.`Edge Case` {
         import Darwin_Kernel_Standard
         #endif
         """
-        let findings = Lint.Rule.Platform.PlatformConditional.Test.findings(in: source)
+        let findings = Lint.Rule.`canimport conditional Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -150,7 +147,7 @@ extension Lint.Rule.Platform.PlatformConditional.Test.`Edge Case` {
         let x = 1
         #endif
         """
-        let findings = Lint.Rule.Platform.PlatformConditional.Test.findings(in: source)
+        let findings = Lint.Rule.`canimport conditional Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 }

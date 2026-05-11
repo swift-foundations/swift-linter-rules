@@ -13,28 +13,25 @@ import Testing
 import SwiftSyntax
 import SwiftParser
 import Linter_Primitives
+import Linter_Rules_Test_Support
 @testable import Linter_Rule_Throws
 
-extension Lint.Rule.Throws.LifecycleTypealiasReview {
+extension Lint.Rule {
     @Suite
-    struct Test {
+    struct `lifecycle typealias review Tests` {
         @Suite struct Unit {}
         @Suite struct `Edge Case` {}
     }
 }
 
-extension Lint.Rule.Throws.LifecycleTypealiasReview.Test {
-    static func findings(in source: String, file: String = "test.swift") -> [Diagnostic.Record] {
-        let tree = Parser.parse(source: source)
-        let converter = SourceLocationConverter(fileName: file, tree: tree)
-        var manager = Source.Manager()
-        let id = manager.register(fileID: file, filePath: file, content: Array(source.utf8))
-        let parsed = Lint.Source.Parsed(file: manager.file(for: id), tree: tree, converter: converter)
-        return Lint.Rule.Throws.LifecycleTypealiasReview().findings(in: parsed)
+extension Lint.Rule.`lifecycle typealias review Tests` {
+    static func findings(in source: Swift.String, file: Swift.String = "test.swift") -> [Diagnostic.Record] {
+        let parsed = Lint.Source.parsed(from: source, file: file)
+        return Lint.Rule.`lifecycle typealias review`.findings(parsed, .warning)
     }
 }
 
-extension Lint.Rule.Throws.LifecycleTypealiasReview.Test.Unit {
+extension Lint.Rule.`lifecycle typealias review Tests`.Unit {
     @Test
     func `typealias Error to Async dot Lifecycle dot Error is flagged`() {
         let source = """
@@ -42,7 +39,7 @@ extension Lint.Rule.Throws.LifecycleTypealiasReview.Test.Unit {
             public typealias Error = Async.Lifecycle.Error
         }
         """
-        let findings = Lint.Rule.Throws.LifecycleTypealiasReview.Test.findings(in: source)
+        let findings = Lint.Rule.`lifecycle typealias review Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
             #expect(findings[0].identifier == "lifecycle_typealias_review")
@@ -55,7 +52,7 @@ extension Lint.Rule.Throws.LifecycleTypealiasReview.Test.Unit {
         let source = """
         public typealias Error = Pool.Lifecycle.Error
         """
-        let findings = Lint.Rule.Throws.LifecycleTypealiasReview.Test.findings(in: source)
+        let findings = Lint.Rule.`lifecycle typealias review Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -64,18 +61,18 @@ extension Lint.Rule.Throws.LifecycleTypealiasReview.Test.Unit {
         let source = """
         typealias Error = Lifecycle.Error
         """
-        let findings = Lint.Rule.Throws.LifecycleTypealiasReview.Test.findings(in: source)
+        let findings = Lint.Rule.`lifecycle typealias review Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 }
 
-extension Lint.Rule.Throws.LifecycleTypealiasReview.Test.`Edge Case` {
+extension Lint.Rule.`lifecycle typealias review Tests`.`Edge Case` {
     @Test
     func `typealias Error to concrete enum is NOT flagged`() {
         let source = """
         typealias Error = ChannelError
         """
-        let findings = Lint.Rule.Throws.LifecycleTypealiasReview.Test.findings(in: source)
+        let findings = Lint.Rule.`lifecycle typealias review Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -84,7 +81,7 @@ extension Lint.Rule.Throws.LifecycleTypealiasReview.Test.`Edge Case` {
         let source = """
         typealias Lifecycle = Async.Lifecycle
         """
-        let findings = Lint.Rule.Throws.LifecycleTypealiasReview.Test.findings(in: source)
+        let findings = Lint.Rule.`lifecycle typealias review Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -95,7 +92,7 @@ extension Lint.Rule.Throws.LifecycleTypealiasReview.Test.`Edge Case` {
         let source = """
         typealias E = Async.Lifecycle.Error
         """
-        let findings = Lint.Rule.Throws.LifecycleTypealiasReview.Test.findings(in: source)
+        let findings = Lint.Rule.`lifecycle typealias review Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -104,7 +101,7 @@ extension Lint.Rule.Throws.LifecycleTypealiasReview.Test.`Edge Case` {
         let source = """
         typealias Error = Domain.Submission.Error
         """
-        let findings = Lint.Rule.Throws.LifecycleTypealiasReview.Test.findings(in: source)
+        let findings = Lint.Rule.`lifecycle typealias review Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -113,7 +110,7 @@ extension Lint.Rule.Throws.LifecycleTypealiasReview.Test.`Edge Case` {
         let source = """
         typealias Error = Module.Async.Lifecycle.Error
         """
-        let findings = Lint.Rule.Throws.LifecycleTypealiasReview.Test.findings(in: source)
+        let findings = Lint.Rule.`lifecycle typealias review Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 }

@@ -13,28 +13,25 @@ import Testing
 import SwiftSyntax
 import SwiftParser
 import Linter_Primitives
+import Linter_Rules_Test_Support
 @testable import Linter_Rule_Memory
 
-extension Lint.Rule.Memory.StructSendableClassMember {
+extension Lint.Rule {
     @Suite
-    struct Test {
+    struct `sendable struct with class member Tests` {
         @Suite struct Unit {}
         @Suite struct `Edge Case` {}
     }
 }
 
-extension Lint.Rule.Memory.StructSendableClassMember.Test {
-    static func findings(in source: String, file: String = "test.swift") -> [Diagnostic.Record] {
-        let tree = Parser.parse(source: source)
-        let converter = SourceLocationConverter(fileName: file, tree: tree)
-        var manager = Source.Manager()
-        let id = manager.register(fileID: file, filePath: file, content: Array(source.utf8))
-        let parsed = Lint.Source.Parsed(file: manager.file(for: id), tree: tree, converter: converter)
-        return Lint.Rule.Memory.StructSendableClassMember().findings(in: parsed)
+extension Lint.Rule.`sendable struct with class member Tests` {
+    static func findings(in source: Swift.String, file: Swift.String = "test.swift") -> [Diagnostic.Record] {
+        let parsed = Lint.Source.parsed(from: source, file: file)
+        return Lint.Rule.`sendable struct with class member`.findings(parsed, .warning)
     }
 }
 
-extension Lint.Rule.Memory.StructSendableClassMember.Test.Unit {
+extension Lint.Rule.`sendable struct with class member Tests`.Unit {
     @Test
     func `struct unchecked Sendable with NSObject member is flagged`() {
         let source = """
@@ -42,7 +39,7 @@ extension Lint.Rule.Memory.StructSendableClassMember.Test.Unit {
             var inner: NSObject
         }
         """
-        let findings = Lint.Rule.Memory.StructSendableClassMember.Test.findings(in: source)
+        let findings = Lint.Rule.`sendable struct with class member Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
             #expect(findings[0].identifier == "struct_sendable_class_member")
@@ -56,12 +53,12 @@ extension Lint.Rule.Memory.StructSendableClassMember.Test.Unit {
             var inner: PayloadClass
         }
         """
-        let findings = Lint.Rule.Memory.StructSendableClassMember.Test.findings(in: source)
+        let findings = Lint.Rule.`sendable struct with class member Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 }
 
-extension Lint.Rule.Memory.StructSendableClassMember.Test.`Edge Case` {
+extension Lint.Rule.`sendable struct with class member Tests`.`Edge Case` {
     @Test
     func `plain Sendable struct is NOT flagged`() {
         let source = """
@@ -69,7 +66,7 @@ extension Lint.Rule.Memory.StructSendableClassMember.Test.`Edge Case` {
             var inner: NSObject
         }
         """
-        let findings = Lint.Rule.Memory.StructSendableClassMember.Test.findings(in: source)
+        let findings = Lint.Rule.`sendable struct with class member Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -80,7 +77,7 @@ extension Lint.Rule.Memory.StructSendableClassMember.Test.`Edge Case` {
             var inner: NSObject
         }
         """
-        let findings = Lint.Rule.Memory.StructSendableClassMember.Test.findings(in: source)
+        let findings = Lint.Rule.`sendable struct with class member Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -92,7 +89,7 @@ extension Lint.Rule.Memory.StructSendableClassMember.Test.`Edge Case` {
             var name: String
         }
         """
-        let findings = Lint.Rule.Memory.StructSendableClassMember.Test.findings(in: source)
+        let findings = Lint.Rule.`sendable struct with class member Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 }

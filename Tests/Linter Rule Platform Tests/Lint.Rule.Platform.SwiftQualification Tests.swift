@@ -13,32 +13,29 @@ import Testing
 import SwiftSyntax
 import SwiftParser
 import Linter_Primitives
+import Linter_Rules_Test_Support
 @testable import Linter_Rule_Platform
 
-extension Lint.Rule.Platform.SwiftQualification {
+extension Lint.Rule {
     @Suite
-    struct Test {
+    struct `swift protocol qualification Tests` {
         @Suite struct Unit {}
         @Suite struct `Edge Case` {}
     }
 }
 
-extension Lint.Rule.Platform.SwiftQualification.Test {
-    static func findings(in source: String, file: String = "test.swift") -> [Diagnostic.Record] {
-        let tree = Parser.parse(source: source)
-        let converter = SourceLocationConverter(fileName: file, tree: tree)
-        var manager = Source.Manager()
-        let id = manager.register(fileID: file, filePath: file, content: Array(source.utf8))
-        let parsed = Lint.Source.Parsed(file: manager.file(for: id), tree: tree, converter: converter)
-        return Lint.Rule.Platform.SwiftQualification().findings(in: parsed)
+extension Lint.Rule.`swift protocol qualification Tests` {
+    static func findings(in source: Swift.String, file: Swift.String = "test.swift") -> [Diagnostic.Record] {
+        let parsed = Lint.Source.parsed(from: source, file: file)
+        return Lint.Rule.`swift protocol qualification`.findings(parsed, .warning)
     }
 }
 
-extension Lint.Rule.Platform.SwiftQualification.Test.Unit {
+extension Lint.Rule.`swift protocol qualification Tests`.Unit {
     @Test
     func `bare some Sequence parameter is flagged`() {
         let source = "func consume(_ bytes: some Sequence<UInt8>) {}"
-        let findings = Lint.Rule.Platform.SwiftQualification.Test.findings(in: source)
+        let findings = Lint.Rule.`swift protocol qualification Tests`.findings(in: source)
         let count = findings.count
         #expect(count == 1)
         if count == 1 {
@@ -50,14 +47,14 @@ extension Lint.Rule.Platform.SwiftQualification.Test.Unit {
     @Test
     func `bare Error generic constraint is flagged`() {
         let source = "func parse<E: Error>() throws(E) {}"
-        let findings = Lint.Rule.Platform.SwiftQualification.Test.findings(in: source)
+        let findings = Lint.Rule.`swift protocol qualification Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
     @Test
     func `bare Error conformance is flagged`() {
         let source = "enum State: Error {}"
-        let findings = Lint.Rule.Platform.SwiftQualification.Test.findings(in: source)
+        let findings = Lint.Rule.`swift protocol qualification Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -68,14 +65,14 @@ extension Lint.Rule.Platform.SwiftQualification.Test.Unit {
             func bar() {}
         }
         """
-        let findings = Lint.Rule.Platform.SwiftQualification.Test.findings(in: source)
+        let findings = Lint.Rule.`swift protocol qualification Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
     @Test
     func `bare Collection conformance is flagged`() {
         let source = "struct Buffer: Collection {}"
-        let findings = Lint.Rule.Platform.SwiftQualification.Test.findings(in: source)
+        let findings = Lint.Rule.`swift protocol qualification Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -84,7 +81,7 @@ extension Lint.Rule.Platform.SwiftQualification.Test.Unit {
         // `some Sequence & Sendable` — Sequence flagged, Sendable is not
         // in the shadowed set.
         let source = "func consume(_ bytes: some Sequence & Sendable) {}"
-        let findings = Lint.Rule.Platform.SwiftQualification.Test.findings(in: source)
+        let findings = Lint.Rule.`swift protocol qualification Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -95,23 +92,23 @@ extension Lint.Rule.Platform.SwiftQualification.Test.Unit {
         func b<E: Error>(_ x: E) {}
         struct C: Collection {}
         """
-        let findings = Lint.Rule.Platform.SwiftQualification.Test.findings(in: source)
+        let findings = Lint.Rule.`swift protocol qualification Tests`.findings(in: source)
         #expect(findings.count == 3)
     }
 }
 
-extension Lint.Rule.Platform.SwiftQualification.Test.`Edge Case` {
+extension Lint.Rule.`swift protocol qualification Tests`.`Edge Case` {
     @Test
     func `qualified Swift dot Sequence is NOT flagged`() {
         let source = "func consume(_ bytes: some Swift.Sequence<UInt8>) {}"
-        let findings = Lint.Rule.Platform.SwiftQualification.Test.findings(in: source)
+        let findings = Lint.Rule.`swift protocol qualification Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
     @Test
     func `qualified Swift dot Error generic constraint is NOT flagged`() {
         let source = "func parse<E: Swift.Error>() throws(E) {}"
-        let findings = Lint.Rule.Platform.SwiftQualification.Test.findings(in: source)
+        let findings = Lint.Rule.`swift protocol qualification Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -120,14 +117,14 @@ extension Lint.Rule.Platform.SwiftQualification.Test.`Edge Case` {
         // `MyDomain.Error` is the project's typed-throws leaf, not the
         // stdlib `Swift.Error` protocol bare. Member-type access is OK.
         let source = "func op() throws(MyDomain.Error) {}"
-        let findings = Lint.Rule.Platform.SwiftQualification.Test.findings(in: source)
+        let findings = Lint.Rule.`swift protocol qualification Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
     @Test
     func `non-shadowed protocol Hashable conformance is NOT flagged`() {
         let source = "struct Foo: Hashable {}"
-        let findings = Lint.Rule.Platform.SwiftQualification.Test.findings(in: source)
+        let findings = Lint.Rule.`swift protocol qualification Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -136,7 +133,7 @@ extension Lint.Rule.Platform.SwiftQualification.Test.`Edge Case` {
         // Sendable is not in the shadowed set (no institute namespace
         // collision). It's exempt.
         let source = "func consume(_ bytes: some Sendable) {}"
-        let findings = Lint.Rule.Platform.SwiftQualification.Test.findings(in: source)
+        let findings = Lint.Rule.`swift protocol qualification Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -144,7 +141,7 @@ extension Lint.Rule.Platform.SwiftQualification.Test.`Edge Case` {
     func `Variable binding type Sequence is NOT flagged`() {
         // Out of mechanical scope per rule body (variable bindings).
         let source = "let x: Sequence = fatalError() as Never"
-        let findings = Lint.Rule.Platform.SwiftQualification.Test.findings(in: source)
+        let findings = Lint.Rule.`swift protocol qualification Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -154,7 +151,7 @@ extension Lint.Rule.Platform.SwiftQualification.Test.`Edge Case` {
         // typically the type wouldn't even compile (Sequence is a PAT).
         // Document the boundary as edge case.
         let source = "func op() -> Sequence { fatalError() }"
-        let findings = Lint.Rule.Platform.SwiftQualification.Test.findings(in: source)
+        let findings = Lint.Rule.`swift protocol qualification Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 }

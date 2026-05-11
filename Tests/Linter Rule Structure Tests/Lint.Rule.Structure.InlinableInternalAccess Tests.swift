@@ -13,35 +13,32 @@ import Testing
 import SwiftSyntax
 import SwiftParser
 import Linter_Primitives
+import Linter_Rules_Test_Support
 @testable import Linter_Rule_Structure
 
-extension Lint.Rule.Structure.InlinableInternalAccess {
+extension Lint.Rule {
     @Suite
-    struct Test {
+    struct `inlinable internal access Tests` {
         @Suite struct Unit {}
         @Suite struct `Edge Case` {}
     }
 }
 
-extension Lint.Rule.Structure.InlinableInternalAccess.Test {
+extension Lint.Rule.`inlinable internal access Tests` {
     static func findings(in source: String, file: String = "Sources/X/Test.swift") -> [Diagnostic.Record] {
-        let tree = Parser.parse(source: source)
-        let converter = SourceLocationConverter(fileName: file, tree: tree)
-        var manager = Source.Manager()
-        let id = manager.register(fileID: file, filePath: file, content: Array(source.utf8))
-        let parsed = Lint.Source.Parsed(file: manager.file(for: id), tree: tree, converter: converter)
-        return Lint.Rule.Structure.InlinableInternalAccess().findings(in: parsed)
+        let parsed = Lint.Source.parsed(from: source, file: file)
+        return Lint.Rule.`inlinable internal access`.findings(parsed, .warning)
     }
 }
 
-extension Lint.Rule.Structure.InlinableInternalAccess.Test.Unit {
+extension Lint.Rule.`inlinable internal access Tests`.Unit {
     @Test
     func `inlinable internal func is flagged`() {
         let source = """
         @inlinable
         func foo() {}
         """
-        let findings = Lint.Rule.Structure.InlinableInternalAccess.Test.findings(in: source)
+        let findings = Lint.Rule.`inlinable internal access Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -51,7 +48,7 @@ extension Lint.Rule.Structure.InlinableInternalAccess.Test.Unit {
         @inlinable
         public func foo() {}
         """
-        let findings = Lint.Rule.Structure.InlinableInternalAccess.Test.findings(in: source)
+        let findings = Lint.Rule.`inlinable internal access Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -61,7 +58,7 @@ extension Lint.Rule.Structure.InlinableInternalAccess.Test.Unit {
         @inlinable
         package func foo() {}
         """
-        let findings = Lint.Rule.Structure.InlinableInternalAccess.Test.findings(in: source)
+        let findings = Lint.Rule.`inlinable internal access Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -71,7 +68,7 @@ extension Lint.Rule.Structure.InlinableInternalAccess.Test.Unit {
         @inlinable @usableFromInline
         func foo() {}
         """
-        let findings = Lint.Rule.Structure.InlinableInternalAccess.Test.findings(in: source)
+        let findings = Lint.Rule.`inlinable internal access Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -81,7 +78,7 @@ extension Lint.Rule.Structure.InlinableInternalAccess.Test.Unit {
         @inlinable
         var x: Int { 1 }
         """
-        let findings = Lint.Rule.Structure.InlinableInternalAccess.Test.findings(in: source)
+        let findings = Lint.Rule.`inlinable internal access Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -91,7 +88,7 @@ extension Lint.Rule.Structure.InlinableInternalAccess.Test.Unit {
         @inlinable
         public var x: Int { 1 }
         """
-        let findings = Lint.Rule.Structure.InlinableInternalAccess.Test.findings(in: source)
+        let findings = Lint.Rule.`inlinable internal access Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -103,16 +100,16 @@ extension Lint.Rule.Structure.InlinableInternalAccess.Test.Unit {
             init() {}
         }
         """
-        let findings = Lint.Rule.Structure.InlinableInternalAccess.Test.findings(in: source)
+        let findings = Lint.Rule.`inlinable internal access Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 }
 
-extension Lint.Rule.Structure.InlinableInternalAccess.Test.`Edge Case` {
+extension Lint.Rule.`inlinable internal access Tests`.`Edge Case` {
     @Test
     func `non-inlinable internal func is not flagged`() {
         let source = "func foo() {}"
-        let findings = Lint.Rule.Structure.InlinableInternalAccess.Test.findings(in: source)
+        let findings = Lint.Rule.`inlinable internal access Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -122,7 +119,7 @@ extension Lint.Rule.Structure.InlinableInternalAccess.Test.`Edge Case` {
         @inlinable
         open func foo() {}
         """
-        let findings = Lint.Rule.Structure.InlinableInternalAccess.Test.findings(in: source)
+        let findings = Lint.Rule.`inlinable internal access Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 }

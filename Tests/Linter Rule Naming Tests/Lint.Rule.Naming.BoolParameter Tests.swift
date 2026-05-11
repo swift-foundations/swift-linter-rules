@@ -13,32 +13,29 @@ import Testing
 import SwiftSyntax
 import SwiftParser
 import Linter_Primitives
+import Linter_Rules_Test_Support
 @testable import Linter_Rule_Naming
 
-extension Lint.Rule.Naming.BoolParameter {
+extension Lint.Rule {
     @Suite
-    struct Test {
+    struct `bool public parameter Tests` {
         @Suite struct Unit {}
         @Suite struct `Edge Case` {}
     }
 }
 
-extension Lint.Rule.Naming.BoolParameter.Test {
+extension Lint.Rule.`bool public parameter Tests` {
     static func findings(in source: String, file: String = "test.swift") -> [Diagnostic.Record] {
-        let tree = Parser.parse(source: source)
-        let converter = SourceLocationConverter(fileName: file, tree: tree)
-        var manager = Source.Manager()
-        let id = manager.register(fileID: file, filePath: file, content: Array(source.utf8))
-        let parsed = Lint.Source.Parsed(file: manager.file(for: id), tree: tree, converter: converter)
-        return Lint.Rule.Naming.BoolParameter().findings(in: parsed)
+        let parsed = Lint.Source.parsed(from: source, file: file)
+        return Lint.Rule.`bool public parameter`.findings(parsed, .warning)
     }
 }
 
-extension Lint.Rule.Naming.BoolParameter.Test.Unit {
+extension Lint.Rule.`bool public parameter Tests`.Unit {
     @Test
     func `public func with single Bool parameter is flagged`() {
         let source = "public func open(create: Bool) {}"
-        let findings = Lint.Rule.Naming.BoolParameter.Test.findings(in: source)
+        let findings = Lint.Rule.`bool public parameter Tests`.findings(in: source)
         let count = findings.count
         #expect(count == 1)
         if count == 1 {
@@ -50,7 +47,7 @@ extension Lint.Rule.Naming.BoolParameter.Test.Unit {
     @Test
     func `public func with two Bool parameters has two findings`() {
         let source = "public func open(create: Bool, truncate: Bool) {}"
-        let findings = Lint.Rule.Naming.BoolParameter.Test.findings(in: source)
+        let findings = Lint.Rule.`bool public parameter Tests`.findings(in: source)
         #expect(findings.count == 2)
     }
 
@@ -61,21 +58,21 @@ extension Lint.Rule.Naming.BoolParameter.Test.Unit {
             public init(verbose: Bool) {}
         }
         """
-        let findings = Lint.Rule.Naming.BoolParameter.Test.findings(in: source)
+        let findings = Lint.Rule.`bool public parameter Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
     @Test
     func `optional Bool parameter is flagged`() {
         let source = "public func read(strict: Bool?) {}"
-        let findings = Lint.Rule.Naming.BoolParameter.Test.findings(in: source)
+        let findings = Lint.Rule.`bool public parameter Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
     @Test
     func `Swift-qualified Bool is flagged`() {
         let source = "public func tag(value: Swift.Bool) {}"
-        let findings = Lint.Rule.Naming.BoolParameter.Test.findings(in: source)
+        let findings = Lint.Rule.`bool public parameter Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -86,7 +83,7 @@ extension Lint.Rule.Naming.BoolParameter.Test.Unit {
             open func customize(reset: Bool) {}
         }
         """
-        let findings = Lint.Rule.Naming.BoolParameter.Test.findings(in: source)
+        let findings = Lint.Rule.`bool public parameter Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -97,44 +94,44 @@ extension Lint.Rule.Naming.BoolParameter.Test.Unit {
         public func c(d: Bool) {}
         public func e(f: Int) {}
         """
-        let findings = Lint.Rule.Naming.BoolParameter.Test.findings(in: source)
+        let findings = Lint.Rule.`bool public parameter Tests`.findings(in: source)
         #expect(findings.count == 2)
     }
 }
 
-extension Lint.Rule.Naming.BoolParameter.Test.`Edge Case` {
+extension Lint.Rule.`bool public parameter Tests`.`Edge Case` {
     @Test
     func `internal func with Bool parameter is NOT flagged`() {
         let source = "func open(create: Bool) {}"
-        let findings = Lint.Rule.Naming.BoolParameter.Test.findings(in: source)
+        let findings = Lint.Rule.`bool public parameter Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
     @Test
     func `private func with Bool parameter is NOT flagged`() {
         let source = "private func open(create: Bool) {}"
-        let findings = Lint.Rule.Naming.BoolParameter.Test.findings(in: source)
+        let findings = Lint.Rule.`bool public parameter Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
     @Test
     func `package func with Bool parameter is NOT flagged`() {
         let source = "package func open(create: Bool) {}"
-        let findings = Lint.Rule.Naming.BoolParameter.Test.findings(in: source)
+        let findings = Lint.Rule.`bool public parameter Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
     @Test
     func `closure-typed parameter with internal Bool is NOT flagged`() {
         let source = "public func update(body: (Bool) -> Void) {}"
-        let findings = Lint.Rule.Naming.BoolParameter.Test.findings(in: source)
+        let findings = Lint.Rule.`bool public parameter Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
     @Test
     func `non-Bool typed parameter is NOT flagged`() {
         let source = "public func tag(value: Int) {}"
-        let findings = Lint.Rule.Naming.BoolParameter.Test.findings(in: source)
+        let findings = Lint.Rule.`bool public parameter Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -143,7 +140,7 @@ extension Lint.Rule.Naming.BoolParameter.Test.`Edge Case` {
         // Compound name belongs to API-NAME-001's domain; this rule
         // checks only the literal `Bool` token.
         let source = "public func tag(value: BoolContainer) {}"
-        let findings = Lint.Rule.Naming.BoolParameter.Test.findings(in: source)
+        let findings = Lint.Rule.`bool public parameter Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -151,7 +148,7 @@ extension Lint.Rule.Naming.BoolParameter.Test.`Edge Case` {
     func `public function returning Bool is NOT flagged`() {
         // The rule scopes to PARAMETERS, not return types.
         let source = "public func isReady() -> Bool { false }"
-        let findings = Lint.Rule.Naming.BoolParameter.Test.findings(in: source)
+        let findings = Lint.Rule.`bool public parameter Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -162,7 +159,7 @@ extension Lint.Rule.Naming.BoolParameter.Test.`Edge Case` {
             public func reset(force: Bool) {}
         }
         """
-        let findings = Lint.Rule.Naming.BoolParameter.Test.findings(in: source)
+        let findings = Lint.Rule.`bool public parameter Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -171,7 +168,7 @@ extension Lint.Rule.Naming.BoolParameter.Test.`Edge Case` {
         // Tuple-typed parameters are out of mechanical scope; the user
         // would already have to think hard to land on a tuple param.
         let source = "public func tag(values: (Bool, Int)) {}"
-        let findings = Lint.Rule.Naming.BoolParameter.Test.findings(in: source)
+        let findings = Lint.Rule.`bool public parameter Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 }

@@ -13,28 +13,25 @@ import Testing
 import SwiftSyntax
 import SwiftParser
 import Linter_Primitives
+import Linter_Rules_Test_Support
 @testable import Linter_Rule_Naming
 
-extension Lint.Rule.Naming.SingleTypeNamespace {
+extension Lint.Rule {
     @Suite
-    struct Test {
+    struct `single type namespace Tests` {
         @Suite struct Unit {}
         @Suite struct `Edge Case` {}
     }
 }
 
-extension Lint.Rule.Naming.SingleTypeNamespace.Test {
+extension Lint.Rule.`single type namespace Tests` {
     static func findings(in source: String, file: String = "test.swift") -> [Diagnostic.Record] {
-        let tree = Parser.parse(source: source)
-        let converter = SourceLocationConverter(fileName: file, tree: tree)
-        var manager = Source.Manager()
-        let id = manager.register(fileID: file, filePath: file, content: Array(source.utf8))
-        let parsed = Lint.Source.Parsed(file: manager.file(for: id), tree: tree, converter: converter)
-        return Lint.Rule.Naming.SingleTypeNamespace().findings(in: parsed)
+        let parsed = Lint.Source.parsed(from: source, file: file)
+        return Lint.Rule.`single type namespace`.findings(parsed, .warning)
     }
 }
 
-extension Lint.Rule.Naming.SingleTypeNamespace.Test.Unit {
+extension Lint.Rule.`single type namespace Tests`.Unit {
     @Test
     func `caseless enum with one nested struct is flagged`() {
         let source = """
@@ -42,7 +39,7 @@ extension Lint.Rule.Naming.SingleTypeNamespace.Test.Unit {
             public struct Executor {}
         }
         """
-        let findings = Lint.Rule.Naming.SingleTypeNamespace.Test.findings(in: source)
+        let findings = Lint.Rule.`single type namespace Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
             #expect(findings[0].identifier == "single_type_namespace")
@@ -57,7 +54,7 @@ extension Lint.Rule.Naming.SingleTypeNamespace.Test.Unit {
             class Worker {}
         }
         """
-        let findings = Lint.Rule.Naming.SingleTypeNamespace.Test.findings(in: source)
+        let findings = Lint.Rule.`single type namespace Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -70,7 +67,7 @@ extension Lint.Rule.Naming.SingleTypeNamespace.Test.Unit {
             }
         }
         """
-        let findings = Lint.Rule.Naming.SingleTypeNamespace.Test.findings(in: source)
+        let findings = Lint.Rule.`single type namespace Tests`.findings(in: source)
         // Outer has exactly one nested type (Inner) — flagged.
         // Inner has cases — not flagged.
         #expect(findings.count == 1)
@@ -87,12 +84,12 @@ extension Lint.Rule.Naming.SingleTypeNamespace.Test.Unit {
         """
         // File has one nested type (Directory) → flagged.
         // Directory has one nested type (Walk) → flagged.
-        let findings = Lint.Rule.Naming.SingleTypeNamespace.Test.findings(in: source)
+        let findings = Lint.Rule.`single type namespace Tests`.findings(in: source)
         #expect(findings.count == 2)
     }
 }
 
-extension Lint.Rule.Naming.SingleTypeNamespace.Test.`Edge Case` {
+extension Lint.Rule.`single type namespace Tests`.`Edge Case` {
     @Test
     func `caseless enum with two nested types is NOT flagged`() {
         let source = """
@@ -105,7 +102,7 @@ extension Lint.Rule.Naming.SingleTypeNamespace.Test.`Edge Case` {
         """
         // File has one nested type (Directory) → flagged.
         // Directory has two nested types → NOT flagged.
-        let findings = Lint.Rule.Naming.SingleTypeNamespace.Test.findings(in: source)
+        let findings = Lint.Rule.`single type namespace Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -118,7 +115,7 @@ extension Lint.Rule.Naming.SingleTypeNamespace.Test.`Edge Case` {
             struct Inner {}
         }
         """
-        let findings = Lint.Rule.Naming.SingleTypeNamespace.Test.findings(in: source)
+        let findings = Lint.Rule.`single type namespace Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -130,7 +127,7 @@ extension Lint.Rule.Naming.SingleTypeNamespace.Test.`Edge Case` {
             static func op() {}
         }
         """
-        let findings = Lint.Rule.Naming.SingleTypeNamespace.Test.findings(in: source)
+        let findings = Lint.Rule.`single type namespace Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -143,7 +140,7 @@ extension Lint.Rule.Naming.SingleTypeNamespace.Test.`Edge Case` {
         }
         """
         // Typealiases count as sibling labels; one type still flagged.
-        let findings = Lint.Rule.Naming.SingleTypeNamespace.Test.findings(in: source)
+        let findings = Lint.Rule.`single type namespace Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -153,7 +150,7 @@ extension Lint.Rule.Naming.SingleTypeNamespace.Test.`Edge Case` {
         enum Namespace {}
         """
         // Zero types — not a single-type namespace.
-        let findings = Lint.Rule.Naming.SingleTypeNamespace.Test.findings(in: source)
+        let findings = Lint.Rule.`single type namespace Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -166,7 +163,7 @@ extension Lint.Rule.Naming.SingleTypeNamespace.Test.`Edge Case` {
             struct Inner {}
         }
         """
-        let findings = Lint.Rule.Naming.SingleTypeNamespace.Test.findings(in: source)
+        let findings = Lint.Rule.`single type namespace Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -179,7 +176,7 @@ extension Lint.Rule.Naming.SingleTypeNamespace.Test.`Edge Case` {
             enum Directory {}
         }
         """
-        let findings = Lint.Rule.Naming.SingleTypeNamespace.Test.findings(in: source)
+        let findings = Lint.Rule.`single type namespace Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 }

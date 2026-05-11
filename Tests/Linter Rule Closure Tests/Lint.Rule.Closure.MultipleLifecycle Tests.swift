@@ -13,34 +13,31 @@ import Testing
 import SwiftSyntax
 import SwiftParser
 import Linter_Primitives
+import Linter_Rules_Test_Support
 @testable import Linter_Rule_Closure
 
-extension Lint.Rule.Closure.MultipleLifecycle {
+extension Lint.Rule {
     @Suite
-    struct Test {
+    struct `unlabeled lifecycle closure Tests` {
         @Suite struct Unit {}
         @Suite struct `Edge Case` {}
     }
 }
 
-extension Lint.Rule.Closure.MultipleLifecycle.Test {
+extension Lint.Rule.`unlabeled lifecycle closure Tests` {
     static func findings(in source: String, file: String = "Sources/X/Test.swift") -> [Diagnostic.Record] {
-        let tree = Parser.parse(source: source)
-        let converter = SourceLocationConverter(fileName: file, tree: tree)
-        var manager = Source.Manager()
-        let id = manager.register(fileID: file, filePath: file, content: Array(source.utf8))
-        let parsed = Lint.Source.Parsed(file: manager.file(for: id), tree: tree, converter: converter)
-        return Lint.Rule.Closure.MultipleLifecycle().findings(in: parsed)
+        let parsed = Lint.Source.parsed(from: source, file: file)
+        return Lint.Rule.`unlabeled lifecycle closure`.findings(parsed, .warning)
     }
 }
 
-extension Lint.Rule.Closure.MultipleLifecycle.Test.Unit {
+extension Lint.Rule.`unlabeled lifecycle closure Tests`.Unit {
     @Test
     func `single unlabelled closure is permitted`() {
         let source = """
         func f(_ body: () -> Void) {}
         """
-        let findings = Lint.Rule.Closure.MultipleLifecycle.Test.findings(in: source)
+        let findings = Lint.Rule.`unlabeled lifecycle closure Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -49,7 +46,7 @@ extension Lint.Rule.Closure.MultipleLifecycle.Test.Unit {
         let source = """
         func f(_ body: () -> Void, _ completion: () -> Void) {}
         """
-        let findings = Lint.Rule.Closure.MultipleLifecycle.Test.findings(in: source)
+        let findings = Lint.Rule.`unlabeled lifecycle closure Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -58,7 +55,7 @@ extension Lint.Rule.Closure.MultipleLifecycle.Test.Unit {
         let source = """
         func f(_ body: () -> Void, completion: () -> Void) {}
         """
-        let findings = Lint.Rule.Closure.MultipleLifecycle.Test.findings(in: source)
+        let findings = Lint.Rule.`unlabeled lifecycle closure Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -67,7 +64,7 @@ extension Lint.Rule.Closure.MultipleLifecycle.Test.Unit {
         let source = """
         func f(_ body: () -> Void, _ completion: () -> Void, _ teardown: () -> Void) {}
         """
-        let findings = Lint.Rule.Closure.MultipleLifecycle.Test.findings(in: source)
+        let findings = Lint.Rule.`unlabeled lifecycle closure Tests`.findings(in: source)
         #expect(findings.count == 2)
     }
 
@@ -78,7 +75,7 @@ extension Lint.Rule.Closure.MultipleLifecycle.Test.Unit {
         """
         // This file's rule only checks unlabelled secondary closures.
         // The misordering is the closure_param_position rule's job.
-        let findings = Lint.Rule.Closure.MultipleLifecycle.Test.findings(in: source)
+        let findings = Lint.Rule.`unlabeled lifecycle closure Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -89,18 +86,18 @@ extension Lint.Rule.Closure.MultipleLifecycle.Test.Unit {
             init(_ body: () -> Void, _ completion: () -> Void) {}
         }
         """
-        let findings = Lint.Rule.Closure.MultipleLifecycle.Test.findings(in: source)
+        let findings = Lint.Rule.`unlabeled lifecycle closure Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 }
 
-extension Lint.Rule.Closure.MultipleLifecycle.Test.`Edge Case` {
+extension Lint.Rule.`unlabeled lifecycle closure Tests`.`Edge Case` {
     @Test
     func `escaping second closure unlabelled is flagged`() {
         let source = """
         func f(_ body: () -> Void, _ completion: @escaping () -> Void) {}
         """
-        let findings = Lint.Rule.Closure.MultipleLifecycle.Test.findings(in: source)
+        let findings = Lint.Rule.`unlabeled lifecycle closure Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -109,14 +106,14 @@ extension Lint.Rule.Closure.MultipleLifecycle.Test.`Edge Case` {
         let source = """
         func f(_ body: () -> Void, _ completion: (() -> Void)?) {}
         """
-        let findings = Lint.Rule.Closure.MultipleLifecycle.Test.findings(in: source)
+        let findings = Lint.Rule.`unlabeled lifecycle closure Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
     @Test
     func `function with non-closure params only is not flagged`() {
         let source = "func f(a: Int, b: String) {}"
-        let findings = Lint.Rule.Closure.MultipleLifecycle.Test.findings(in: source)
+        let findings = Lint.Rule.`unlabeled lifecycle closure Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 }

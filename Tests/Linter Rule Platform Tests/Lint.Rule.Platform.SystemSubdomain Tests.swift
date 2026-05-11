@@ -13,28 +13,25 @@ import Testing
 import SwiftSyntax
 import SwiftParser
 import Linter_Primitives
+import Linter_Rules_Test_Support
 @testable import Linter_Rule_Platform
 
-extension Lint.Rule.Platform.SystemSubdomain {
+extension Lint.Rule {
     @Suite
-    struct Test {
+    struct `system subdomain Tests` {
         @Suite struct Unit {}
         @Suite struct `Edge Case` {}
     }
 }
 
-extension Lint.Rule.Platform.SystemSubdomain.Test {
-    static func findings(in source: String, file: String = "test.swift") -> [Diagnostic.Record] {
-        let tree = Parser.parse(source: source)
-        let converter = SourceLocationConverter(fileName: file, tree: tree)
-        var manager = Source.Manager()
-        let id = manager.register(fileID: file, filePath: file, content: Array(source.utf8))
-        let parsed = Lint.Source.Parsed(file: manager.file(for: id), tree: tree, converter: converter)
-        return Lint.Rule.Platform.SystemSubdomain().findings(in: parsed)
+extension Lint.Rule.`system subdomain Tests` {
+    static func findings(in source: Swift.String, file: Swift.String = "test.swift") -> [Diagnostic.Record] {
+        let parsed = Lint.Source.parsed(from: source, file: file)
+        return Lint.Rule.`system subdomain`.findings(parsed, .warning)
     }
 }
 
-extension Lint.Rule.Platform.SystemSubdomain.Test.Unit {
+extension Lint.Rule.`system subdomain Tests`.Unit {
     @Test
     func `extension Darwin dot System is flagged`() {
         let source = """
@@ -42,7 +39,7 @@ extension Lint.Rule.Platform.SystemSubdomain.Test.Unit {
             public static func op() {}
         }
         """
-        let findings = Lint.Rule.Platform.SystemSubdomain.Test.findings(in: source)
+        let findings = Lint.Rule.`system subdomain Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
             #expect(findings[0].identifier == "platform_system_subdomain")
@@ -57,7 +54,7 @@ extension Lint.Rule.Platform.SystemSubdomain.Test.Unit {
             public enum System {}
         }
         """
-        let findings = Lint.Rule.Platform.SystemSubdomain.Test.findings(in: source)
+        let findings = Lint.Rule.`system subdomain Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -68,7 +65,7 @@ extension Lint.Rule.Platform.SystemSubdomain.Test.Unit {
             public enum System {}
         }
         """
-        let findings = Lint.Rule.Platform.SystemSubdomain.Test.findings(in: source)
+        let findings = Lint.Rule.`system subdomain Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -78,12 +75,12 @@ extension Lint.Rule.Platform.SystemSubdomain.Test.Unit {
         extension Darwin.System {}
         extension Linux.System {}
         """
-        let findings = Lint.Rule.Platform.SystemSubdomain.Test.findings(in: source)
+        let findings = Lint.Rule.`system subdomain Tests`.findings(in: source)
         #expect(findings.count == 2)
     }
 }
 
-extension Lint.Rule.Platform.SystemSubdomain.Test.`Edge Case` {
+extension Lint.Rule.`system subdomain Tests`.`Edge Case` {
     @Test
     func `extension System is NOT flagged`() {
         let source = """
@@ -91,7 +88,7 @@ extension Lint.Rule.Platform.SystemSubdomain.Test.`Edge Case` {
             public static func op() {}
         }
         """
-        let findings = Lint.Rule.Platform.SystemSubdomain.Test.findings(in: source)
+        let findings = Lint.Rule.`system subdomain Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -102,7 +99,7 @@ extension Lint.Rule.Platform.SystemSubdomain.Test.`Edge Case` {
             public enum Kernel {}
         }
         """
-        let findings = Lint.Rule.Platform.SystemSubdomain.Test.findings(in: source)
+        let findings = Lint.Rule.`system subdomain Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -113,7 +110,7 @@ extension Lint.Rule.Platform.SystemSubdomain.Test.`Edge Case` {
             public static func op() {}
         }
         """
-        let findings = Lint.Rule.Platform.SystemSubdomain.Test.findings(in: source)
+        let findings = Lint.Rule.`system subdomain Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -124,7 +121,7 @@ extension Lint.Rule.Platform.SystemSubdomain.Test.`Edge Case` {
             public enum System {}
         }
         """
-        let findings = Lint.Rule.Platform.SystemSubdomain.Test.findings(in: source)
+        let findings = Lint.Rule.`system subdomain Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -135,7 +132,7 @@ extension Lint.Rule.Platform.SystemSubdomain.Test.`Edge Case` {
             public static func op() {}
         }
         """
-        let findings = Lint.Rule.Platform.SystemSubdomain.Test.findings(in: source)
+        let findings = Lint.Rule.`system subdomain Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 }

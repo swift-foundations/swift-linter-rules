@@ -13,28 +13,25 @@ import Testing
 import SwiftSyntax
 import SwiftParser
 import Linter_Primitives
+import Linter_Rules_Test_Support
 @testable import Linter_Rule_Structure
 
-extension Lint.Rule.Structure.ThrowingWrapperInit {
+extension Lint.Rule {
     @Suite
-    struct Test {
+    struct `throwing wrapper init Tests` {
         @Suite struct Unit {}
         @Suite struct `Edge Case` {}
     }
 }
 
-extension Lint.Rule.Structure.ThrowingWrapperInit.Test {
+extension Lint.Rule.`throwing wrapper init Tests` {
     static func findings(in source: String, file: String = "test.swift") -> [Diagnostic.Record] {
-        let tree = Parser.parse(source: source)
-        let converter = SourceLocationConverter(fileName: file, tree: tree)
-        var manager = Source.Manager()
-        let id = manager.register(fileID: file, filePath: file, content: Array(source.utf8))
-        let parsed = Lint.Source.Parsed(file: manager.file(for: id), tree: tree, converter: converter)
-        return Lint.Rule.Structure.ThrowingWrapperInit().findings(in: parsed)
+        let parsed = Lint.Source.parsed(from: source, file: file)
+        return Lint.Rule.`throwing wrapper init`.findings(parsed, .warning)
     }
 }
 
-extension Lint.Rule.Structure.ThrowingWrapperInit.Test.Unit {
+extension Lint.Rule.`throwing wrapper init Tests`.Unit {
     @Test
     func `throwing init with try-only body is flagged`() {
         let source = """
@@ -44,7 +41,7 @@ extension Lint.Rule.Structure.ThrowingWrapperInit.Test.Unit {
             }
         }
         """
-        let findings = Lint.Rule.Structure.ThrowingWrapperInit.Test.findings(in: source)
+        let findings = Lint.Rule.`throwing wrapper init Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
             #expect(findings[0].identifier == "throwing_wrapper_init_no_validation")
@@ -52,7 +49,7 @@ extension Lint.Rule.Structure.ThrowingWrapperInit.Test.Unit {
     }
 }
 
-extension Lint.Rule.Structure.ThrowingWrapperInit.Test.`Edge Case` {
+extension Lint.Rule.`throwing wrapper init Tests`.`Edge Case` {
     @Test
     func `throwing init with additional validation is NOT flagged`() {
         let source = """
@@ -63,7 +60,7 @@ extension Lint.Rule.Structure.ThrowingWrapperInit.Test.`Edge Case` {
             }
         }
         """
-        let findings = Lint.Rule.Structure.ThrowingWrapperInit.Test.findings(in: source)
+        let findings = Lint.Rule.`throwing wrapper init Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -76,7 +73,7 @@ extension Lint.Rule.Structure.ThrowingWrapperInit.Test.`Edge Case` {
             }
         }
         """
-        let findings = Lint.Rule.Structure.ThrowingWrapperInit.Test.findings(in: source)
+        let findings = Lint.Rule.`throwing wrapper init Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 }

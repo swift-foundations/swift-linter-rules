@@ -13,28 +13,25 @@ import Testing
 import SwiftSyntax
 import SwiftParser
 import Linter_Primitives
+import Linter_Rules_Test_Support
 @testable import Linter_Rule_Idiom
 
-extension Lint.Rule.Idiom.IterationIntent {
+extension Lint.Rule {
     @Suite
-    struct Test {
+    struct `counter loop iteration Tests` {
         @Suite struct Unit {}
         @Suite struct `Edge Case` {}
     }
 }
 
-extension Lint.Rule.Idiom.IterationIntent.Test {
+extension Lint.Rule.`counter loop iteration Tests` {
     static func findings(in source: String, file: String = "test.swift") -> [Diagnostic.Record] {
-        let tree = Parser.parse(source: source)
-        let converter = SourceLocationConverter(fileName: file, tree: tree)
-        var manager = Source.Manager()
-        let id = manager.register(fileID: file, filePath: file, content: Array(source.utf8))
-        let parsed = Lint.Source.Parsed(file: manager.file(for: id), tree: tree, converter: converter)
-        return Lint.Rule.Idiom.IterationIntent().findings(in: parsed)
+        let parsed = Lint.Source.parsed(from: source, file: file)
+        return Lint.Rule.`counter loop iteration`.findings(parsed, .warning)
     }
 }
 
-extension Lint.Rule.Idiom.IterationIntent.Test.Unit {
+extension Lint.Rule.`counter loop iteration Tests`.Unit {
     @Test
     func `counter loop with 0 to n is flagged`() {
         let source = """
@@ -44,7 +41,7 @@ extension Lint.Rule.Idiom.IterationIntent.Test.Unit {
             }
         }
         """
-        let findings = Lint.Rule.Idiom.IterationIntent.Test.findings(in: source)
+        let findings = Lint.Rule.`counter loop iteration Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
             #expect(findings[0].identifier == "iteration_intent_counter_loop")
@@ -61,7 +58,7 @@ extension Lint.Rule.Idiom.IterationIntent.Test.Unit {
             }
         }
         """
-        let findings = Lint.Rule.Idiom.IterationIntent.Test.findings(in: source)
+        let findings = Lint.Rule.`counter loop iteration Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -74,7 +71,7 @@ extension Lint.Rule.Idiom.IterationIntent.Test.Unit {
             }
         }
         """
-        let findings = Lint.Rule.Idiom.IterationIntent.Test.findings(in: source)
+        let findings = Lint.Rule.`counter loop iteration Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -86,12 +83,12 @@ extension Lint.Rule.Idiom.IterationIntent.Test.Unit {
             for j in 0..<20 { use(j) }
         }
         """
-        let findings = Lint.Rule.Idiom.IterationIntent.Test.findings(in: source)
+        let findings = Lint.Rule.`counter loop iteration Tests`.findings(in: source)
         #expect(findings.count == 2)
     }
 }
 
-extension Lint.Rule.Idiom.IterationIntent.Test.`Edge Case` {
+extension Lint.Rule.`counter loop iteration Tests`.`Edge Case` {
     @Test
     func `direct iteration over collection is NOT flagged`() {
         let source = """
@@ -101,7 +98,7 @@ extension Lint.Rule.Idiom.IterationIntent.Test.`Edge Case` {
             }
         }
         """
-        let findings = Lint.Rule.Idiom.IterationIntent.Test.findings(in: source)
+        let findings = Lint.Rule.`counter loop iteration Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -114,7 +111,7 @@ extension Lint.Rule.Idiom.IterationIntent.Test.`Edge Case` {
             }
         }
         """
-        let findings = Lint.Rule.Idiom.IterationIntent.Test.findings(in: source)
+        let findings = Lint.Rule.`counter loop iteration Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -127,7 +124,7 @@ extension Lint.Rule.Idiom.IterationIntent.Test.`Edge Case` {
             }
         }
         """
-        let findings = Lint.Rule.Idiom.IterationIntent.Test.findings(in: source)
+        let findings = Lint.Rule.`counter loop iteration Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -138,7 +135,7 @@ extension Lint.Rule.Idiom.IterationIntent.Test.`Edge Case` {
             items.forEach { handle($0) }
         }
         """
-        let findings = Lint.Rule.Idiom.IterationIntent.Test.findings(in: source)
+        let findings = Lint.Rule.`counter loop iteration Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -152,7 +149,7 @@ extension Lint.Rule.Idiom.IterationIntent.Test.`Edge Case` {
             }
         }
         """
-        let findings = Lint.Rule.Idiom.IterationIntent.Test.findings(in: source)
+        let findings = Lint.Rule.`counter loop iteration Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 }

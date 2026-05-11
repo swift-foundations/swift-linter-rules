@@ -13,28 +13,25 @@ import Testing
 import SwiftSyntax
 import SwiftParser
 import Linter_Primitives
+import Linter_Rules_Test_Support
 @testable import Linter_Rule_Platform
 
-extension Lint.Rule.Platform.TypealiasedNamespace {
+extension Lint.Rule {
     @Suite
-    struct Test {
+    struct `typealiased namespace bridge Tests` {
         @Suite struct Unit {}
         @Suite struct `Edge Case` {}
     }
 }
 
-extension Lint.Rule.Platform.TypealiasedNamespace.Test {
-    static func findings(in source: String, file: String = "test.swift") -> [Diagnostic.Record] {
-        let tree = Parser.parse(source: source)
-        let converter = SourceLocationConverter(fileName: file, tree: tree)
-        var manager = Source.Manager()
-        let id = manager.register(fileID: file, filePath: file, content: Array(source.utf8))
-        let parsed = Lint.Source.Parsed(file: manager.file(for: id), tree: tree, converter: converter)
-        return Lint.Rule.Platform.TypealiasedNamespace().findings(in: parsed)
+extension Lint.Rule.`typealiased namespace bridge Tests` {
+    static func findings(in source: Swift.String, file: Swift.String = "test.swift") -> [Diagnostic.Record] {
+        let parsed = Lint.Source.parsed(from: source, file: file)
+        return Lint.Rule.`typealiased namespace bridge`.findings(parsed, .warning)
     }
 }
 
-extension Lint.Rule.Platform.TypealiasedNamespace.Test.Unit {
+extension Lint.Rule.`typealiased namespace bridge Tests`.Unit {
     @Test
     func `cross-module typealias keeping leaf name is flagged`() {
         let source = """
@@ -42,7 +39,7 @@ extension Lint.Rule.Platform.TypealiasedNamespace.Test.Unit {
             public typealias Kernel = Kernel_Primitives_Core.Kernel
         }
         """
-        let findings = Lint.Rule.Platform.TypealiasedNamespace.Test.findings(in: source)
+        let findings = Lint.Rule.`typealiased namespace bridge Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
             #expect(findings[0].identifier == "typealiased_namespace_bridge")
@@ -55,7 +52,7 @@ extension Lint.Rule.Platform.TypealiasedNamespace.Test.Unit {
         let source = """
         typealias Socket = Foundation.Socket
         """
-        let findings = Lint.Rule.Platform.TypealiasedNamespace.Test.findings(in: source)
+        let findings = Lint.Rule.`typealiased namespace bridge Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -64,18 +61,18 @@ extension Lint.Rule.Platform.TypealiasedNamespace.Test.Unit {
         let source = """
         typealias Descriptor = A.B.C.D.Descriptor
         """
-        let findings = Lint.Rule.Platform.TypealiasedNamespace.Test.findings(in: source)
+        let findings = Lint.Rule.`typealiased namespace bridge Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 }
 
-extension Lint.Rule.Platform.TypealiasedNamespace.Test.`Edge Case` {
+extension Lint.Rule.`typealiased namespace bridge Tests`.`Edge Case` {
     @Test
     func `typealias with different LHS-RHS leaf names is NOT flagged`() {
         let source = """
         typealias Storage = Internal.Buffer
         """
-        let findings = Lint.Rule.Platform.TypealiasedNamespace.Test.findings(in: source)
+        let findings = Lint.Rule.`typealiased namespace bridge Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -84,7 +81,7 @@ extension Lint.Rule.Platform.TypealiasedNamespace.Test.`Edge Case` {
         let source = """
         typealias Foo = Int
         """
-        let findings = Lint.Rule.Platform.TypealiasedNamespace.Test.findings(in: source)
+        let findings = Lint.Rule.`typealiased namespace bridge Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -93,7 +90,7 @@ extension Lint.Rule.Platform.TypealiasedNamespace.Test.`Edge Case` {
         let source = """
         typealias Bytes = Array<UInt8>
         """
-        let findings = Lint.Rule.Platform.TypealiasedNamespace.Test.findings(in: source)
+        let findings = Lint.Rule.`typealiased namespace bridge Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -111,7 +108,7 @@ extension Lint.Rule.Platform.TypealiasedNamespace.Test.`Edge Case` {
         // This DOES match the pattern (leaf names equal). Rule flags it
         // — correctly, because consumers calling `Holder.Foo.X` would
         // resolve through to `OtherType.Foo.X`.
-        let findings = Lint.Rule.Platform.TypealiasedNamespace.Test.findings(in: source)
+        let findings = Lint.Rule.`typealiased namespace bridge Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -124,7 +121,7 @@ extension Lint.Rule.Platform.TypealiasedNamespace.Test.`Edge Case` {
             typealias Mode = Other.Different
         }
         """
-        let findings = Lint.Rule.Platform.TypealiasedNamespace.Test.findings(in: source)
+        let findings = Lint.Rule.`typealiased namespace bridge Tests`.findings(in: source)
         // First two flagged (leaf match), third not (different leaf).
         #expect(findings.count == 2)
     }

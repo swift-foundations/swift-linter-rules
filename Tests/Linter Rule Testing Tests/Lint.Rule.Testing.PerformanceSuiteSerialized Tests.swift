@@ -13,33 +13,30 @@ import Testing
 import SwiftSyntax
 import SwiftParser
 import Linter_Primitives
+import Linter_Rules_Test_Support
 @testable import Linter_Rule_Testing
 
-extension Lint.Rule.Testing.PerformanceSuiteSerialized {
+extension Lint.Rule {
     @Suite
-    struct Test {
+    struct `performance suite serialized Tests` {
         @Suite struct Unit {}
     }
 }
 
-extension Lint.Rule.Testing.PerformanceSuiteSerialized.Test {
+extension Lint.Rule.`performance suite serialized Tests` {
     static func findings(in source: String, file: String = "Sources/X/Test.swift") -> [Diagnostic.Record] {
-        let tree = Parser.parse(source: source)
-        let converter = SourceLocationConverter(fileName: file, tree: tree)
-        var manager = Source.Manager()
-        let id = manager.register(fileID: file, filePath: file, content: Array(source.utf8))
-        let parsed = Lint.Source.Parsed(file: manager.file(for: id), tree: tree, converter: converter)
-        return Lint.Rule.Testing.PerformanceSuiteSerialized().findings(in: parsed)
+        let parsed = Lint.Source.parsed(from: source, file: file)
+        return Lint.Rule.`performance suite serialized`.findings(parsed, .warning)
     }
 }
 
-extension Lint.Rule.Testing.PerformanceSuiteSerialized.Test.Unit {
+extension Lint.Rule.`performance suite serialized Tests`.Unit {
     @Test
     func `Performance suite without serialized is flagged`() {
         let source = """
         @Suite struct Performance {}
         """
-        let findings = Lint.Rule.Testing.PerformanceSuiteSerialized.Test.findings(in: source)
+        let findings = Lint.Rule.`performance suite serialized Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -48,7 +45,7 @@ extension Lint.Rule.Testing.PerformanceSuiteSerialized.Test.Unit {
         let source = """
         @Suite(.serialized) struct Performance {}
         """
-        let findings = Lint.Rule.Testing.PerformanceSuiteSerialized.Test.findings(in: source)
+        let findings = Lint.Rule.`performance suite serialized Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -57,7 +54,7 @@ extension Lint.Rule.Testing.PerformanceSuiteSerialized.Test.Unit {
         let source = """
         struct Performance {}
         """
-        let findings = Lint.Rule.Testing.PerformanceSuiteSerialized.Test.findings(in: source)
+        let findings = Lint.Rule.`performance suite serialized Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -66,7 +63,7 @@ extension Lint.Rule.Testing.PerformanceSuiteSerialized.Test.Unit {
         let source = """
         @Suite struct Unit {}
         """
-        let findings = Lint.Rule.Testing.PerformanceSuiteSerialized.Test.findings(in: source)
+        let findings = Lint.Rule.`performance suite serialized Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -75,7 +72,7 @@ extension Lint.Rule.Testing.PerformanceSuiteSerialized.Test.Unit {
         let source = """
         @Suite(.tags(.benchmark), .serialized) struct Performance {}
         """
-        let findings = Lint.Rule.Testing.PerformanceSuiteSerialized.Test.findings(in: source)
+        let findings = Lint.Rule.`performance suite serialized Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 }

@@ -57,126 +57,120 @@ internal import SwiftOperators
 ///   §"R1. `count - 1` and family"
 /// - `swift-institute/Research/swiftsyntax-based-custom-linter-investigation.md`
 ///   §"Q3 — Deferred AST-rule unblocking matrix"
-extension Lint.Rule.Cardinal {
-    public struct Count: Lint.Rule.`Protocol` {
-        public static let id: Lint.Rule.ID = "cardinal_count_minus_one"
-        public static let defaultSeverity: Diagnostic.Severity = .warning
-
-        public let severity: Diagnostic.Severity
-
-        @inlinable
-        public init(severity: Diagnostic.Severity = .warning) {
-            self.severity = severity
-        }
-
-        public func findings(in source: Lint.Source.Parsed) -> [Diagnostic.Record] {
+extension Lint.Rule {
+    public static let `count minus one` = Lint.Rule(
+        id: "cardinal_count_minus_one",
+        defaultSeverity: .warning,
+        findings: { source, severity in
             let folded = OperatorTable.standardOperators.foldAll(source.tree, errorHandler: { _ in })
-            let visitor = Visitor(source: source.file, severity: severity, converter: source.converter)
+            let visitor = CardinalCountVisitor(
+                source: source.file,
+                severity: severity,
+                converter: source.converter
+            )
             visitor.walk(folded)
             return visitor.matches
         }
-    }
+    )
 }
 
-extension Lint.Rule.Cardinal.Count {
-    @usableFromInline
-    static let message: Swift.String =
-        "[cardinal_count_minus_one] [INFRA-200]: `<expr>.count - 1` (or syntactic "
-        + "equivalents — paren-wrap `(seq.count) - 1`, cast-outside `Double(seq.count) - 1`, "
-        + "algebraic-flip `+ 1 [<=] seq.count`, operand-reorder `seq.count - i - 1`) "
-        + "indicates `count: Int` not `count: Cardinal` (the typed form would not compile). "
-        + "Use `.subtract.saturating(.one)` / `.subtract.exact(.one)` / typed `count - .one` "
-        + "per [INFRA-025], or for stdlib-Int sites where no typed surface is available "
-        + "either (α) use the stdlib's named idiom for the concept (`indices.dropLast()`, "
-        + "`.last`, `endIndex - 1`) or (β) escalate to supervisor and apply "
-        + "`// swiftlint:disable:next cardinal_count_minus_one  // reason: <citation>`."
+@usableFromInline
+internal let cardinalCountMinusOneMessage: Swift.String =
+    "[cardinal_count_minus_one] [INFRA-200]: `<expr>.count - 1` (or syntactic "
+    + "equivalents — paren-wrap `(seq.count) - 1`, cast-outside `Double(seq.count) - 1`, "
+    + "algebraic-flip `+ 1 [<=] seq.count`, operand-reorder `seq.count - i - 1`) "
+    + "indicates `count: Int` not `count: Cardinal` (the typed form would not compile). "
+    + "Use `.subtract.saturating(.one)` / `.subtract.exact(.one)` / typed `count - .one` "
+    + "per [INFRA-025], or for stdlib-Int sites where no typed surface is available "
+    + "either (α) use the stdlib's named idiom for the concept (`indices.dropLast()`, "
+    + "`.last`, `endIndex - 1`) or (β) escalate to supervisor and apply "
+    + "`// swiftlint:disable:next cardinal_count_minus_one  // reason: <citation>`."
 
-    final class Visitor: SyntaxVisitor {
-        let source: Source.File
-        let severity: Diagnostic.Severity
-        let converter: SourceLocationConverter
-        var matches: [Diagnostic.Record] = []
+internal final class CardinalCountVisitor: SyntaxVisitor {
+    let source: Source.File
+    let severity: Diagnostic.Severity
+    let converter: SourceLocationConverter
+    var matches: [Diagnostic.Record] = []
 
-        init(source: Source.File, severity: Diagnostic.Severity, converter: SourceLocationConverter) {
-            self.source = source
-            self.severity = severity
-            self.converter = converter
-            super.init(viewMode: .sourceAccurate)
+    init(source: Source.File, severity: Diagnostic.Severity, converter: SourceLocationConverter) {
+        self.source = source
+        self.severity = severity
+        self.converter = converter
+        super.init(viewMode: .sourceAccurate)
+    }
+
+    override func visit(_ node: InfixOperatorExprSyntax) -> SyntaxVisitorContinueKind {
+        guard let binOp = node.operator.as(BinaryOperatorExprSyntax.self) else {
+            return .visitChildren
         }
+        let opText = binOp.operator.text
 
-        override func visit(_ node: InfixOperatorExprSyntax) -> SyntaxVisitorContinueKind {
-            guard let binOp = node.operator.as(BinaryOperatorExprSyntax.self) else {
-                return .visitChildren
-            }
-            let opText = binOp.operator.text
-
-            if opText == "-",
-               Self.isLiteralOne(node.rightOperand),
-               Self.containsCountMemberAccess(node.leftOperand) {
-                report(at: binOp.operator)
-                return .visitChildren
-            }
-
-            if Self.isComparisonOperator(opText) {
-                if Self.isPlusOne(node.leftOperand), Self.containsCountMemberAccess(node.rightOperand) {
-                    report(at: binOp.operator)
-                } else if Self.isPlusOne(node.rightOperand), Self.containsCountMemberAccess(node.leftOperand) {
-                    report(at: binOp.operator)
-                }
-            }
-
+        if opText == "-",
+           Self.isLiteralOne(node.rightOperand),
+           Self.containsCountMemberAccess(node.leftOperand) {
+            report(at: binOp.operator)
             return .visitChildren
         }
 
-        func report(at token: TokenSyntax) {
-            let location = converter.location(for: token.positionAfterSkippingLeadingTrivia)
-            matches.append(Diagnostic.Record(
-                location: Source.Location(
-                    fileID: source.fileID,
-                    filePath: source.filePath,
-                    line: location.line,
-                    column: location.column
-                ),
-                severity: severity,
-                identifier: Lint.Rule.Cardinal.Count.id.underlying,
-                message: Lint.Rule.Cardinal.Count.message
-            ))
-        }
-
-        static func isLiteralOne(_ expr: ExprSyntax) -> Bool {
-            guard let lit = expr.as(IntegerLiteralExprSyntax.self) else { return false }
-            return lit.literal.text == "1"
-        }
-
-        static func isComparisonOperator(_ text: Swift.String) -> Bool {
-            switch text {
-            case "<", "<=", "==", "!=", ">=", ">": return true
-            default: return false
+        if Self.isComparisonOperator(opText) {
+            if Self.isPlusOne(node.leftOperand), Self.containsCountMemberAccess(node.rightOperand) {
+                report(at: binOp.operator)
+            } else if Self.isPlusOne(node.rightOperand), Self.containsCountMemberAccess(node.leftOperand) {
+                report(at: binOp.operator)
             }
         }
 
-        static func isPlusOne(_ expr: ExprSyntax) -> Bool {
-            guard let infix = expr.as(InfixOperatorExprSyntax.self),
-                  let binOp = infix.operator.as(BinaryOperatorExprSyntax.self),
-                  binOp.operator.text == "+"
-            else { return false }
-            return isLiteralOne(infix.leftOperand) || isLiteralOne(infix.rightOperand)
-        }
+        return .visitChildren
+    }
 
-        static func containsCountMemberAccess(_ expr: ExprSyntax) -> Bool {
-            class Finder: SyntaxVisitor {
-                var found = false
-                override func visit(_ node: MemberAccessExprSyntax) -> SyntaxVisitorContinueKind {
-                    if node.declName.baseName.text == "count" {
-                        found = true
-                        return .skipChildren
-                    }
-                    return .visitChildren
+    func report(at token: TokenSyntax) {
+        let location = converter.location(for: token.positionAfterSkippingLeadingTrivia)
+        matches.append(Diagnostic.Record(
+            location: Source.Location(
+                fileID: source.fileID,
+                filePath: source.filePath,
+                line: location.line,
+                column: location.column
+            ),
+            severity: severity,
+            identifier: "cardinal_count_minus_one",
+            message: cardinalCountMinusOneMessage
+        ))
+    }
+
+    static func isLiteralOne(_ expr: ExprSyntax) -> Bool {
+        guard let lit = expr.as(IntegerLiteralExprSyntax.self) else { return false }
+        return lit.literal.text == "1"
+    }
+
+    static func isComparisonOperator(_ text: Swift.String) -> Bool {
+        switch text {
+        case "<", "<=", "==", "!=", ">=", ">": return true
+        default: return false
+        }
+    }
+
+    static func isPlusOne(_ expr: ExprSyntax) -> Bool {
+        guard let infix = expr.as(InfixOperatorExprSyntax.self),
+              let binOp = infix.operator.as(BinaryOperatorExprSyntax.self),
+              binOp.operator.text == "+"
+        else { return false }
+        return isLiteralOne(infix.leftOperand) || isLiteralOne(infix.rightOperand)
+    }
+
+    static func containsCountMemberAccess(_ expr: ExprSyntax) -> Bool {
+        final class Finder: SyntaxVisitor {
+            var found = false
+            override func visit(_ node: MemberAccessExprSyntax) -> SyntaxVisitorContinueKind {
+                if node.declName.baseName.text == "count" {
+                    found = true
+                    return .skipChildren
                 }
+                return .visitChildren
             }
-            let finder = Finder(viewMode: .sourceAccurate)
-            finder.walk(expr)
-            return finder.found
         }
+        let finder = Finder(viewMode: .sourceAccurate)
+        finder.walk(expr)
+        return finder.found
     }
 }

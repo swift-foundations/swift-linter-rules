@@ -13,34 +13,31 @@ import Testing
 import SwiftSyntax
 import SwiftParser
 import Linter_Primitives
+import Linter_Rules_Test_Support
 @testable import Linter_Rule_Closure
 
-extension Lint.Rule.Closure.ConfigurationPlacement {
+extension Lint.Rule {
     @Suite
-    struct Test {
+    struct `configuration before content Tests` {
         @Suite struct Unit {}
         @Suite struct `Edge Case` {}
     }
 }
 
-extension Lint.Rule.Closure.ConfigurationPlacement.Test {
+extension Lint.Rule.`configuration before content Tests` {
     static func findings(in source: String, file: String = "test.swift") -> [Diagnostic.Record] {
-        let tree = Parser.parse(source: source)
-        let converter = SourceLocationConverter(fileName: file, tree: tree)
-        var manager = Source.Manager()
-        let id = manager.register(fileID: file, filePath: file, content: Array(source.utf8))
-        let parsed = Lint.Source.Parsed(file: manager.file(for: id), tree: tree, converter: converter)
-        return Lint.Rule.Closure.ConfigurationPlacement().findings(in: parsed)
+        let parsed = Lint.Source.parsed(from: source, file: file)
+        return Lint.Rule.`configuration before content`.findings(parsed, .warning)
     }
 }
 
-extension Lint.Rule.Closure.ConfigurationPlacement.Test.Unit {
+extension Lint.Rule.`configuration before content Tests`.Unit {
     @Test
     func `Options between two domain parameters is flagged`() {
         let source = """
         func perform(on target: Target, options: Options, mode: Mode) {}
         """
-        let findings = Lint.Rule.Closure.ConfigurationPlacement.Test.findings(in: source)
+        let findings = Lint.Rule.`configuration before content Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
             #expect(findings[0].identifier == "configuration_parameter_placement")
@@ -53,7 +50,7 @@ extension Lint.Rule.Closure.ConfigurationPlacement.Test.Unit {
         let source = """
         func op(a: A, configuration: Configuration, b: B) {}
         """
-        let findings = Lint.Rule.Closure.ConfigurationPlacement.Test.findings(in: source)
+        let findings = Lint.Rule.`configuration before content Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -62,7 +59,7 @@ extension Lint.Rule.Closure.ConfigurationPlacement.Test.Unit {
         let source = """
         func op(a: A, context: Context, b: B, body: () -> Void) {}
         """
-        let findings = Lint.Rule.Closure.ConfigurationPlacement.Test.findings(in: source)
+        let findings = Lint.Rule.`configuration before content Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -71,18 +68,18 @@ extension Lint.Rule.Closure.ConfigurationPlacement.Test.Unit {
         let source = """
         func op(a: A, options: Options, b: B, context: Context, c: C) {}
         """
-        let findings = Lint.Rule.Closure.ConfigurationPlacement.Test.findings(in: source)
+        let findings = Lint.Rule.`configuration before content Tests`.findings(in: source)
         #expect(findings.count == 2)
     }
 }
 
-extension Lint.Rule.Closure.ConfigurationPlacement.Test.`Edge Case` {
+extension Lint.Rule.`configuration before content Tests`.`Edge Case` {
     @Test
     func `Options at last non-closure position is NOT flagged`() {
         let source = """
         func perform(on target: Target, mode: Mode, options: Options = []) {}
         """
-        let findings = Lint.Rule.Closure.ConfigurationPlacement.Test.findings(in: source)
+        let findings = Lint.Rule.`configuration before content Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -91,7 +88,7 @@ extension Lint.Rule.Closure.ConfigurationPlacement.Test.`Edge Case` {
         let source = """
         func perform(on target: Target, mode: Mode, options: Options = [], body: () -> Void) {}
         """
-        let findings = Lint.Rule.Closure.ConfigurationPlacement.Test.findings(in: source)
+        let findings = Lint.Rule.`configuration before content Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -100,7 +97,7 @@ extension Lint.Rule.Closure.ConfigurationPlacement.Test.`Edge Case` {
         let source = """
         init(_ configuration: Configuration = .default, mode: Mode, target: Target) {}
         """
-        let findings = Lint.Rule.Closure.ConfigurationPlacement.Test.findings(in: source)
+        let findings = Lint.Rule.`configuration before content Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -109,7 +106,7 @@ extension Lint.Rule.Closure.ConfigurationPlacement.Test.`Edge Case` {
         let source = """
         init(_ configuration: Configuration = .default) {}
         """
-        let findings = Lint.Rule.Closure.ConfigurationPlacement.Test.findings(in: source)
+        let findings = Lint.Rule.`configuration before content Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -118,7 +115,7 @@ extension Lint.Rule.Closure.ConfigurationPlacement.Test.`Edge Case` {
         let source = """
         init(options: Options = [], extra: Int) {}
         """
-        let findings = Lint.Rule.Closure.ConfigurationPlacement.Test.findings(in: source)
+        let findings = Lint.Rule.`configuration before content Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -127,7 +124,7 @@ extension Lint.Rule.Closure.ConfigurationPlacement.Test.`Edge Case` {
         let source = """
         init(extra: Int, options: Options = []) {}
         """
-        let findings = Lint.Rule.Closure.ConfigurationPlacement.Test.findings(in: source)
+        let findings = Lint.Rule.`configuration before content Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -136,7 +133,7 @@ extension Lint.Rule.Closure.ConfigurationPlacement.Test.`Edge Case` {
         let source = """
         func op(a: A, options: Foo.Options, b: B) {}
         """
-        let findings = Lint.Rule.Closure.ConfigurationPlacement.Test.findings(in: source)
+        let findings = Lint.Rule.`configuration before content Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -145,7 +142,7 @@ extension Lint.Rule.Closure.ConfigurationPlacement.Test.`Edge Case` {
         let source = """
         func op(a: A, mode: Mode, b: B) {}
         """
-        let findings = Lint.Rule.Closure.ConfigurationPlacement.Test.findings(in: source)
+        let findings = Lint.Rule.`configuration before content Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 }

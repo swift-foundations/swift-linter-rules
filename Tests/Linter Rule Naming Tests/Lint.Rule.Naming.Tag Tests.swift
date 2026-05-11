@@ -13,32 +13,29 @@ import Testing
 import SwiftSyntax
 import SwiftParser
 import Linter_Primitives
+import Linter_Rules_Test_Support
 @testable import Linter_Rule_Naming
 
-extension Lint.Rule.Naming.Tag {
+extension Lint.Rule {
     @Suite
-    struct Test {
+    struct `tag suffix Tests` {
         @Suite struct Unit {}
         @Suite struct `Edge Case` {}
     }
 }
 
-extension Lint.Rule.Naming.Tag.Test {
+extension Lint.Rule.`tag suffix Tests` {
     static func findings(in source: String, file: String = "test.swift") -> [Diagnostic.Record] {
-        let tree = Parser.parse(source: source)
-        let converter = SourceLocationConverter(fileName: file, tree: tree)
-        var manager = Source.Manager()
-        let id = manager.register(fileID: file, filePath: file, content: Array(source.utf8))
-        let parsed = Lint.Source.Parsed(file: manager.file(for: id), tree: tree, converter: converter)
-        return Lint.Rule.Naming.Tag().findings(in: parsed)
+        let parsed = Lint.Source.parsed(from: source, file: file)
+        return Lint.Rule.`tag suffix`.findings(parsed, .warning)
     }
 }
 
-extension Lint.Rule.Naming.Tag.Test.Unit {
+extension Lint.Rule.`tag suffix Tests`.Unit {
     @Test
     func `empty struct ending in Tag is flagged`() {
         let source = "struct CardinalTag {}"
-        let findings = Lint.Rule.Naming.Tag.Test.findings(in: source)
+        let findings = Lint.Rule.`tag suffix Tests`.findings(in: source)
         let count = findings.count
         #expect(count == 1)
         if count == 1 {
@@ -50,14 +47,14 @@ extension Lint.Rule.Naming.Tag.Test.Unit {
     @Test
     func `empty enum ending in Tag is flagged`() {
         let source = "enum MillimeterTag {}"
-        let findings = Lint.Rule.Naming.Tag.Test.findings(in: source)
+        let findings = Lint.Rule.`tag suffix Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
     @Test
     func `multi-word phantom XYZTag is flagged`() {
         let source = "struct ConsumerATag {}"
-        let findings = Lint.Rule.Naming.Tag.Test.findings(in: source)
+        let findings = Lint.Rule.`tag suffix Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -68,7 +65,7 @@ extension Lint.Rule.Naming.Tag.Test.Unit {
         struct BTag {}
         enum CTag {}
         """
-        let findings = Lint.Rule.Naming.Tag.Test.findings(in: source)
+        let findings = Lint.Rule.`tag suffix Tests`.findings(in: source)
         #expect(findings.count == 3)
     }
 
@@ -80,7 +77,7 @@ extension Lint.Rule.Naming.Tag.Test.Unit {
             static var description: String { "Cardinal" }
         }
         """
-        let findings = Lint.Rule.Naming.Tag.Test.findings(in: source)
+        let findings = Lint.Rule.`tag suffix Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -91,12 +88,12 @@ extension Lint.Rule.Naming.Tag.Test.Unit {
             struct InnerTag {}
         }
         """
-        let findings = Lint.Rule.Naming.Tag.Test.findings(in: source)
+        let findings = Lint.Rule.`tag suffix Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 }
 
-extension Lint.Rule.Naming.Tag.Test.`Edge Case` {
+extension Lint.Rule.`tag suffix Tests`.`Edge Case` {
     @Test
     func `struct ending in Tag with stored property is NOT flagged`() {
         let source = """
@@ -105,7 +102,7 @@ extension Lint.Rule.Naming.Tag.Test.`Edge Case` {
             let attributes: [String: String]
         }
         """
-        let findings = Lint.Rule.Naming.Tag.Test.findings(in: source)
+        let findings = Lint.Rule.`tag suffix Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -118,14 +115,14 @@ extension Lint.Rule.Naming.Tag.Test.`Edge Case` {
             case p
         }
         """
-        let findings = Lint.Rule.Naming.Tag.Test.findings(in: source)
+        let findings = Lint.Rule.`tag suffix Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
     @Test
     func `struct named Tag (no prefix) is NOT flagged`() {
         let source = "struct Tag {}"
-        let findings = Lint.Rule.Naming.Tag.Test.findings(in: source)
+        let findings = Lint.Rule.`tag suffix Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -135,7 +132,7 @@ extension Lint.Rule.Naming.Tag.Test.`Edge Case` {
         struct Cardinal {}
         struct Millimeter {}
         """
-        let findings = Lint.Rule.Naming.Tag.Test.findings(in: source)
+        let findings = Lint.Rule.`tag suffix Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -144,7 +141,7 @@ extension Lint.Rule.Naming.Tag.Test.`Edge Case` {
         // The rule visits StructDeclSyntax / EnumDeclSyntax; classes are not
         // phantom-type carriers.
         let source = "class CardinalTag {}"
-        let findings = Lint.Rule.Naming.Tag.Test.findings(in: source)
+        let findings = Lint.Rule.`tag suffix Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 }

@@ -13,28 +13,25 @@ import Testing
 import SwiftSyntax
 import SwiftParser
 import Linter_Primitives
+import Linter_Rules_Test_Support
 @testable import Linter_Rule_RawValue
 
-extension Lint.Rule.RawValue.TaggedExtensionPublicInit {
+extension Lint.Rule {
     @Suite
-    struct Test {
+    struct `tagged extension public init Tests` {
         @Suite struct Unit {}
         @Suite struct `Edge Case` {}
     }
 }
 
-extension Lint.Rule.RawValue.TaggedExtensionPublicInit.Test {
-    static func findings(in source: String, file: String = "Sources/X/Test.swift") -> [Diagnostic.Record] {
-        let tree = Parser.parse(source: source)
-        let converter = SourceLocationConverter(fileName: file, tree: tree)
-        var manager = Source.Manager()
-        let id = manager.register(fileID: file, filePath: file, content: Array(source.utf8))
-        let parsed = Lint.Source.Parsed(file: manager.file(for: id), tree: tree, converter: converter)
-        return Lint.Rule.RawValue.TaggedExtensionPublicInit().findings(in: parsed)
+extension Lint.Rule.`tagged extension public init Tests` {
+    static func findings(in source: Swift.String, file: Swift.String = "Sources/X/Test.swift") -> [Diagnostic.Record] {
+        let parsed = Lint.Source.parsed(from: source, file: file)
+        return Lint.Rule.`tagged extension public init`.findings(parsed, .warning)
     }
 }
 
-extension Lint.Rule.RawValue.TaggedExtensionPublicInit.Test.Unit {
+extension Lint.Rule.`tagged extension public init Tests`.Unit {
     @Test
     func `extension on bare Tagged with public init is flagged`() {
         let source = """
@@ -42,7 +39,7 @@ extension Lint.Rule.RawValue.TaggedExtensionPublicInit.Test.Unit {
             public init(rawValue: String) { fatalError() }
         }
         """
-        let findings = Lint.Rule.RawValue.TaggedExtensionPublicInit.Test.findings(in: source)
+        let findings = Lint.Rule.`tagged extension public init Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
             #expect(findings[0].identifier == "tagged_rawvalue_extension_public_init")
@@ -56,7 +53,7 @@ extension Lint.Rule.RawValue.TaggedExtensionPublicInit.Test.Unit {
             public init(_ s: String) { fatalError() }
         }
         """
-        let findings = Lint.Rule.RawValue.TaggedExtensionPublicInit.Test.findings(in: source)
+        let findings = Lint.Rule.`tagged extension public init Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -67,7 +64,7 @@ extension Lint.Rule.RawValue.TaggedExtensionPublicInit.Test.Unit {
             init(rawValue: String) { fatalError() }
         }
         """
-        let findings = Lint.Rule.RawValue.TaggedExtensionPublicInit.Test.findings(in: source)
+        let findings = Lint.Rule.`tagged extension public init Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -78,7 +75,7 @@ extension Lint.Rule.RawValue.TaggedExtensionPublicInit.Test.Unit {
             public init(rawValue: String) { fatalError() }
         }
         """
-        let findings = Lint.Rule.RawValue.TaggedExtensionPublicInit.Test.findings(in: source)
+        let findings = Lint.Rule.`tagged extension public init Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -90,7 +87,7 @@ extension Lint.Rule.RawValue.TaggedExtensionPublicInit.Test.Unit {
             public init(value: Int) { fatalError() }
         }
         """
-        let findings = Lint.Rule.RawValue.TaggedExtensionPublicInit.Test.findings(in: source)
+        let findings = Lint.Rule.`tagged extension public init Tests`.findings(in: source)
         #expect(findings.count == 2)
     }
 
@@ -101,12 +98,12 @@ extension Lint.Rule.RawValue.TaggedExtensionPublicInit.Test.Unit {
             public func foo() {}
         }
         """
-        let findings = Lint.Rule.RawValue.TaggedExtensionPublicInit.Test.findings(in: source)
+        let findings = Lint.Rule.`tagged extension public init Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 }
 
-extension Lint.Rule.RawValue.TaggedExtensionPublicInit.Test.`Edge Case` {
+extension Lint.Rule.`tagged extension public init Tests`.`Edge Case` {
     @Test
     func `extension on qualified Tagging Tagged is flagged`() {
         let source = """
@@ -114,7 +111,7 @@ extension Lint.Rule.RawValue.TaggedExtensionPublicInit.Test.`Edge Case` {
             public init(_ s: String) { fatalError() }
         }
         """
-        let findings = Lint.Rule.RawValue.TaggedExtensionPublicInit.Test.findings(in: source)
+        let findings = Lint.Rule.`tagged extension public init Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -125,7 +122,7 @@ extension Lint.Rule.RawValue.TaggedExtensionPublicInit.Test.`Edge Case` {
             public init(_ s: String) { fatalError() }
         }
         """
-        let findings = Lint.Rule.RawValue.TaggedExtensionPublicInit.Test.findings(in: source)
+        let findings = Lint.Rule.`tagged extension public init Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -136,7 +133,7 @@ extension Lint.Rule.RawValue.TaggedExtensionPublicInit.Test.`Edge Case` {
             public init(_ s: String) { fatalError() }
         }
         """
-        let findings = Lint.Rule.RawValue.TaggedExtensionPublicInit.Test.findings(in: source)
+        let findings = Lint.Rule.`tagged extension public init Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 }

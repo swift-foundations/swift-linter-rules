@@ -13,33 +13,30 @@ import Testing
 import SwiftSyntax
 import SwiftParser
 import Linter_Primitives
+import Linter_Rules_Test_Support
 @testable import Linter_Rule_Memory
 
-extension Lint.Rule.Memory.NonisolatedUnsafeSafe {
+extension Lint.Rule {
     @Suite
-    struct Test {
+    struct `nonisolated unsafe without safe Tests` {
         @Suite struct Unit {}
     }
 }
 
-extension Lint.Rule.Memory.NonisolatedUnsafeSafe.Test {
-    static func findings(in source: String, file: String = "Sources/X/Test.swift") -> [Diagnostic.Record] {
-        let tree = Parser.parse(source: source)
-        let converter = SourceLocationConverter(fileName: file, tree: tree)
-        var manager = Source.Manager()
-        let id = manager.register(fileID: file, filePath: file, content: Array(source.utf8))
-        let parsed = Lint.Source.Parsed(file: manager.file(for: id), tree: tree, converter: converter)
-        return Lint.Rule.Memory.NonisolatedUnsafeSafe().findings(in: parsed)
+extension Lint.Rule.`nonisolated unsafe without safe Tests` {
+    static func findings(in source: Swift.String, file: Swift.String = "Sources/X/Test.swift") -> [Diagnostic.Record] {
+        let parsed = Lint.Source.parsed(from: source, file: file)
+        return Lint.Rule.`nonisolated unsafe without safe`.findings(parsed, .warning)
     }
 }
 
-extension Lint.Rule.Memory.NonisolatedUnsafeSafe.Test.Unit {
+extension Lint.Rule.`nonisolated unsafe without safe Tests`.Unit {
     @Test
     func `nonisolated unsafe without safe is flagged`() {
         let source = """
         nonisolated(unsafe) let _sentinel: UnsafeMutableRawPointer = .allocate(capacity: 0)
         """
-        let findings = Lint.Rule.Memory.NonisolatedUnsafeSafe.Test.findings(in: source)
+        let findings = Lint.Rule.`nonisolated unsafe without safe Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -48,7 +45,7 @@ extension Lint.Rule.Memory.NonisolatedUnsafeSafe.Test.Unit {
         let source = """
         @safe nonisolated(unsafe) let _sentinel: UnsafeMutableRawPointer = .allocate(capacity: 0)
         """
-        let findings = Lint.Rule.Memory.NonisolatedUnsafeSafe.Test.findings(in: source)
+        let findings = Lint.Rule.`nonisolated unsafe without safe Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -57,7 +54,7 @@ extension Lint.Rule.Memory.NonisolatedUnsafeSafe.Test.Unit {
         let source = """
         nonisolated let value: Int = 0
         """
-        let findings = Lint.Rule.Memory.NonisolatedUnsafeSafe.Test.findings(in: source)
+        let findings = Lint.Rule.`nonisolated unsafe without safe Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -66,7 +63,7 @@ extension Lint.Rule.Memory.NonisolatedUnsafeSafe.Test.Unit {
         let source = """
         let value: Int = 0
         """
-        let findings = Lint.Rule.Memory.NonisolatedUnsafeSafe.Test.findings(in: source)
+        let findings = Lint.Rule.`nonisolated unsafe without safe Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -75,7 +72,7 @@ extension Lint.Rule.Memory.NonisolatedUnsafeSafe.Test.Unit {
         let source = """
         nonisolated(unsafe) var counter: Int = 0
         """
-        let findings = Lint.Rule.Memory.NonisolatedUnsafeSafe.Test.findings(in: source)
+        let findings = Lint.Rule.`nonisolated unsafe without safe Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -85,7 +82,7 @@ extension Lint.Rule.Memory.NonisolatedUnsafeSafe.Test.Unit {
         @safe @usableFromInline
         nonisolated(unsafe) let _table: UnsafePointer<UInt8> = .init(bitPattern: 0)!
         """
-        let findings = Lint.Rule.Memory.NonisolatedUnsafeSafe.Test.findings(in: source)
+        let findings = Lint.Rule.`nonisolated unsafe without safe Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 }

@@ -26,7 +26,8 @@ extension Lint.Source {
     /// function, so call sites read `Lint.Source.Parsed.test(...)`.
     public static func parsed(
         from source: Swift.String,
-        file: Swift.String = "test.swift"
+        file: Swift.String = "test.swift",
+        path: Lint.Source.Path? = nil
     ) -> Lint.Source.Parsed {
         let tree = Parser.parse(source: source)
         let converter = SourceLocationConverter(fileName: file, tree: tree)
@@ -38,6 +39,7 @@ extension Lint.Source {
         )
         return Lint.Source.Parsed(
             file: manager.file(for: id),
+            path: path ?? Lint.Source.Path(file),
             tree: tree,
             converter: converter
         )

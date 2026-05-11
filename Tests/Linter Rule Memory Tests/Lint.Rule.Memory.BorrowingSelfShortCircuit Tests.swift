@@ -13,28 +13,25 @@ import Testing
 import SwiftSyntax
 import SwiftParser
 import Linter_Primitives
+import Linter_Rules_Test_Support
 @testable import Linter_Rule_Memory
 
-extension Lint.Rule.Memory.BorrowingSelfShortCircuit {
+extension Lint.Rule {
     @Suite
-    struct Test {
+    struct `borrowing self short circuit Tests` {
         @Suite struct Unit {}
         @Suite struct `Edge Case` {}
     }
 }
 
-extension Lint.Rule.Memory.BorrowingSelfShortCircuit.Test {
-    static func findings(in source: String, file: String = "test.swift") -> [Diagnostic.Record] {
-        let tree = Parser.parse(source: source)
-        let converter = SourceLocationConverter(fileName: file, tree: tree)
-        var manager = Source.Manager()
-        let id = manager.register(fileID: file, filePath: file, content: Array(source.utf8))
-        let parsed = Lint.Source.Parsed(file: manager.file(for: id), tree: tree, converter: converter)
-        return Lint.Rule.Memory.BorrowingSelfShortCircuit().findings(in: parsed)
+extension Lint.Rule.`borrowing self short circuit Tests` {
+    static func findings(in source: Swift.String, file: Swift.String = "test.swift") -> [Diagnostic.Record] {
+        let parsed = Lint.Source.parsed(from: source, file: file)
+        return Lint.Rule.`borrowing self short circuit`.findings(parsed, .warning)
     }
 }
 
-extension Lint.Rule.Memory.BorrowingSelfShortCircuit.Test.Unit {
+extension Lint.Rule.`borrowing self short circuit Tests`.Unit {
     @Test
     func `less-than operator with borrowing Self and OR is flagged`() {
         let source = """
@@ -42,7 +39,7 @@ extension Lint.Rule.Memory.BorrowingSelfShortCircuit.Test.Unit {
             lhs.priority < rhs.priority || (lhs.priority == rhs.priority && lhs.sequence < rhs.sequence)
         }
         """
-        let findings = Lint.Rule.Memory.BorrowingSelfShortCircuit.Test.findings(in: source)
+        let findings = Lint.Rule.`borrowing self short circuit Tests`.findings(in: source)
         // Two operators in the body: `||` and `&&` — both flagged.
         #expect(findings.count == 2)
         if findings.count >= 1 {
@@ -58,12 +55,12 @@ extension Lint.Rule.Memory.BorrowingSelfShortCircuit.Test.Unit {
             lhs.x == rhs.x && lhs.y == rhs.y
         }
         """
-        let findings = Lint.Rule.Memory.BorrowingSelfShortCircuit.Test.findings(in: source)
+        let findings = Lint.Rule.`borrowing self short circuit Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 }
 
-extension Lint.Rule.Memory.BorrowingSelfShortCircuit.Test.`Edge Case` {
+extension Lint.Rule.`borrowing self short circuit Tests`.`Edge Case` {
     @Test
     func `tuple comparison alternative is NOT flagged`() {
         let source = """
@@ -71,7 +68,7 @@ extension Lint.Rule.Memory.BorrowingSelfShortCircuit.Test.`Edge Case` {
             (lhs.a, lhs.b) < (rhs.a, rhs.b)
         }
         """
-        let findings = Lint.Rule.Memory.BorrowingSelfShortCircuit.Test.findings(in: source)
+        let findings = Lint.Rule.`borrowing self short circuit Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -88,7 +85,7 @@ extension Lint.Rule.Memory.BorrowingSelfShortCircuit.Test.`Edge Case` {
             return lb < rb
         }
         """
-        let findings = Lint.Rule.Memory.BorrowingSelfShortCircuit.Test.findings(in: source)
+        let findings = Lint.Rule.`borrowing self short circuit Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -99,7 +96,7 @@ extension Lint.Rule.Memory.BorrowingSelfShortCircuit.Test.`Edge Case` {
             self.a < rhs.a || self.b < rhs.b
         }
         """
-        let findings = Lint.Rule.Memory.BorrowingSelfShortCircuit.Test.findings(in: source)
+        let findings = Lint.Rule.`borrowing self short circuit Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -110,7 +107,7 @@ extension Lint.Rule.Memory.BorrowingSelfShortCircuit.Test.`Edge Case` {
             lhs > 0 && rhs > 0 ? lhs + rhs : 0
         }
         """
-        let findings = Lint.Rule.Memory.BorrowingSelfShortCircuit.Test.findings(in: source)
+        let findings = Lint.Rule.`borrowing self short circuit Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -121,7 +118,7 @@ extension Lint.Rule.Memory.BorrowingSelfShortCircuit.Test.`Edge Case` {
             Self(rawValue: lhs.rawValue + rhs.rawValue)
         }
         """
-        let findings = Lint.Rule.Memory.BorrowingSelfShortCircuit.Test.findings(in: source)
+        let findings = Lint.Rule.`borrowing self short circuit Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 }

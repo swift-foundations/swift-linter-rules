@@ -220,19 +220,9 @@ let package = Package(
         .target(
             name: "Linter Rules Test Support",
             dependencies: [
-                "Linter Rule Cardinal",
-                "Linter Rule Closure",
-                "Linter Rule Idiom",
-                "Linter Rule Memory",
-                "Linter Rule Naming",
-                "Linter Rule Platform",
-                "Linter Rule RawValue",
-                "Linter Rule ResultBuilder",
-                "Linter Rule Structure",
-                "Linter Rule Testing",
-                "Linter Rule Throws",
-                "Linter Rule Try",
-                "Linter Rule Unchecked",
+                // Test support only provides the parsed-source factory; it
+                // does not depend on any rule pack. Per-pack test targets
+                // depend on their own pack + this support module.
                 .product(name: "Linter Primitives Test Support", package: "swift-linter-primitives"),
                 .product(name: "SwiftParser", package: "swift-syntax"),
                 .product(name: "SwiftSyntax", package: "swift-syntax"),

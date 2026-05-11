@@ -22,98 +22,86 @@ internal import SwiftSyntax
 /// invariant — the institute requires the invariant be stated at the
 /// declaration site with `@safe`. Without `@safe`, the cross-thread
 /// safety story is implicit and easy to silently violate.
-///
-/// AST shape: `VariableDeclSyntax` whose modifiers contain
-/// `nonisolated(unsafe)` AND whose attributes do NOT contain `@safe`.
-/// Both `let` and `var` are in scope; `var` is *additionally*
-/// suspect (mutable globals are a separate category) but the same
-/// `@safe`-or-synchronized requirement applies.
-extension Lint.Rule.Memory {
-    public struct NonisolatedUnsafeSafe: Lint.Rule.`Protocol` {
-        public static let id: Lint.Rule.ID = "nonisolated_unsafe_safe"
-        public static let defaultSeverity: Diagnostic.Severity = .warning
-
-        public let severity: Diagnostic.Severity
-
-        @inlinable
-        public init(severity: Diagnostic.Severity = .warning) {
-            self.severity = severity
-        }
-
-        public func findings(in source: Lint.Source.Parsed) -> [Diagnostic.Record] {
-            let visitor = Visitor(source: source.file, severity: severity, converter: source.converter)
+extension Lint.Rule {
+    public static let `nonisolated unsafe without safe` = Lint.Rule(
+        id: "nonisolated_unsafe_safe",
+        defaultSeverity: .warning,
+        findings: { source, severity in
+            let visitor = MemoryNonisolatedUnsafeSafeVisitor(
+                source: source.file,
+                severity: severity,
+                converter: source.converter
+            )
             visitor.walk(source.tree)
             return visitor.matches
         }
-    }
+    )
 }
 
-extension Lint.Rule.Memory.NonisolatedUnsafeSafe {
-    @usableFromInline
-    static let message: Swift.String =
-        "[nonisolated_unsafe_safe] [MEM-SAFE-025]: `nonisolated(unsafe)` globals MUST "
-        + "carry `@safe` to assert the encapsulation invariant (allocated once, never "
-        + "mutated post-init, only used as sentinel / constant). Without `@safe` the "
-        + "safety story is implicit. Concurrently-mutated `nonisolated(unsafe)` is a "
-        + "separate violation — use `Mutex` / `Atomic`, not temporal invariants."
+@usableFromInline
+internal let memoryNonisolatedUnsafeSafeMessage: Swift.String =
+    "[nonisolated_unsafe_safe] [MEM-SAFE-025]: `nonisolated(unsafe)` globals MUST "
+    + "carry `@safe` to assert the encapsulation invariant (allocated once, never "
+    + "mutated post-init, only used as sentinel / constant). Without `@safe` the "
+    + "safety story is implicit. Concurrently-mutated `nonisolated(unsafe)` is a "
+    + "separate violation — use `Mutex` / `Atomic`, not temporal invariants."
 
-    final class Visitor: SyntaxVisitor {
-        let source: Source.File
-        let severity: Diagnostic.Severity
-        let converter: SourceLocationConverter
-        var matches: [Diagnostic.Record] = []
+internal final class MemoryNonisolatedUnsafeSafeVisitor: SyntaxVisitor {
+    let source: Source.File
+    let severity: Diagnostic.Severity
+    let converter: SourceLocationConverter
+    var matches: [Diagnostic.Record] = []
 
-        init(source: Source.File, severity: Diagnostic.Severity, converter: SourceLocationConverter) {
-            self.source = source
-            self.severity = severity
-            self.converter = converter
-            super.init(viewMode: .sourceAccurate)
-        }
+    init(source: Source.File, severity: Diagnostic.Severity, converter: SourceLocationConverter) {
+        self.source = source
+        self.severity = severity
+        self.converter = converter
+        super.init(viewMode: .sourceAccurate)
+    }
 
-        private func hasNonisolatedUnsafe(_ modifiers: DeclModifierListSyntax) -> Bool {
-            for modifier in modifiers {
-                if modifier.name.tokenKind == .keyword(.nonisolated) {
-                    if let detail = modifier.detail {
-                        // detail is `(unsafe)` — match by trimmed text.
-                        if detail.detail.text == "unsafe" {
-                            return true
-                        }
+    private func hasNonisolatedUnsafe(_ modifiers: DeclModifierListSyntax) -> Bool {
+        for modifier in modifiers {
+            if modifier.name.tokenKind == .keyword(.nonisolated) {
+                if let detail = modifier.detail {
+                    // detail is `(unsafe)` — match by trimmed text.
+                    if detail.detail.text == "unsafe" {
+                        return true
                     }
                 }
             }
-            return false
         }
+        return false
+    }
 
-        private func hasSafeAttribute(_ attributes: AttributeListSyntax) -> Bool {
-            for attribute in attributes {
-                guard let attr = attribute.as(AttributeSyntax.self) else { continue }
-                if attr.attributeName.trimmedDescription == "safe" {
-                    return true
-                }
+    private func hasSafeAttribute(_ attributes: AttributeListSyntax) -> Bool {
+        for attribute in attributes {
+            guard let attr = attribute.as(AttributeSyntax.self) else { continue }
+            if attr.attributeName.trimmedDescription == "safe" {
+                return true
             }
-            return false
         }
+        return false
+    }
 
-        override func visit(_ node: VariableDeclSyntax) -> SyntaxVisitorContinueKind {
-            guard hasNonisolatedUnsafe(node.modifiers) else {
-                return .visitChildren
-            }
-            guard !hasSafeAttribute(node.attributes) else {
-                return .visitChildren
-            }
-            let location = converter.location(for: node.bindingSpecifier.positionAfterSkippingLeadingTrivia)
-            matches.append(Diagnostic.Record(
-                location: Source.Location(
-                    fileID: source.fileID,
-                    filePath: source.filePath,
-                    line: location.line,
-                    column: location.column
-                ),
-                severity: severity,
-                identifier: Lint.Rule.Memory.NonisolatedUnsafeSafe.id.underlying,
-                message: Lint.Rule.Memory.NonisolatedUnsafeSafe.message
-            ))
+    override func visit(_ node: VariableDeclSyntax) -> SyntaxVisitorContinueKind {
+        guard hasNonisolatedUnsafe(node.modifiers) else {
             return .visitChildren
         }
+        guard !hasSafeAttribute(node.attributes) else {
+            return .visitChildren
+        }
+        let location = converter.location(for: node.bindingSpecifier.positionAfterSkippingLeadingTrivia)
+        matches.append(Diagnostic.Record(
+            location: Source.Location(
+                fileID: source.fileID,
+                filePath: source.filePath,
+                line: location.line,
+                column: location.column
+            ),
+            severity: severity,
+            identifier: "nonisolated_unsafe_safe",
+            message: memoryNonisolatedUnsafeSafeMessage
+        ))
+        return .visitChildren
     }
 }

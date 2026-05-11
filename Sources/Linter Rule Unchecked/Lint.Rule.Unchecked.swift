@@ -10,7 +10,7 @@
 // ===----------------------------------------------------------------------===//
 
 public import Linter_Primitives
-public import SwiftSyntax
+internal import SwiftSyntax
 
 /// R5 — `__unchecked:` argument label appearing at a call site.
 ///
@@ -28,65 +28,59 @@ public import SwiftSyntax
 /// - `swift-institute/Research/swiftsyntax-based-custom-linter-investigation.md`
 ///   §"Q3 — Deferred AST-rule unblocking matrix" — R5 is unblocked by this tool.
 extension Lint.Rule {
-    public struct Unchecked: Lint.Rule.`Protocol` {
-        public static let id: Lint.Rule.ID = "unchecked_call_site"
-        public static let defaultSeverity: Diagnostic.Severity = .warning
-
-        public let severity: Diagnostic.Severity
-
-        @inlinable
-        public init(severity: Diagnostic.Severity = .warning) {
-            self.severity = severity
-        }
-
-        public func findings(in source: Lint.Source.Parsed) -> [Diagnostic.Record] {
-            let visitor = Visitor(source: source.file, severity: severity, converter: source.converter)
+    public static let `unchecked call site` = Lint.Rule(
+        id: "unchecked_call_site",
+        defaultSeverity: .warning,
+        findings: { source, severity in
+            let visitor = UncheckedVisitor(
+                source: source.file,
+                severity: severity,
+                converter: source.converter
+            )
             visitor.walk(source.tree)
             return visitor.matches
         }
-    }
+    )
 }
 
-extension Lint.Rule.Unchecked {
-    @usableFromInline
-    static let message: Swift.String =
-        "[unchecked_call_site] [CONV-016]: `__unchecked:` at a call site is a Tier-5 "
-        + "last-resort bypass of the typed system. Prefer `.retag()` (Tier 1) or `.map()` "
-        + "(Tier 2) before resorting to `__unchecked:`. If this site is the typed-system "
-        + "bottom-out (extension-init internals, [CONV-001] permitted same-package use), "
-        + "escalate to supervisor and apply "
-        + "`// swiftlint:disable:next unchecked_call_site  // reason: <citation>`."
+@usableFromInline
+internal let uncheckedCallSiteMessage: Swift.String =
+    "[unchecked_call_site] [CONV-016]: `__unchecked:` at a call site is a Tier-5 "
+    + "last-resort bypass of the typed system. Prefer `.retag()` (Tier 1) or `.map()` "
+    + "(Tier 2) before resorting to `__unchecked:`. If this site is the typed-system "
+    + "bottom-out (extension-init internals, [CONV-001] permitted same-package use), "
+    + "escalate to supervisor and apply "
+    + "`// swiftlint:disable:next unchecked_call_site  // reason: <citation>`."
 
-    final class Visitor: SyntaxVisitor {
-        let source: Source.File
-        let severity: Diagnostic.Severity
-        let converter: SourceLocationConverter
-        var matches: [Diagnostic.Record] = []
+internal final class UncheckedVisitor: SyntaxVisitor {
+    let source: Source.File
+    let severity: Diagnostic.Severity
+    let converter: SourceLocationConverter
+    var matches: [Diagnostic.Record] = []
 
-        init(source: Source.File, severity: Diagnostic.Severity, converter: SourceLocationConverter) {
-            self.source = source
-            self.severity = severity
-            self.converter = converter
-            super.init(viewMode: .sourceAccurate)
-        }
+    init(source: Source.File, severity: Diagnostic.Severity, converter: SourceLocationConverter) {
+        self.source = source
+        self.severity = severity
+        self.converter = converter
+        super.init(viewMode: .sourceAccurate)
+    }
 
-        override func visit(_ node: LabeledExprSyntax) -> SyntaxVisitorContinueKind {
-            guard let label = node.label, label.text == "__unchecked" else {
-                return .visitChildren
-            }
-            let location = converter.location(for: label.positionAfterSkippingLeadingTrivia)
-            matches.append(Diagnostic.Record(
-                location: Source.Location(
-                    fileID: source.fileID,
-                    filePath: source.filePath,
-                    line: location.line,
-                    column: location.column
-                ),
-                severity: severity,
-                identifier: Lint.Rule.Unchecked.id.underlying,
-                message: Lint.Rule.Unchecked.message
-            ))
+    override func visit(_ node: LabeledExprSyntax) -> SyntaxVisitorContinueKind {
+        guard let label = node.label, label.text == "__unchecked" else {
             return .visitChildren
         }
+        let location = converter.location(for: label.positionAfterSkippingLeadingTrivia)
+        matches.append(Diagnostic.Record(
+            location: Source.Location(
+                fileID: source.fileID,
+                filePath: source.filePath,
+                line: location.line,
+                column: location.column
+            ),
+            severity: severity,
+            identifier: "unchecked_call_site",
+            message: uncheckedCallSiteMessage
+        ))
+        return .visitChildren
     }
 }

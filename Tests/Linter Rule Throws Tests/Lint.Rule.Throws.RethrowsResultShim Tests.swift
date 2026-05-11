@@ -13,34 +13,31 @@ import Testing
 import SwiftSyntax
 import SwiftParser
 import Linter_Primitives
+import Linter_Rules_Test_Support
 @testable import Linter_Rule_Throws
 
-extension Lint.Rule.Throws.RethrowsResultShim {
+extension Lint.Rule {
     @Suite
-    struct Test {
+    struct `result wrapper for rethrows shim Tests` {
         @Suite struct Unit {}
         @Suite struct `Edge Case` {}
     }
 }
 
-extension Lint.Rule.Throws.RethrowsResultShim.Test {
-    static func findings(in source: String, file: String = "Sources/X/Test.swift") -> [Diagnostic.Record] {
-        let tree = Parser.parse(source: source)
-        let converter = SourceLocationConverter(fileName: file, tree: tree)
-        var manager = Source.Manager()
-        let id = manager.register(fileID: file, filePath: file, content: Array(source.utf8))
-        let parsed = Lint.Source.Parsed(file: manager.file(for: id), tree: tree, converter: converter)
-        return Lint.Rule.Throws.RethrowsResultShim().findings(in: parsed)
+extension Lint.Rule.`result wrapper for rethrows shim Tests` {
+    static func findings(in source: Swift.String, file: Swift.String = "Sources/X/Test.swift") -> [Diagnostic.Record] {
+        let parsed = Lint.Source.parsed(from: source, file: file)
+        return Lint.Rule.`result wrapper for rethrows shim`.findings(parsed, .warning)
     }
 }
 
-extension Lint.Rule.Throws.RethrowsResultShim.Test.Unit {
+extension Lint.Rule.`result wrapper for rethrows shim Tests`.Unit {
     @Test
     func `try inside map closure is flagged`() {
         let source = """
         let result = items.map { try transform($0) }
         """
-        let findings = Lint.Rule.Throws.RethrowsResultShim.Test.findings(in: source)
+        let findings = Lint.Rule.`result wrapper for rethrows shim Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -49,7 +46,7 @@ extension Lint.Rule.Throws.RethrowsResultShim.Test.Unit {
         let source = """
         let result = items.compactMap { try transform($0) }
         """
-        let findings = Lint.Rule.Throws.RethrowsResultShim.Test.findings(in: source)
+        let findings = Lint.Rule.`result wrapper for rethrows shim Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -58,7 +55,7 @@ extension Lint.Rule.Throws.RethrowsResultShim.Test.Unit {
         let source = """
         let result = items.filter { try predicate($0) }
         """
-        let findings = Lint.Rule.Throws.RethrowsResultShim.Test.findings(in: source)
+        let findings = Lint.Rule.`result wrapper for rethrows shim Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -67,7 +64,7 @@ extension Lint.Rule.Throws.RethrowsResultShim.Test.Unit {
         let source = """
         let result = items.map { transform($0) }
         """
-        let findings = Lint.Rule.Throws.RethrowsResultShim.Test.findings(in: source)
+        let findings = Lint.Rule.`result wrapper for rethrows shim Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -76,7 +73,7 @@ extension Lint.Rule.Throws.RethrowsResultShim.Test.Unit {
         let source = """
         let result = items.map { try? transform($0) }
         """
-        let findings = Lint.Rule.Throws.RethrowsResultShim.Test.findings(in: source)
+        let findings = Lint.Rule.`result wrapper for rethrows shim Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -85,7 +82,7 @@ extension Lint.Rule.Throws.RethrowsResultShim.Test.Unit {
         let source = """
         let result = items.map { try! transform($0) }
         """
-        let findings = Lint.Rule.Throws.RethrowsResultShim.Test.findings(in: source)
+        let findings = Lint.Rule.`result wrapper for rethrows shim Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -96,7 +93,7 @@ extension Lint.Rule.Throws.RethrowsResultShim.Test.Unit {
             Result { try transform(input) }
         }
         """
-        let findings = Lint.Rule.Throws.RethrowsResultShim.Test.findings(in: source)
+        let findings = Lint.Rule.`result wrapper for rethrows shim Tests`.findings(in: source)
         // The `try` is inside the inner Result init's closure (nested), our
         // visitor skips into nested closures so the inner `try` belongs to
         // the inner closure (which is not a known rethrows method on `Result`).
@@ -104,13 +101,13 @@ extension Lint.Rule.Throws.RethrowsResultShim.Test.Unit {
     }
 }
 
-extension Lint.Rule.Throws.RethrowsResultShim.Test.`Edge Case` {
+extension Lint.Rule.`result wrapper for rethrows shim Tests`.`Edge Case` {
     @Test
     func `non-stdlib rethrows method (custom name) is not flagged`() {
         let source = """
         let result = builder.processEach { try op($0) }
         """
-        let findings = Lint.Rule.Throws.RethrowsResultShim.Test.findings(in: source)
+        let findings = Lint.Rule.`result wrapper for rethrows shim Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -119,7 +116,7 @@ extension Lint.Rule.Throws.RethrowsResultShim.Test.`Edge Case` {
         let source = """
         items.forEach { try doIt($0) }
         """
-        let findings = Lint.Rule.Throws.RethrowsResultShim.Test.findings(in: source)
+        let findings = Lint.Rule.`result wrapper for rethrows shim Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 }

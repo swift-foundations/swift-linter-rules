@@ -10,7 +10,7 @@
 // ===----------------------------------------------------------------------===//
 
 public import Linter_Primitives
-public import SwiftSyntax
+internal import SwiftSyntax
 
 /// R4 — `X(bitPattern: …rawValue)` integration-overload anti-pattern.
 ///
@@ -30,87 +30,81 @@ public import SwiftSyntax
 ///   §"R4. `Int(bitPattern: <something>.rawValue ...)`"
 /// - `swift-institute/Research/swiftsyntax-based-custom-linter-investigation.md`
 ///   §"Q2 — Evasion-class closure matrix" (typename-swap row)
-extension Lint.Rule.RawValue {
-    public struct BitPattern: Lint.Rule.`Protocol` {
-        public static let id: Lint.Rule.ID = "bitpattern_rawvalue_chain"
-        public static let defaultSeverity: Diagnostic.Severity = .warning
-
-        public let severity: Diagnostic.Severity
-
-        @inlinable
-        public init(severity: Diagnostic.Severity = .warning) {
-            self.severity = severity
-        }
-
-        public func findings(in source: Lint.Source.Parsed) -> [Diagnostic.Record] {
-            let visitor = Visitor(source: source.file, severity: severity, converter: source.converter)
+extension Lint.Rule {
+    public static let `bitpattern rawvalue chain` = Lint.Rule(
+        id: "bitpattern_rawvalue_chain",
+        defaultSeverity: .warning,
+        findings: { source, severity in
+            let visitor = RawValueBitPatternVisitor(
+                source: source.file,
+                severity: severity,
+                converter: source.converter
+            )
             visitor.walk(source.tree)
             return visitor.matches
         }
+    )
+}
+
+@usableFromInline
+internal let bitpatternRawvalueChainMessage: Swift.String =
+    "[bitpattern_rawvalue_chain] [CONV-016]: `init(bitPattern:)` whose argument chains "
+    + "through `.rawValue` — including `Int(...)`, `UInt(...)`, `Int.init(...)`, "
+    + "`self.init(...)`, and other syntactic equivalents — bypasses the canonical "
+    + "preference hierarchy. Prefer `.retag()` / `.map()` (Tier 1/2) before resorting "
+    + "to the [INFRA-002] integration overload — and when you do use the overload, "
+    + "pass the typed value directly: `Int(bitPattern: foo)` not "
+    + "`Int(bitPattern: foo.rawValue)`. If this site IS the [INFRA-002] integration "
+    + "overload definition itself, escalate to supervisor and apply "
+    + "`// swiftlint:disable:next bitpattern_rawvalue_chain  // reason: <citation>`."
+
+internal final class RawValueBitPatternVisitor: SyntaxVisitor {
+    let source: Source.File
+    let severity: Diagnostic.Severity
+    let converter: SourceLocationConverter
+    var matches: [Diagnostic.Record] = []
+
+    init(source: Source.File, severity: Diagnostic.Severity, converter: SourceLocationConverter) {
+        self.source = source
+        self.severity = severity
+        self.converter = converter
+        super.init(viewMode: .sourceAccurate)
+    }
+
+    override func visit(_ node: FunctionCallExprSyntax) -> SyntaxVisitorContinueKind {
+        for arg in node.arguments {
+            guard let label = arg.label, label.text == "bitPattern" else { continue }
+            guard Self.containsRawValueAccess(arg.expression) else { continue }
+            let location = converter.location(for: label.positionAfterSkippingLeadingTrivia)
+            matches.append(Diagnostic.Record(
+                location: Source.Location(
+                    fileID: source.fileID,
+                    filePath: source.filePath,
+                    line: location.line,
+                    column: location.column
+                ),
+                severity: severity,
+                identifier: "bitpattern_rawvalue_chain",
+                message: bitpatternRawvalueChainMessage
+            ))
+        }
+        return .visitChildren
+    }
+
+    static func containsRawValueAccess(_ expr: ExprSyntax) -> Bool {
+        let finder = RawValueBitPatternFinder(viewMode: .sourceAccurate)
+        finder.walk(expr)
+        return finder.found
     }
 }
 
-extension Lint.Rule.RawValue.BitPattern {
-    @usableFromInline
-    static let message: Swift.String =
-        "[bitpattern_rawvalue_chain] [CONV-016]: `init(bitPattern:)` whose argument chains "
-        + "through `.rawValue` — including `Int(...)`, `UInt(...)`, `Int.init(...)`, "
-        + "`self.init(...)`, and other syntactic equivalents — bypasses the canonical "
-        + "preference hierarchy. Prefer `.retag()` / `.map()` (Tier 1/2) before resorting "
-        + "to the [INFRA-002] integration overload — and when you do use the overload, "
-        + "pass the typed value directly: `Int(bitPattern: foo)` not "
-        + "`Int(bitPattern: foo.rawValue)`. If this site IS the [INFRA-002] integration "
-        + "overload definition itself, escalate to supervisor and apply "
-        + "`// swiftlint:disable:next bitpattern_rawvalue_chain  // reason: <citation>`."
+internal final class RawValueBitPatternFinder: SyntaxVisitor {
+    var found = false
 
-    final class Visitor: SyntaxVisitor {
-        let source: Source.File
-        let severity: Diagnostic.Severity
-        let converter: SourceLocationConverter
-        var matches: [Diagnostic.Record] = []
-
-        init(source: Source.File, severity: Diagnostic.Severity, converter: SourceLocationConverter) {
-            self.source = source
-            self.severity = severity
-            self.converter = converter
-            super.init(viewMode: .sourceAccurate)
+    override func visit(_ node: MemberAccessExprSyntax) -> SyntaxVisitorContinueKind {
+        if node.declName.baseName.text == "rawValue" {
+            found = true
         }
-
-        override func visit(_ node: FunctionCallExprSyntax) -> SyntaxVisitorContinueKind {
-            for arg in node.arguments {
-                guard let label = arg.label, label.text == "bitPattern" else { continue }
-                guard Self.containsRawValueAccess(arg.expression) else { continue }
-                let location = converter.location(for: label.positionAfterSkippingLeadingTrivia)
-                matches.append(Diagnostic.Record(
-                    location: Source.Location(
-                        fileID: source.fileID,
-                        filePath: source.filePath,
-                        line: location.line,
-                        column: location.column
-                    ),
-                    severity: severity,
-                    identifier: Lint.Rule.RawValue.BitPattern.id.underlying,
-                    message: Lint.Rule.RawValue.BitPattern.message
-                ))
-            }
-            return .visitChildren
-        }
-
-        static func containsRawValueAccess(_ expr: ExprSyntax) -> Bool {
-            let finder = RawValueFinder(viewMode: .sourceAccurate)
-            finder.walk(expr)
-            return finder.found
-        }
-    }
-
-    final class RawValueFinder: SyntaxVisitor {
-        var found = false
-
-        override func visit(_ node: MemberAccessExprSyntax) -> SyntaxVisitorContinueKind {
-            if node.declName.baseName.text == "rawValue" {
-                found = true
-            }
-            return .visitChildren
-        }
+        return .visitChildren
     }
 }

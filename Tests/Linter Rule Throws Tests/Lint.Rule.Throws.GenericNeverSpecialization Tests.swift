@@ -13,28 +13,25 @@ import Testing
 import SwiftSyntax
 import SwiftParser
 import Linter_Primitives
+import Linter_Rules_Test_Support
 @testable import Linter_Rule_Throws
 
-extension Lint.Rule.Throws.GenericNeverSpecialization {
+extension Lint.Rule {
     @Suite
-    struct Test {
+    struct `generic throws missing never Tests` {
         @Suite struct Unit {}
         @Suite struct `Edge Case` {}
     }
 }
 
-extension Lint.Rule.Throws.GenericNeverSpecialization.Test {
-    static func findings(in source: String, file: String = "test.swift") -> [Diagnostic.Record] {
-        let tree = Parser.parse(source: source)
-        let converter = SourceLocationConverter(fileName: file, tree: tree)
-        var manager = Source.Manager()
-        let id = manager.register(fileID: file, filePath: file, content: Array(source.utf8))
-        let parsed = Lint.Source.Parsed(file: manager.file(for: id), tree: tree, converter: converter)
-        return Lint.Rule.Throws.GenericNeverSpecialization().findings(in: parsed)
+extension Lint.Rule.`generic throws missing never Tests` {
+    static func findings(in source: Swift.String, file: Swift.String = "test.swift") -> [Diagnostic.Record] {
+        let parsed = Lint.Source.parsed(from: source, file: file)
+        return Lint.Rule.`generic throws missing never`.findings(parsed, .warning)
     }
 }
 
-extension Lint.Rule.Throws.GenericNeverSpecialization.Test.Unit {
+extension Lint.Rule.`generic throws missing never Tests`.Unit {
     @Test
     func `public method on generic struct throwing G dot Failure is flagged`() {
         let source = """
@@ -42,7 +39,7 @@ extension Lint.Rule.Throws.GenericNeverSpecialization.Test.Unit {
             public mutating func parse() throws(Sink.Failure) { }
         }
         """
-        let findings = Lint.Rule.Throws.GenericNeverSpecialization.Test.findings(in: source)
+        let findings = Lint.Rule.`generic throws missing never Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
             #expect(findings[0].identifier == "generic_throws_missing_never_specialization")
@@ -57,7 +54,7 @@ extension Lint.Rule.Throws.GenericNeverSpecialization.Test.Unit {
             public init() throws(Source.Failure) { }
         }
         """
-        let findings = Lint.Rule.Throws.GenericNeverSpecialization.Test.findings(in: source)
+        let findings = Lint.Rule.`generic throws missing never Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -68,7 +65,7 @@ extension Lint.Rule.Throws.GenericNeverSpecialization.Test.Unit {
             public func consume() throws(Sink.Failure) { }
         }
         """
-        let findings = Lint.Rule.Throws.GenericNeverSpecialization.Test.findings(in: source)
+        let findings = Lint.Rule.`generic throws missing never Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -77,12 +74,12 @@ extension Lint.Rule.Throws.GenericNeverSpecialization.Test.Unit {
         let source = """
         public func op<E: Handler>() throws(E.Failure) { }
         """
-        let findings = Lint.Rule.Throws.GenericNeverSpecialization.Test.findings(in: source)
+        let findings = Lint.Rule.`generic throws missing never Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 }
 
-extension Lint.Rule.Throws.GenericNeverSpecialization.Test.`Edge Case` {
+extension Lint.Rule.`generic throws missing never Tests`.`Edge Case` {
     @Test
     func `concrete throw type is NOT flagged`() {
         let source = """
@@ -90,7 +87,7 @@ extension Lint.Rule.Throws.GenericNeverSpecialization.Test.`Edge Case` {
             public mutating func parse() throws(MyError) { }
         }
         """
-        let findings = Lint.Rule.Throws.GenericNeverSpecialization.Test.findings(in: source)
+        let findings = Lint.Rule.`generic throws missing never Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -101,7 +98,7 @@ extension Lint.Rule.Throws.GenericNeverSpecialization.Test.`Edge Case` {
             public mutating func parse() throws { }
         }
         """
-        let findings = Lint.Rule.Throws.GenericNeverSpecialization.Test.findings(in: source)
+        let findings = Lint.Rule.`generic throws missing never Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -113,7 +110,7 @@ extension Lint.Rule.Throws.GenericNeverSpecialization.Test.`Edge Case` {
             func also() throws(Sink.Failure) { }
         }
         """
-        let findings = Lint.Rule.Throws.GenericNeverSpecialization.Test.findings(in: source)
+        let findings = Lint.Rule.`generic throws missing never Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -127,7 +124,7 @@ extension Lint.Rule.Throws.GenericNeverSpecialization.Test.`Edge Case` {
             public func consume() throws(Sink.Failure) { }
         }
         """
-        let findings = Lint.Rule.Throws.GenericNeverSpecialization.Test.findings(in: source)
+        let findings = Lint.Rule.`generic throws missing never Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -138,7 +135,7 @@ extension Lint.Rule.Throws.GenericNeverSpecialization.Test.`Edge Case` {
             public func parse() throws(MyError) { }
         }
         """
-        let findings = Lint.Rule.Throws.GenericNeverSpecialization.Test.findings(in: source)
+        let findings = Lint.Rule.`generic throws missing never Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 }

@@ -13,28 +13,25 @@ import Testing
 import SwiftSyntax
 import SwiftParser
 import Linter_Primitives
+import Linter_Rules_Test_Support
 @testable import Linter_Rule_Idiom
 
-extension Lint.Rule.Idiom.StringUTF8Scanning {
+extension Lint.Rule {
     @Suite
-    struct Test {
+    struct `string utf8 scanning Tests` {
         @Suite struct Unit {}
         @Suite struct `Edge Case` {}
     }
 }
 
-extension Lint.Rule.Idiom.StringUTF8Scanning.Test {
+extension Lint.Rule.`string utf8 scanning Tests` {
     static func findings(in source: String, file: String = "test.swift") -> [Diagnostic.Record] {
-        let tree = Parser.parse(source: source)
-        let converter = SourceLocationConverter(fileName: file, tree: tree)
-        var manager = Source.Manager()
-        let id = manager.register(fileID: file, filePath: file, content: Array(source.utf8))
-        let parsed = Lint.Source.Parsed(file: manager.file(for: id), tree: tree, converter: converter)
-        return Lint.Rule.Idiom.StringUTF8Scanning().findings(in: parsed)
+        let parsed = Lint.Source.parsed(from: source, file: file)
+        return Lint.Rule.`string utf8 scanning`.findings(parsed, .warning)
     }
 }
 
-extension Lint.Rule.Idiom.StringUTF8Scanning.Test.Unit {
+extension Lint.Rule.`string utf8 scanning Tests`.Unit {
     @Test
     func `unicodeScalars firstIndex is flagged`() {
         let source = """
@@ -42,7 +39,7 @@ extension Lint.Rule.Idiom.StringUTF8Scanning.Test.Unit {
             content.unicodeScalars.firstIndex(of: "\\n")
         }
         """
-        let findings = Lint.Rule.Idiom.StringUTF8Scanning.Test.findings(in: source)
+        let findings = Lint.Rule.`string utf8 scanning Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
             #expect(findings[0].identifier == "string_utf8_scanning")
@@ -59,7 +56,7 @@ extension Lint.Rule.Idiom.StringUTF8Scanning.Test.Unit {
             }
         }
         """
-        let findings = Lint.Rule.Idiom.StringUTF8Scanning.Test.findings(in: source)
+        let findings = Lint.Rule.`string utf8 scanning Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -70,12 +67,12 @@ extension Lint.Rule.Idiom.StringUTF8Scanning.Test.Unit {
             a.unicodeScalars.count == b.unicodeScalars.count
         }
         """
-        let findings = Lint.Rule.Idiom.StringUTF8Scanning.Test.findings(in: source)
+        let findings = Lint.Rule.`string utf8 scanning Tests`.findings(in: source)
         #expect(findings.count == 2)
     }
 }
 
-extension Lint.Rule.Idiom.StringUTF8Scanning.Test.`Edge Case` {
+extension Lint.Rule.`string utf8 scanning Tests`.`Edge Case` {
     @Test
     func `utf8 access is NOT flagged`() {
         let source = """
@@ -83,7 +80,7 @@ extension Lint.Rule.Idiom.StringUTF8Scanning.Test.`Edge Case` {
             content.utf8.firstIndex(of: 0x0A)
         }
         """
-        let findings = Lint.Rule.Idiom.StringUTF8Scanning.Test.findings(in: source)
+        let findings = Lint.Rule.`string utf8 scanning Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -94,7 +91,7 @@ extension Lint.Rule.Idiom.StringUTF8Scanning.Test.`Edge Case` {
             content.first
         }
         """
-        let findings = Lint.Rule.Idiom.StringUTF8Scanning.Test.findings(in: source)
+        let findings = Lint.Rule.`string utf8 scanning Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -106,7 +103,7 @@ extension Lint.Rule.Idiom.StringUTF8Scanning.Test.`Edge Case` {
             content.utf16
         }
         """
-        let findings = Lint.Rule.Idiom.StringUTF8Scanning.Test.findings(in: source)
+        let findings = Lint.Rule.`string utf8 scanning Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -121,7 +118,7 @@ extension Lint.Rule.Idiom.StringUTF8Scanning.Test.`Edge Case` {
         }
         let x = Custom().unicodeScalars
         """
-        let findings = Lint.Rule.Idiom.StringUTF8Scanning.Test.findings(in: source)
+        let findings = Lint.Rule.`string utf8 scanning Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 }

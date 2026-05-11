@@ -13,11 +13,12 @@ import Testing
 import SwiftSyntax
 import SwiftParser
 import Linter_Primitives
+import Linter_Rules_Test_Support
 @testable import Linter_Rule_Cardinal
 
-extension Lint.Rule.Cardinal.Count {
+extension Lint.Rule {
     @Suite
-    struct Test {
+    struct `count minus one Tests` {
         @Suite struct Unit {}
         @Suite struct `Edge Case` {}
         @Suite struct Evasion {}
@@ -25,21 +26,17 @@ extension Lint.Rule.Cardinal.Count {
     }
 }
 
-extension Lint.Rule.Cardinal.Count.Test {
+extension Lint.Rule.`count minus one Tests` {
     static func findings(in source: Swift.String, file: Swift.String = "test.swift") -> [Diagnostic.Record] {
-        let tree = Parser.parse(source: source)
-        let converter = SourceLocationConverter(fileName: file, tree: tree)
-        var manager = Source.Manager()
-        let id = manager.register(fileID: file, filePath: file, content: Array(source.utf8))
-        let parsed = Lint.Source.Parsed(file: manager.file(for: id), tree: tree, converter: converter)
-        return Lint.Rule.Cardinal.Count().findings(in: parsed)
+        let parsed = Lint.Source.parsed(from: source, file: file)
+        return Lint.Rule.`count minus one`.findings(parsed, .warning)
     }
 }
 
-extension Lint.Rule.Cardinal.Count.Test.Unit {
+extension Lint.Rule.`count minus one Tests`.Unit {
     @Test
     func `Member-access seq.count - 1 is flagged`() {
-        let findings = Lint.Rule.Cardinal.Count.Test.findings(in: "let n = seq.count - 1")
+        let findings = Lint.Rule.`count minus one Tests`.findings(in: "let n = seq.count - 1")
         let count = findings.count
         #expect(count == 1)
         if count == 1 {
@@ -50,20 +47,15 @@ extension Lint.Rule.Cardinal.Count.Test.Unit {
 
     @Test
     func `Member-access on local arr.count - 1 is flagged`() {
-        let findings = Lint.Rule.Cardinal.Count.Test.findings(in: "let n = arr.count - 1")
+        let findings = Lint.Rule.`count minus one Tests`.findings(in: "let n = arr.count - 1")
         #expect(findings.count == 1)
     }
 
     @Test
     func `Custom severity is honored`() {
         let source = "let n = seq.count - 1"
-        let tree = Parser.parse(source: source)
-        let converter = SourceLocationConverter(fileName: "test.swift", tree: tree)
-        var manager = Source.Manager()
-        let id = manager.register(fileID: "test.swift", filePath: "test.swift", content: Array(source.utf8))
-        let parsed = Lint.Source.Parsed(file: manager.file(for: id), tree: tree, converter: converter)
-        let rule = Lint.Rule.Cardinal.Count(severity: .error)
-        let findings = rule.findings(in: parsed)
+        let parsed = Lint.Source.parsed(from: source)
+        let findings = Lint.Rule.`count minus one`.findings(parsed, .error)
         #expect(findings.count == 1)
         if findings.count == 1 {
             #expect(findings[0].severity == .error)
@@ -71,46 +63,46 @@ extension Lint.Rule.Cardinal.Count.Test.Unit {
     }
 }
 
-extension Lint.Rule.Cardinal.Count.Test.Evasion {
+extension Lint.Rule.`count minus one Tests`.Evasion {
     @Test
     func `Paren-wrapped (seq.count - 1) is flagged`() {
-        let findings = Lint.Rule.Cardinal.Count.Test.findings(in: "let n = (seq.count - 1)")
+        let findings = Lint.Rule.`count minus one Tests`.findings(in: "let n = (seq.count - 1)")
         #expect(findings.count == 1)
     }
 
     @Test
     func `Cast-outside Double(seq.count) - 1 is flagged`() {
-        let findings = Lint.Rule.Cardinal.Count.Test.findings(in: "let n = Double(seq.count) - 1")
+        let findings = Lint.Rule.`count minus one Tests`.findings(in: "let n = Double(seq.count) - 1")
         #expect(findings.count == 1)
     }
 
     @Test
     func `Algebraic-flip i + 1 less-than seq.count is flagged`() {
-        let findings = Lint.Rule.Cardinal.Count.Test.findings(in: "if i + 1 < seq.count { }")
+        let findings = Lint.Rule.`count minus one Tests`.findings(in: "if i + 1 < seq.count { }")
         #expect(findings.count == 1)
     }
 
     @Test
     func `Algebraic-flip distance + 1 equals seq.count is flagged`() {
-        let findings = Lint.Rule.Cardinal.Count.Test.findings(in: "if distance + 1 == seq.count { }")
+        let findings = Lint.Rule.`count minus one Tests`.findings(in: "if distance + 1 == seq.count { }")
         #expect(findings.count == 1)
     }
 
     @Test
     func `Algebraic-flip seq.count greater-than i + 1 is flagged`() {
-        let findings = Lint.Rule.Cardinal.Count.Test.findings(in: "if seq.count > i + 1 { }")
+        let findings = Lint.Rule.`count minus one Tests`.findings(in: "if seq.count > i + 1 { }")
         #expect(findings.count == 1)
     }
 
     @Test
     func `Algebraic-flip with 1 + i (commutative) is flagged`() {
-        let findings = Lint.Rule.Cardinal.Count.Test.findings(in: "if 1 + i < seq.count { }")
+        let findings = Lint.Rule.`count minus one Tests`.findings(in: "if 1 + i < seq.count { }")
         #expect(findings.count == 1)
     }
 
     @Test
     func `Operand-reorder seq.count - i - 1 is flagged`() {
-        let findings = Lint.Rule.Cardinal.Count.Test.findings(in: "let n = seq.count - i - 1")
+        let findings = Lint.Rule.`count minus one Tests`.findings(in: "let n = seq.count - i - 1")
         #expect(findings.count >= 1)
     }
 
@@ -120,39 +112,39 @@ extension Lint.Rule.Cardinal.Count.Test.Evasion {
         // seq.count - 1 is the canonical anti-pattern (this is just prose)
         let x = 42
         """
-        let findings = Lint.Rule.Cardinal.Count.Test.findings(in: source)
+        let findings = Lint.Rule.`count minus one Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 }
 
-extension Lint.Rule.Cardinal.Count.Test.Negative {
+extension Lint.Rule.`count minus one Tests`.Negative {
     @Test
     func `seq.count - 2 is NOT flagged`() {
-        let findings = Lint.Rule.Cardinal.Count.Test.findings(in: "let n = seq.count - 2")
+        let findings = Lint.Rule.`count minus one Tests`.findings(in: "let n = seq.count - 2")
         #expect(findings.isEmpty)
     }
 
     @Test
     func `accountCount - 1 (non-count identifier) is NOT flagged`() {
-        let findings = Lint.Rule.Cardinal.Count.Test.findings(in: "let n = accountCount - 1")
+        let findings = Lint.Rule.`count minus one Tests`.findings(in: "let n = accountCount - 1")
         #expect(findings.isEmpty)
     }
 
     @Test
     func `seq.count + 1 is NOT flagged outside comparison context`() {
-        let findings = Lint.Rule.Cardinal.Count.Test.findings(in: "let n = seq.count + 1")
+        let findings = Lint.Rule.`count minus one Tests`.findings(in: "let n = seq.count + 1")
         #expect(findings.isEmpty)
     }
 
     @Test
     func `i + 1 < limit is NOT flagged when count absent`() {
-        let findings = Lint.Rule.Cardinal.Count.Test.findings(in: "if i + 1 < limit { }")
+        let findings = Lint.Rule.`count minus one Tests`.findings(in: "if i + 1 < limit { }")
         #expect(findings.isEmpty)
     }
 
     @Test
     func `Empty file produces no findings`() {
-        let findings = Lint.Rule.Cardinal.Count.Test.findings(in: "")
+        let findings = Lint.Rule.`count minus one Tests`.findings(in: "")
         #expect(findings.isEmpty)
     }
 
@@ -160,7 +152,7 @@ extension Lint.Rule.Cardinal.Count.Test.Negative {
     func `Bare count - 1 (non-member-access) is NOT flagged`() {
         // Pre-narrowing the rule walked tokens for any identifier `count`;
         // post-narrowing only `<expr>.count` member-access form fires.
-        let findings = Lint.Rule.Cardinal.Count.Test.findings(in: "let n = count - 1")
+        let findings = Lint.Rule.`count minus one Tests`.findings(in: "let n = count - 1")
         #expect(findings.isEmpty)
     }
 
@@ -170,7 +162,7 @@ extension Lint.Rule.Cardinal.Count.Test.Negative {
         let count = i
         let last = count - 1
         """
-        let findings = Lint.Rule.Cardinal.Count.Test.findings(in: source)
+        let findings = Lint.Rule.`count minus one Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -181,21 +173,21 @@ extension Lint.Rule.Cardinal.Count.Test.Negative {
             _ = count - 1
         }
         """
-        let findings = Lint.Rule.Cardinal.Count.Test.findings(in: source)
+        let findings = Lint.Rule.`count minus one Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 }
 
-extension Lint.Rule.Cardinal.Count.Test.`Edge Case` {
+extension Lint.Rule.`count minus one Tests`.`Edge Case` {
     @Test
     func `seq.count - 1 inside string literal is NOT flagged`() {
-        let findings = Lint.Rule.Cardinal.Count.Test.findings(in: #"let s = "seq.count - 1""#)
+        let findings = Lint.Rule.`count minus one Tests`.findings(in: #"let s = "seq.count - 1""#)
         #expect(findings.isEmpty)
     }
 
     @Test
     func `Nested expression let n = (a + b) + (seq.count - 1) is flagged`() {
-        let findings = Lint.Rule.Cardinal.Count.Test.findings(in: "let n = (a + b) + (seq.count - 1)")
+        let findings = Lint.Rule.`count minus one Tests`.findings(in: "let n = (a + b) + (seq.count - 1)")
         #expect(findings.count == 1)
     }
 
@@ -207,7 +199,7 @@ extension Lint.Rule.Cardinal.Count.Test.`Edge Case` {
             doSomething()
         }
         """
-        let findings = Lint.Rule.Cardinal.Count.Test.findings(in: source)
+        let findings = Lint.Rule.`count minus one Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 }

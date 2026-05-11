@@ -13,28 +13,25 @@ import Testing
 import SwiftSyntax
 import SwiftParser
 import Linter_Primitives
+import Linter_Rules_Test_Support
 @testable import Linter_Rule_Idiom
 
-extension Lint.Rule.Idiom.EnumeratedSubscript {
+extension Lint.Rule {
     @Suite
-    struct Test {
+    struct `enumerated with subscript Tests` {
         @Suite struct Unit {}
         @Suite struct `Edge Case` {}
     }
 }
 
-extension Lint.Rule.Idiom.EnumeratedSubscript.Test {
+extension Lint.Rule.`enumerated with subscript Tests` {
     static func findings(in source: String, file: String = "test.swift") -> [Diagnostic.Record] {
-        let tree = Parser.parse(source: source)
-        let converter = SourceLocationConverter(fileName: file, tree: tree)
-        var manager = Source.Manager()
-        let id = manager.register(fileID: file, filePath: file, content: Array(source.utf8))
-        let parsed = Lint.Source.Parsed(file: manager.file(for: id), tree: tree, converter: converter)
-        return Lint.Rule.Idiom.EnumeratedSubscript().findings(in: parsed)
+        let parsed = Lint.Source.parsed(from: source, file: file)
+        return Lint.Rule.`enumerated with subscript`.findings(parsed, .warning)
     }
 }
 
-extension Lint.Rule.Idiom.EnumeratedSubscript.Test.Unit {
+extension Lint.Rule.`enumerated with subscript Tests`.Unit {
     @Test
     func `enumerated subscript pattern is flagged`() {
         let source = """
@@ -44,7 +41,7 @@ extension Lint.Rule.Idiom.EnumeratedSubscript.Test.Unit {
             }
         }
         """
-        let findings = Lint.Rule.Idiom.EnumeratedSubscript.Test.findings(in: source)
+        let findings = Lint.Rule.`enumerated with subscript Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
             #expect(findings[0].identifier == "enumerated_subscript_collection")
@@ -52,7 +49,7 @@ extension Lint.Rule.Idiom.EnumeratedSubscript.Test.Unit {
     }
 }
 
-extension Lint.Rule.Idiom.EnumeratedSubscript.Test.`Edge Case` {
+extension Lint.Rule.`enumerated with subscript Tests`.`Edge Case` {
     @Test
     func `enumerated without subscript-by-i is NOT flagged`() {
         let source = """
@@ -62,7 +59,7 @@ extension Lint.Rule.Idiom.EnumeratedSubscript.Test.`Edge Case` {
             }
         }
         """
-        let findings = Lint.Rule.Idiom.EnumeratedSubscript.Test.findings(in: source)
+        let findings = Lint.Rule.`enumerated with subscript Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -75,7 +72,7 @@ extension Lint.Rule.Idiom.EnumeratedSubscript.Test.`Edge Case` {
             }
         }
         """
-        let findings = Lint.Rule.Idiom.EnumeratedSubscript.Test.findings(in: source)
+        let findings = Lint.Rule.`enumerated with subscript Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -86,7 +83,7 @@ extension Lint.Rule.Idiom.EnumeratedSubscript.Test.`Edge Case` {
             items.forEach { use($0) }
         }
         """
-        let findings = Lint.Rule.Idiom.EnumeratedSubscript.Test.findings(in: source)
+        let findings = Lint.Rule.`enumerated with subscript Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 }

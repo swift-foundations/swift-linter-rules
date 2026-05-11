@@ -13,27 +13,24 @@ import Testing
 import SwiftSyntax
 import SwiftParser
 import Linter_Primitives
+import Linter_Rules_Test_Support
 @testable import Linter_Rule_Memory
 
-extension Lint.Rule.Memory.PrivateUnsafeStorage {
+extension Lint.Rule {
     @Suite
-    struct Test {
+    struct `unsafe storage visibility Tests` {
         @Suite struct Unit {}
     }
 }
 
-extension Lint.Rule.Memory.PrivateUnsafeStorage.Test {
-    static func findings(in source: String, file: String = "Sources/X/Test.swift") -> [Diagnostic.Record] {
-        let tree = Parser.parse(source: source)
-        let converter = SourceLocationConverter(fileName: file, tree: tree)
-        var manager = Source.Manager()
-        let id = manager.register(fileID: file, filePath: file, content: Array(source.utf8))
-        let parsed = Lint.Source.Parsed(file: manager.file(for: id), tree: tree, converter: converter)
-        return Lint.Rule.Memory.PrivateUnsafeStorage().findings(in: parsed)
+extension Lint.Rule.`unsafe storage visibility Tests` {
+    static func findings(in source: Swift.String, file: Swift.String = "Sources/X/Test.swift") -> [Diagnostic.Record] {
+        let parsed = Lint.Source.parsed(from: source, file: file)
+        return Lint.Rule.`unsafe storage visibility`.findings(parsed, .warning)
     }
 }
 
-extension Lint.Rule.Memory.PrivateUnsafeStorage.Test.Unit {
+extension Lint.Rule.`unsafe storage visibility Tests`.Unit {
     @Test
     func `public unsafe pointer property is flagged`() {
         let source = """
@@ -41,7 +38,7 @@ extension Lint.Rule.Memory.PrivateUnsafeStorage.Test.Unit {
             public let storage: UnsafeMutablePointer<UInt8>
         }
         """
-        let findings = Lint.Rule.Memory.PrivateUnsafeStorage.Test.findings(in: source)
+        let findings = Lint.Rule.`unsafe storage visibility Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -52,7 +49,7 @@ extension Lint.Rule.Memory.PrivateUnsafeStorage.Test.Unit {
             private let storage: UnsafeMutablePointer<UInt8>
         }
         """
-        let findings = Lint.Rule.Memory.PrivateUnsafeStorage.Test.findings(in: source)
+        let findings = Lint.Rule.`unsafe storage visibility Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -63,7 +60,7 @@ extension Lint.Rule.Memory.PrivateUnsafeStorage.Test.Unit {
             let storage: UnsafeMutablePointer<UInt8>
         }
         """
-        let findings = Lint.Rule.Memory.PrivateUnsafeStorage.Test.findings(in: source)
+        let findings = Lint.Rule.`unsafe storage visibility Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -74,7 +71,7 @@ extension Lint.Rule.Memory.PrivateUnsafeStorage.Test.Unit {
             @unsafe public let storage: UnsafeMutablePointer<UInt8>
         }
         """
-        let findings = Lint.Rule.Memory.PrivateUnsafeStorage.Test.findings(in: source)
+        let findings = Lint.Rule.`unsafe storage visibility Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -85,7 +82,7 @@ extension Lint.Rule.Memory.PrivateUnsafeStorage.Test.Unit {
             public let count: Int
         }
         """
-        let findings = Lint.Rule.Memory.PrivateUnsafeStorage.Test.findings(in: source)
+        let findings = Lint.Rule.`unsafe storage visibility Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -96,7 +93,7 @@ extension Lint.Rule.Memory.PrivateUnsafeStorage.Test.Unit {
             public let storage: UnsafeMutablePointer<UInt8>?
         }
         """
-        let findings = Lint.Rule.Memory.PrivateUnsafeStorage.Test.findings(in: source)
+        let findings = Lint.Rule.`unsafe storage visibility Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -109,7 +106,7 @@ extension Lint.Rule.Memory.PrivateUnsafeStorage.Test.Unit {
             public let buf: UnsafeBufferPointer<UInt8>
         }
         """
-        let findings = Lint.Rule.Memory.PrivateUnsafeStorage.Test.findings(in: source)
+        let findings = Lint.Rule.`unsafe storage visibility Tests`.findings(in: source)
         #expect(findings.count == 3)
     }
 }

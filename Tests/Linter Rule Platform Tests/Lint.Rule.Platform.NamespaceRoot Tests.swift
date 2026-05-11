@@ -13,34 +13,31 @@ import Testing
 import SwiftSyntax
 import SwiftParser
 import Linter_Primitives
+import Linter_Rules_Test_Support
 @testable import Linter_Rule_Platform
 
-extension Lint.Rule.Platform.NamespaceRoot {
+extension Lint.Rule {
     @Suite
-    struct Test {
+    struct `compound platform namespace root Tests` {
         @Suite struct Unit {}
         @Suite struct `Edge Case` {}
     }
 }
 
-extension Lint.Rule.Platform.NamespaceRoot.Test {
-    static func findings(in source: String, file: String = "test.swift") -> [Diagnostic.Record] {
-        let tree = Parser.parse(source: source)
-        let converter = SourceLocationConverter(fileName: file, tree: tree)
-        var manager = Source.Manager()
-        let id = manager.register(fileID: file, filePath: file, content: Array(source.utf8))
-        let parsed = Lint.Source.Parsed(file: manager.file(for: id), tree: tree, converter: converter)
-        return Lint.Rule.Platform.NamespaceRoot().findings(in: parsed)
+extension Lint.Rule.`compound platform namespace root Tests` {
+    static func findings(in source: Swift.String, file: Swift.String = "test.swift") -> [Diagnostic.Record] {
+        let parsed = Lint.Source.parsed(from: source, file: file)
+        return Lint.Rule.`compound platform namespace root`.findings(parsed, .warning)
     }
 }
 
-extension Lint.Rule.Platform.NamespaceRoot.Test.Unit {
+extension Lint.Rule.`compound platform namespace root Tests`.Unit {
     @Test
     func `LinuxKernel compound name is flagged`() {
         let source = """
         public enum LinuxKernel {}
         """
-        let findings = Lint.Rule.Platform.NamespaceRoot.Test.findings(in: source)
+        let findings = Lint.Rule.`compound platform namespace root Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
             #expect(findings[0].identifier == "namespace_root_compound_platform")
@@ -52,18 +49,18 @@ extension Lint.Rule.Platform.NamespaceRoot.Test.Unit {
         let source = """
         public enum KqueueEventNotification {}
         """
-        let findings = Lint.Rule.Platform.NamespaceRoot.Test.findings(in: source)
+        let findings = Lint.Rule.`compound platform namespace root Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 }
 
-extension Lint.Rule.Platform.NamespaceRoot.Test.`Edge Case` {
+extension Lint.Rule.`compound platform namespace root Tests`.`Edge Case` {
     @Test
     func `Kernel namespace alone is NOT flagged`() {
         let source = """
         public enum Kernel {}
         """
-        let findings = Lint.Rule.Platform.NamespaceRoot.Test.findings(in: source)
+        let findings = Lint.Rule.`compound platform namespace root Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -74,7 +71,7 @@ extension Lint.Rule.Platform.NamespaceRoot.Test.`Edge Case` {
             public enum Uring {}
         }
         """
-        let findings = Lint.Rule.Platform.NamespaceRoot.Test.findings(in: source)
+        let findings = Lint.Rule.`compound platform namespace root Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -85,7 +82,7 @@ extension Lint.Rule.Platform.NamespaceRoot.Test.`Edge Case` {
             public enum LinuxKernel {}
         }
         """
-        let findings = Lint.Rule.Platform.NamespaceRoot.Test.findings(in: source)
+        let findings = Lint.Rule.`compound platform namespace root Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 }

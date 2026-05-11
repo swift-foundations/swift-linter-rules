@@ -13,34 +13,31 @@ import Testing
 import SwiftSyntax
 import SwiftParser
 import Linter_Primitives
+import Linter_Rules_Test_Support
 @testable import Linter_Rule_Testing
 
-extension Lint.Rule.Testing.FunctionNaming {
+extension Lint.Rule {
     @Suite
-    struct Test {
+    struct `test function naming Tests` {
         @Suite struct Unit {}
     }
 }
 
-extension Lint.Rule.Testing.FunctionNaming.Test {
+extension Lint.Rule.`test function naming Tests` {
     static func findings(in source: String, file: String = "Sources/X/Test.swift") -> [Diagnostic.Record] {
-        let tree = Parser.parse(source: source)
-        let converter = SourceLocationConverter(fileName: file, tree: tree)
-        var manager = Source.Manager()
-        let id = manager.register(fileID: file, filePath: file, content: Array(source.utf8))
-        let parsed = Lint.Source.Parsed(file: manager.file(for: id), tree: tree, converter: converter)
-        return Lint.Rule.Testing.FunctionNaming().findings(in: parsed)
+        let parsed = Lint.Source.parsed(from: source, file: file)
+        return Lint.Rule.`test function naming`.findings(parsed, .warning)
     }
 }
 
-extension Lint.Rule.Testing.FunctionNaming.Test.Unit {
+extension Lint.Rule.`test function naming Tests`.Unit {
     @Test
     func `Test func with backticked descriptive name is permitted`() {
         let source = """
         @Test
         func `init creates empty buffer`() {}
         """
-        let findings = Lint.Rule.Testing.FunctionNaming.Test.findings(in: source)
+        let findings = Lint.Rule.`test function naming Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -50,7 +47,7 @@ extension Lint.Rule.Testing.FunctionNaming.Test.Unit {
         @Test
         func testInitCreatesEmptyBuffer() {}
         """
-        let findings = Lint.Rule.Testing.FunctionNaming.Test.findings(in: source)
+        let findings = Lint.Rule.`test function naming Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -59,7 +56,7 @@ extension Lint.Rule.Testing.FunctionNaming.Test.Unit {
         let source = """
         func helperFunction() {}
         """
-        let findings = Lint.Rule.Testing.FunctionNaming.Test.findings(in: source)
+        let findings = Lint.Rule.`test function naming Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -69,7 +66,7 @@ extension Lint.Rule.Testing.FunctionNaming.Test.Unit {
         @Test
         func `Memory.Address from UnsafeRawPointer preserves identity`() {}
         """
-        let findings = Lint.Rule.Testing.FunctionNaming.Test.findings(in: source)
+        let findings = Lint.Rule.`test function naming Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -79,7 +76,7 @@ extension Lint.Rule.Testing.FunctionNaming.Test.Unit {
         @Test(.tags(.fast))
         func runStuff() {}
         """
-        let findings = Lint.Rule.Testing.FunctionNaming.Test.findings(in: source)
+        let findings = Lint.Rule.`test function naming Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 }

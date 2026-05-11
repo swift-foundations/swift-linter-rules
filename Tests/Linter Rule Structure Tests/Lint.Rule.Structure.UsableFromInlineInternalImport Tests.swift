@@ -13,28 +13,25 @@ import Testing
 import SwiftSyntax
 import SwiftParser
 import Linter_Primitives
+import Linter_Rules_Test_Support
 @testable import Linter_Rule_Structure
 
-extension Lint.Rule.Structure.UsableFromInlineInternalImport {
+extension Lint.Rule {
     @Suite
-    struct Test {
+    struct `usable from inline internal import Tests` {
         @Suite struct Unit {}
         @Suite struct `Edge Case` {}
     }
 }
 
-extension Lint.Rule.Structure.UsableFromInlineInternalImport.Test {
+extension Lint.Rule.`usable from inline internal import Tests` {
     static func findings(in source: String, file: String = "test.swift") -> [Diagnostic.Record] {
-        let tree = Parser.parse(source: source)
-        let converter = SourceLocationConverter(fileName: file, tree: tree)
-        var manager = Source.Manager()
-        let id = manager.register(fileID: file, filePath: file, content: Array(source.utf8))
-        let parsed = Lint.Source.Parsed(file: manager.file(for: id), tree: tree, converter: converter)
-        return Lint.Rule.Structure.UsableFromInlineInternalImport().findings(in: parsed)
+        let parsed = Lint.Source.parsed(from: source, file: file)
+        return Lint.Rule.`usable from inline internal import`.findings(parsed, .warning)
     }
 }
 
-extension Lint.Rule.Structure.UsableFromInlineInternalImport.Test.Unit {
+extension Lint.Rule.`usable from inline internal import Tests`.Unit {
     @Test
     func `usableFromInline plus internal import is flagged`() {
         let source = """
@@ -43,7 +40,7 @@ extension Lint.Rule.Structure.UsableFromInlineInternalImport.Test.Unit {
         @usableFromInline
         func helper() -> Int { 0 }
         """
-        let findings = Lint.Rule.Structure.UsableFromInlineInternalImport.Test.findings(in: source)
+        let findings = Lint.Rule.`usable from inline internal import Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
             #expect(findings[0].identifier == "usable_from_inline_internal_import")
@@ -60,19 +57,19 @@ extension Lint.Rule.Structure.UsableFromInlineInternalImport.Test.Unit {
         @usableFromInline
         let x: Int = 0
         """
-        let findings = Lint.Rule.Structure.UsableFromInlineInternalImport.Test.findings(in: source)
+        let findings = Lint.Rule.`usable from inline internal import Tests`.findings(in: source)
         #expect(findings.count == 2)
     }
 }
 
-extension Lint.Rule.Structure.UsableFromInlineInternalImport.Test.`Edge Case` {
+extension Lint.Rule.`usable from inline internal import Tests`.`Edge Case` {
     @Test
     func `usableFromInline alone is NOT flagged`() {
         let source = """
         @usableFromInline
         func helper() -> Int { 0 }
         """
-        let findings = Lint.Rule.Structure.UsableFromInlineInternalImport.Test.findings(in: source)
+        let findings = Lint.Rule.`usable from inline internal import Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -83,7 +80,7 @@ extension Lint.Rule.Structure.UsableFromInlineInternalImport.Test.`Edge Case` {
 
         func helper() -> Int { 0 }
         """
-        let findings = Lint.Rule.Structure.UsableFromInlineInternalImport.Test.findings(in: source)
+        let findings = Lint.Rule.`usable from inline internal import Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -95,7 +92,7 @@ extension Lint.Rule.Structure.UsableFromInlineInternalImport.Test.`Edge Case` {
         @usableFromInline
         func helper() -> Int { 0 }
         """
-        let findings = Lint.Rule.Structure.UsableFromInlineInternalImport.Test.findings(in: source)
+        let findings = Lint.Rule.`usable from inline internal import Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 }

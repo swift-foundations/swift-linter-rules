@@ -13,33 +13,30 @@ import Testing
 import SwiftSyntax
 import SwiftParser
 import Linter_Primitives
+import Linter_Rules_Test_Support
 @testable import Linter_Rule_Testing
 
-extension Lint.Rule.Testing.CompoundSuiteName {
+extension Lint.Rule {
     @Suite
-    struct Test {
+    struct `compound suite name Tests` {
         @Suite struct Unit {}
     }
 }
 
-extension Lint.Rule.Testing.CompoundSuiteName.Test {
+extension Lint.Rule.`compound suite name Tests` {
     static func findings(in source: String, file: String = "Sources/X/Test.swift") -> [Diagnostic.Record] {
-        let tree = Parser.parse(source: source)
-        let converter = SourceLocationConverter(fileName: file, tree: tree)
-        var manager = Source.Manager()
-        let id = manager.register(fileID: file, filePath: file, content: Array(source.utf8))
-        let parsed = Lint.Source.Parsed(file: manager.file(for: id), tree: tree, converter: converter)
-        return Lint.Rule.Testing.CompoundSuiteName().findings(in: parsed)
+        let parsed = Lint.Source.parsed(from: source, file: file)
+        return Lint.Rule.`compound suite name`.findings(parsed, .warning)
     }
 }
 
-extension Lint.Rule.Testing.CompoundSuiteName.Test.Unit {
+extension Lint.Rule.`compound suite name Tests`.Unit {
     @Test
     func `Suite with compound name FooTests is flagged`() {
         let source = """
         @Suite struct MemoryBufferTests {}
         """
-        let findings = Lint.Rule.Testing.CompoundSuiteName.Test.findings(in: source)
+        let findings = Lint.Rule.`compound suite name Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -48,7 +45,7 @@ extension Lint.Rule.Testing.CompoundSuiteName.Test.Unit {
         let source = """
         @Suite struct Test {}
         """
-        let findings = Lint.Rule.Testing.CompoundSuiteName.Test.findings(in: source)
+        let findings = Lint.Rule.`compound suite name Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -57,7 +54,7 @@ extension Lint.Rule.Testing.CompoundSuiteName.Test.Unit {
         let source = """
         @Suite struct Performance {}
         """
-        let findings = Lint.Rule.Testing.CompoundSuiteName.Test.findings(in: source)
+        let findings = Lint.Rule.`compound suite name Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -66,7 +63,7 @@ extension Lint.Rule.Testing.CompoundSuiteName.Test.Unit {
         let source = """
         @Suite struct Unit {}
         """
-        let findings = Lint.Rule.Testing.CompoundSuiteName.Test.findings(in: source)
+        let findings = Lint.Rule.`compound suite name Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -75,7 +72,7 @@ extension Lint.Rule.Testing.CompoundSuiteName.Test.Unit {
         let source = """
         struct MemoryBufferTests {}
         """
-        let findings = Lint.Rule.Testing.CompoundSuiteName.Test.findings(in: source)
+        let findings = Lint.Rule.`compound suite name Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -84,7 +81,7 @@ extension Lint.Rule.Testing.CompoundSuiteName.Test.Unit {
         let source = """
         @Suite struct Integration {}
         """
-        let findings = Lint.Rule.Testing.CompoundSuiteName.Test.findings(in: source)
+        let findings = Lint.Rule.`compound suite name Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -93,7 +90,7 @@ extension Lint.Rule.Testing.CompoundSuiteName.Test.Unit {
         let source = """
         @Suite struct MyAPIChecks {}
         """
-        let findings = Lint.Rule.Testing.CompoundSuiteName.Test.findings(in: source)
+        let findings = Lint.Rule.`compound suite name Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 }

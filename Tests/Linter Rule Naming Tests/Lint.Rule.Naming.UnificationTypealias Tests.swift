@@ -13,34 +13,31 @@ import Testing
 import SwiftSyntax
 import SwiftParser
 import Linter_Primitives
+import Linter_Rules_Test_Support
 @testable import Linter_Rule_Naming
 
-extension Lint.Rule.Naming.UnificationTypealias {
+extension Lint.Rule {
     @Suite
-    struct Test {
+    struct `unification typealias Tests` {
         @Suite struct Unit {}
         @Suite struct `Edge Case` {}
     }
 }
 
-extension Lint.Rule.Naming.UnificationTypealias.Test {
+extension Lint.Rule.`unification typealias Tests` {
     static func findings(in source: String, file: String = "test.swift") -> [Diagnostic.Record] {
-        let tree = Parser.parse(source: source)
-        let converter = SourceLocationConverter(fileName: file, tree: tree)
-        var manager = Source.Manager()
-        let id = manager.register(fileID: file, filePath: file, content: Array(source.utf8))
-        let parsed = Lint.Source.Parsed(file: manager.file(for: id), tree: tree, converter: converter)
-        return Lint.Rule.Naming.UnificationTypealias().findings(in: parsed)
+        let parsed = Lint.Source.parsed(from: source, file: file)
+        return Lint.Rule.`unification typealias`.findings(parsed, .warning)
     }
 }
 
-extension Lint.Rule.Naming.UnificationTypealias.Test.Unit {
+extension Lint.Rule.`unification typealias Tests`.Unit {
     @Test
     func `rename-bridge typealias is flagged`() {
         let source = """
         public typealias SourceLocation = Text.Location
         """
-        let findings = Lint.Rule.Naming.UnificationTypealias.Test.findings(in: source)
+        let findings = Lint.Rule.`unification typealias Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
             #expect(findings[0].identifier == "unification_bridge_typealias")
@@ -48,14 +45,14 @@ extension Lint.Rule.Naming.UnificationTypealias.Test.Unit {
     }
 }
 
-extension Lint.Rule.Naming.UnificationTypealias.Test.`Edge Case` {
+extension Lint.Rule.`unification typealias Tests`.`Edge Case` {
     @Test
     func `same-leaf typealias is NOT flagged`() {
         // Handled by [API-NAME-004a] NamespaceAdoption instead.
         let source = """
         public typealias Event = Kernel.Event
         """
-        let findings = Lint.Rule.Naming.UnificationTypealias.Test.findings(in: source)
+        let findings = Lint.Rule.`unification typealias Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -64,7 +61,7 @@ extension Lint.Rule.Naming.UnificationTypealias.Test.`Edge Case` {
         let source = """
         public typealias IntArray = Array<Int>
         """
-        let findings = Lint.Rule.Naming.UnificationTypealias.Test.findings(in: source)
+        let findings = Lint.Rule.`unification typealias Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -73,7 +70,7 @@ extension Lint.Rule.Naming.UnificationTypealias.Test.`Edge Case` {
         let source = """
         public typealias Counter = Int
         """
-        let findings = Lint.Rule.Naming.UnificationTypealias.Test.findings(in: source)
+        let findings = Lint.Rule.`unification typealias Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 }

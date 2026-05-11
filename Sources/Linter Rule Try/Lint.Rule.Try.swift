@@ -12,9 +12,7 @@
 public import Linter_Primitives
 internal import SwiftSyntax
 
-/// Wave-1 — `try?` swallows typed errors.
-///
-/// Citation: `feedback_prefer_typed_throws_over_try_optional`.
+/// `try?` swallows typed errors.
 ///
 /// `try?` converts a thrown error into a `nil` Optional, erasing both the
 /// error type and the error instance. The institute convention prefers
@@ -26,68 +24,62 @@ internal import SwiftSyntax
 /// AST shape: `TryExprSyntax` whose `questionOrExclamationMark.tokenKind`
 /// is `.postfixQuestionMark`.
 extension Lint.Rule {
-    public struct Try: Lint.Rule.`Protocol` {
-        public static let id: Lint.Rule.ID = "try_optional"
-        public static let defaultSeverity: Diagnostic.Severity = .warning
-
-        public let severity: Diagnostic.Severity
-
-        @inlinable
-        public init(severity: Diagnostic.Severity = .warning) {
-            self.severity = severity
-        }
-
-        public func findings(in source: Lint.Source.Parsed) -> [Diagnostic.Record] {
-            let visitor = Visitor(source: source.file, severity: severity, converter: source.converter)
+    public static let `try optional` = Lint.Rule(
+        id: "try_optional",
+        defaultSeverity: .warning,
+        findings: { source, severity in
+            let visitor = TryOptionalVisitor(
+                source: source.file,
+                severity: severity,
+                converter: source.converter
+            )
             visitor.walk(source.tree)
             return visitor.matches
         }
-    }
+    )
 }
 
-extension Lint.Rule.Try {
-    @usableFromInline
-    static let message: Swift.String =
-        "[try_optional] feedback_prefer_typed_throws_over_try_optional: "
-        + "`try?` swallows the thrown error and returns `nil`, erasing both the error type "
-        + "and the error instance. Prefer typed throws (`throws(E)`) so the error path stays "
-        + "explicit and recoverable. Past incident: `try? input.advance()` swallowed `EAGAIN` "
-        + "causing the Linux hot-spin in the IO Notification.wait() site. If you genuinely "
-        + "want to discard the error, use `do { ... } catch { }` so the discard is local "
-        + "and visible."
+@usableFromInline
+internal let tryOptionalMessage: Swift.String =
+    "[try_optional] feedback_prefer_typed_throws_over_try_optional: "
+    + "`try?` swallows the thrown error and returns `nil`, erasing both the error type "
+    + "and the error instance. Prefer typed throws (`throws(E)`) so the error path stays "
+    + "explicit and recoverable. Past incident: `try? input.advance()` swallowed `EAGAIN` "
+    + "causing the Linux hot-spin in the IO Notification.wait() site. If you genuinely "
+    + "want to discard the error, use `do { ... } catch { }` so the discard is local "
+    + "and visible."
 
-    final class Visitor: SyntaxVisitor {
-        let source: Source.File
-        let severity: Diagnostic.Severity
-        let converter: SourceLocationConverter
-        var matches: [Diagnostic.Record] = []
+internal final class TryOptionalVisitor: SyntaxVisitor {
+    let source: Source.File
+    let severity: Diagnostic.Severity
+    let converter: SourceLocationConverter
+    var matches: [Diagnostic.Record] = []
 
-        init(source: Source.File, severity: Diagnostic.Severity, converter: SourceLocationConverter) {
-            self.source = source
-            self.severity = severity
-            self.converter = converter
-            super.init(viewMode: .sourceAccurate)
-        }
+    init(source: Source.File, severity: Diagnostic.Severity, converter: SourceLocationConverter) {
+        self.source = source
+        self.severity = severity
+        self.converter = converter
+        super.init(viewMode: .sourceAccurate)
+    }
 
-        override func visit(_ node: TryExprSyntax) -> SyntaxVisitorContinueKind {
-            guard let mark = node.questionOrExclamationMark,
-                  mark.tokenKind == .postfixQuestionMark
-            else {
-                return .visitChildren
-            }
-            let location = converter.location(for: mark.positionAfterSkippingLeadingTrivia)
-            matches.append(Diagnostic.Record(
-                location: Source.Location(
-                    fileID: source.fileID,
-                    filePath: source.filePath,
-                    line: location.line,
-                    column: location.column
-                ),
-                severity: severity,
-                identifier: Lint.Rule.Try.id.underlying,
-                message: Lint.Rule.Try.message
-            ))
+    override func visit(_ node: TryExprSyntax) -> SyntaxVisitorContinueKind {
+        guard let mark = node.questionOrExclamationMark,
+              mark.tokenKind == .postfixQuestionMark
+        else {
             return .visitChildren
         }
+        let location = converter.location(for: mark.positionAfterSkippingLeadingTrivia)
+        matches.append(Diagnostic.Record(
+            location: Source.Location(
+                fileID: source.fileID,
+                filePath: source.filePath,
+                line: location.line,
+                column: location.column
+            ),
+            severity: severity,
+            identifier: "try_optional",
+            message: tryOptionalMessage
+        ))
+        return .visitChildren
     }
 }

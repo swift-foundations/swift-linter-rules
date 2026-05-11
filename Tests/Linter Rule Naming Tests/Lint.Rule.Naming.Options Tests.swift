@@ -13,28 +13,25 @@ import Testing
 import SwiftSyntax
 import SwiftParser
 import Linter_Primitives
+import Linter_Rules_Test_Support
 @testable import Linter_Rule_Naming
 
-extension Lint.Rule.Naming.Options {
+extension Lint.Rule {
     @Suite
-    struct Test {
+    struct `property named flags Tests` {
         @Suite struct Unit {}
         @Suite struct `Edge Case` {}
     }
 }
 
-extension Lint.Rule.Naming.Options.Test {
+extension Lint.Rule.`property named flags Tests` {
     static func findings(in source: String, file: String = "test.swift") -> [Diagnostic.Record] {
-        let tree = Parser.parse(source: source)
-        let converter = SourceLocationConverter(fileName: file, tree: tree)
-        var manager = Source.Manager()
-        let id = manager.register(fileID: file, filePath: file, content: Array(source.utf8))
-        let parsed = Lint.Source.Parsed(file: manager.file(for: id), tree: tree, converter: converter)
-        return Lint.Rule.Naming.Options().findings(in: parsed)
+        let parsed = Lint.Source.parsed(from: source, file: file)
+        return Lint.Rule.`property named flags`.findings(parsed, .warning)
     }
 }
 
-extension Lint.Rule.Naming.Options.Test.Unit {
+extension Lint.Rule.`property named flags Tests`.Unit {
     @Test
     func `OptionSet struct ending in Flags is flagged`() {
         let source = """
@@ -42,7 +39,7 @@ extension Lint.Rule.Naming.Options.Test.Unit {
             let rawValue: Int
         }
         """
-        let findings = Lint.Rule.Naming.Options.Test.findings(in: source)
+        let findings = Lint.Rule.`property named flags Tests`.findings(in: source)
         let count = findings.count
         #expect(count == 1)
         if count == 1 {
@@ -58,7 +55,7 @@ extension Lint.Rule.Naming.Options.Test.Unit {
             let rawValue: Int
         }
         """
-        let findings = Lint.Rule.Naming.Options.Test.findings(in: source)
+        let findings = Lint.Rule.`property named flags Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -69,7 +66,7 @@ extension Lint.Rule.Naming.Options.Test.Unit {
             let rawValue: Int
         }
         """
-        let findings = Lint.Rule.Naming.Options.Test.findings(in: source)
+        let findings = Lint.Rule.`property named flags Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -80,7 +77,7 @@ extension Lint.Rule.Naming.Options.Test.Unit {
         struct BFlags: OptionSet { let rawValue: Int }
         struct CFlags: OptionSet { let rawValue: Int }
         """
-        let findings = Lint.Rule.Naming.Options.Test.findings(in: source)
+        let findings = Lint.Rule.`property named flags Tests`.findings(in: source)
         #expect(findings.count == 3)
     }
 
@@ -93,12 +90,12 @@ extension Lint.Rule.Naming.Options.Test.Unit {
             }
         }
         """
-        let findings = Lint.Rule.Naming.Options.Test.findings(in: source)
+        let findings = Lint.Rule.`property named flags Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 }
 
-extension Lint.Rule.Naming.Options.Test.`Edge Case` {
+extension Lint.Rule.`property named flags Tests`.`Edge Case` {
     @Test
     func `OptionSet struct named Options is NOT flagged`() {
         let source = """
@@ -106,7 +103,7 @@ extension Lint.Rule.Naming.Options.Test.`Edge Case` {
             let rawValue: Int
         }
         """
-        let findings = Lint.Rule.Naming.Options.Test.findings(in: source)
+        let findings = Lint.Rule.`property named flags Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -117,7 +114,7 @@ extension Lint.Rule.Naming.Options.Test.`Edge Case` {
             var verbose: Bool
         }
         """
-        let findings = Lint.Rule.Naming.Options.Test.findings(in: source)
+        let findings = Lint.Rule.`property named flags Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -128,7 +125,7 @@ extension Lint.Rule.Naming.Options.Test.`Edge Case` {
             var verbose: Bool
         }
         """
-        let findings = Lint.Rule.Naming.Options.Test.findings(in: source)
+        let findings = Lint.Rule.`property named flags Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -141,7 +138,7 @@ extension Lint.Rule.Naming.Options.Test.`Edge Case` {
         """
         // Rule requires "ends in Flags" with at least one prefix character; "Flags"
         // alone doesn't have a suffix-bearing prefix.
-        let findings = Lint.Rule.Naming.Options.Test.findings(in: source)
+        let findings = Lint.Rule.`property named flags Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -154,7 +151,7 @@ extension Lint.Rule.Naming.Options.Test.`Edge Case` {
             var rawValue: Int = 0
         }
         """
-        let findings = Lint.Rule.Naming.Options.Test.findings(in: source)
+        let findings = Lint.Rule.`property named flags Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 }

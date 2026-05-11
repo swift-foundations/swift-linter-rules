@@ -15,30 +15,35 @@ import SwiftParser
 import Linter_Primitives
 @testable import Linter_Rule_Try
 
-extension Lint.Rule.Try {
+extension Lint.Rule {
     @Suite
-    struct Test {
+    struct `try optional Tests` {
         @Suite struct Unit {}
         @Suite struct `Edge Case` {}
     }
 }
 
-extension Lint.Rule.Try.Test {
+extension Lint.Rule.`try optional Tests` {
     static func findings(in source: String, file: String = "test.swift") -> [Diagnostic.Record] {
         let tree = Parser.parse(source: source)
         let converter = SourceLocationConverter(fileName: file, tree: tree)
         var manager = Source.Manager()
         let id = manager.register(fileID: file, filePath: file, content: Array(source.utf8))
-        let parsed = Lint.Source.Parsed(file: manager.file(for: id), tree: tree, converter: converter)
-        return Lint.Rule.Try().findings(in: parsed)
+        let parsed = Lint.Source.Parsed(
+            file: manager.file(for: id),
+            path: Lint.Source.Path(file),
+            tree: tree,
+            converter: converter
+        )
+        return Lint.Rule.`try optional`.findings(parsed, .warning)
     }
 }
 
-extension Lint.Rule.Try.Test.Unit {
+extension Lint.Rule.`try optional Tests`.Unit {
     @Test
     func `try? at top level is flagged`() {
         let source = "let x = try? throwingCall()"
-        let findings = Lint.Rule.Try.Test.findings(in: source)
+        let findings = Lint.Rule.`try optional Tests`.findings(in: source)
         let count = findings.count
         #expect(count == 1)
         if count == 1 {
@@ -55,7 +60,7 @@ extension Lint.Rule.Try.Test.Unit {
             _ = result
         }
         """
-        let findings = Lint.Rule.Try.Test.findings(in: source)
+        let findings = Lint.Rule.`try optional Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -66,21 +71,21 @@ extension Lint.Rule.Try.Test.Unit {
         let b = try? g()
         let c = try? h()
         """
-        let findings = Lint.Rule.Try.Test.findings(in: source)
+        let findings = Lint.Rule.`try optional Tests`.findings(in: source)
         #expect(findings.count == 3)
     }
 
     @Test
     func `try? as a discarded expression is flagged`() {
         let source = "_ = try? cleanup()"
-        let findings = Lint.Rule.Try.Test.findings(in: source)
+        let findings = Lint.Rule.`try optional Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
     @Test
     func `nested try? inside method chain is flagged`() {
         let source = "let x = (try? loader.load())?.result"
-        let findings = Lint.Rule.Try.Test.findings(in: source)
+        let findings = Lint.Rule.`try optional Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -91,9 +96,13 @@ extension Lint.Rule.Try.Test.Unit {
         let converter = SourceLocationConverter(fileName: "test.swift", tree: tree)
         var manager = Source.Manager()
         let id = manager.register(fileID: "test.swift", filePath: "test.swift", content: Array(source.utf8))
-        let parsed = Lint.Source.Parsed(file: manager.file(for: id), tree: tree, converter: converter)
-        let rule = Lint.Rule.Try(severity: .error)
-        let findings = rule.findings(in: parsed)
+        let parsed = Lint.Source.Parsed(
+            file: manager.file(for: id),
+            path: "test.swift",
+            tree: tree,
+            converter: converter
+        )
+        let findings = Lint.Rule.`try optional`.findings(parsed, .error)
         let count = findings.count
         #expect(count == 1)
         if count == 1 {
@@ -102,7 +111,7 @@ extension Lint.Rule.Try.Test.Unit {
     }
 }
 
-extension Lint.Rule.Try.Test.`Edge Case` {
+extension Lint.Rule.`try optional Tests`.`Edge Case` {
     @Test
     func `try without ? or ! is NOT flagged`() {
         let source = """
@@ -113,21 +122,21 @@ extension Lint.Rule.Try.Test.`Edge Case` {
             _ = error
         }
         """
-        let findings = Lint.Rule.Try.Test.findings(in: source)
+        let findings = Lint.Rule.`try optional Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
     @Test
     func `try! is NOT flagged`() {
         let source = "let x = try! f()"
-        let findings = Lint.Rule.Try.Test.findings(in: source)
+        let findings = Lint.Rule.`try optional Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
     @Test
     func `try? in a string literal is NOT flagged`() {
         let source = "let s = \"let x = try? f()\""
-        let findings = Lint.Rule.Try.Test.findings(in: source)
+        let findings = Lint.Rule.`try optional Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -137,13 +146,13 @@ extension Lint.Rule.Try.Test.`Edge Case` {
         // let x = try? f()
         let y = 42
         """
-        let findings = Lint.Rule.Try.Test.findings(in: source)
+        let findings = Lint.Rule.`try optional Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
     @Test
     func `empty file produces no findings`() {
-        let findings = Lint.Rule.Try.Test.findings(in: "")
+        let findings = Lint.Rule.`try optional Tests`.findings(in: "")
         #expect(findings.isEmpty)
     }
 
@@ -155,7 +164,7 @@ extension Lint.Rule.Try.Test.`Edge Case` {
         }
         _ = action
         """
-        let findings = Lint.Rule.Try.Test.findings(in: source)
+        let findings = Lint.Rule.`try optional Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 }

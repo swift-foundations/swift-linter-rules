@@ -13,28 +13,25 @@ import Testing
 import SwiftSyntax
 import SwiftParser
 import Linter_Primitives
+import Linter_Rules_Test_Support
 @testable import Linter_Rule_Structure
 
-extension Lint.Rule.Structure.TypeTransformPlacement {
+extension Lint.Rule {
     @Suite
-    struct Test {
+    struct `type transform placement Tests` {
         @Suite struct Unit {}
         @Suite struct `Edge Case` {}
     }
 }
 
-extension Lint.Rule.Structure.TypeTransformPlacement.Test {
+extension Lint.Rule.`type transform placement Tests` {
     static func findings(in source: String, file: String = "test.swift") -> [Diagnostic.Record] {
-        let tree = Parser.parse(source: source)
-        let converter = SourceLocationConverter(fileName: file, tree: tree)
-        var manager = Source.Manager()
-        let id = manager.register(fileID: file, filePath: file, content: Array(source.utf8))
-        let parsed = Lint.Source.Parsed(file: manager.file(for: id), tree: tree, converter: converter)
-        return Lint.Rule.Structure.TypeTransformPlacement().findings(in: parsed)
+        let parsed = Lint.Source.parsed(from: source, file: file)
+        return Lint.Rule.`type transform placement`.findings(parsed, .warning)
     }
 }
 
-extension Lint.Rule.Structure.TypeTransformPlacement.Test.Unit {
+extension Lint.Rule.`type transform placement Tests`.Unit {
     @Test
     func `toFoo returning Foo is flagged`() {
         let source = """
@@ -42,7 +39,7 @@ extension Lint.Rule.Structure.TypeTransformPlacement.Test.Unit {
             public func toFoo() -> Foo { fatalError() }
         }
         """
-        let findings = Lint.Rule.Structure.TypeTransformPlacement.Test.findings(in: source)
+        let findings = Lint.Rule.`type transform placement Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
             #expect(findings[0].identifier == "type_transform_placement")
@@ -56,12 +53,12 @@ extension Lint.Rule.Structure.TypeTransformPlacement.Test.Unit {
             public func asBar() -> Bar { fatalError() }
         }
         """
-        let findings = Lint.Rule.Structure.TypeTransformPlacement.Test.findings(in: source)
+        let findings = Lint.Rule.`type transform placement Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 }
 
-extension Lint.Rule.Structure.TypeTransformPlacement.Test.`Edge Case` {
+extension Lint.Rule.`type transform placement Tests`.`Edge Case` {
     @Test
     func `static method is NOT flagged`() {
         let source = """
@@ -69,7 +66,7 @@ extension Lint.Rule.Structure.TypeTransformPlacement.Test.`Edge Case` {
             public static func from(_ source: Source) -> Foo { fatalError() }
         }
         """
-        let findings = Lint.Rule.Structure.TypeTransformPlacement.Test.findings(in: source)
+        let findings = Lint.Rule.`type transform placement Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -80,7 +77,7 @@ extension Lint.Rule.Structure.TypeTransformPlacement.Test.`Edge Case` {
             public func toRepresentation() -> Bar { fatalError() }
         }
         """
-        let findings = Lint.Rule.Structure.TypeTransformPlacement.Test.findings(in: source)
+        let findings = Lint.Rule.`type transform placement Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -91,7 +88,7 @@ extension Lint.Rule.Structure.TypeTransformPlacement.Test.`Edge Case` {
             public func describe() -> Bar { fatalError() }
         }
         """
-        let findings = Lint.Rule.Structure.TypeTransformPlacement.Test.findings(in: source)
+        let findings = Lint.Rule.`type transform placement Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 }

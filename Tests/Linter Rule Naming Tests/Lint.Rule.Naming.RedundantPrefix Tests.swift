@@ -13,28 +13,25 @@ import Testing
 import SwiftSyntax
 import SwiftParser
 import Linter_Primitives
+import Linter_Rules_Test_Support
 @testable import Linter_Rule_Naming
 
-extension Lint.Rule.Naming.RedundantPrefix {
+extension Lint.Rule {
     @Suite
-    struct Test {
+    struct `redundant prefix Tests` {
         @Suite struct Unit {}
         @Suite struct `Edge Case` {}
     }
 }
 
-extension Lint.Rule.Naming.RedundantPrefix.Test {
+extension Lint.Rule.`redundant prefix Tests` {
     static func findings(in source: String, file: String = "test.swift") -> [Diagnostic.Record] {
-        let tree = Parser.parse(source: source)
-        let converter = SourceLocationConverter(fileName: file, tree: tree)
-        var manager = Source.Manager()
-        let id = manager.register(fileID: file, filePath: file, content: Array(source.utf8))
-        let parsed = Lint.Source.Parsed(file: manager.file(for: id), tree: tree, converter: converter)
-        return Lint.Rule.Naming.RedundantPrefix().findings(in: parsed)
+        let parsed = Lint.Source.parsed(from: source, file: file)
+        return Lint.Rule.`redundant prefix`.findings(parsed, .warning)
     }
 }
 
-extension Lint.Rule.Naming.RedundantPrefix.Test.Unit {
+extension Lint.Rule.`redundant prefix Tests`.Unit {
     @Test
     func `Walk-WalkOptions inside Walk is flagged`() {
         let source = """
@@ -42,7 +39,7 @@ extension Lint.Rule.Naming.RedundantPrefix.Test.Unit {
             struct WalkOptions {}
         }
         """
-        let findings = Lint.Rule.Naming.RedundantPrefix.Test.findings(in: source)
+        let findings = Lint.Rule.`redundant prefix Tests`.findings(in: source)
         let count = findings.count
         #expect(count == 1)
         if count == 1 {
@@ -58,7 +55,7 @@ extension Lint.Rule.Naming.RedundantPrefix.Test.Unit {
             enum FileError {}
         }
         """
-        let findings = Lint.Rule.Naming.RedundantPrefix.Test.findings(in: source)
+        let findings = Lint.Rule.`redundant prefix Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -69,7 +66,7 @@ extension Lint.Rule.Naming.RedundantPrefix.Test.Unit {
             struct ManifestEntry {}
         }
         """
-        let findings = Lint.Rule.Naming.RedundantPrefix.Test.findings(in: source)
+        let findings = Lint.Rule.`redundant prefix Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -81,7 +78,7 @@ extension Lint.Rule.Naming.RedundantPrefix.Test.Unit {
             struct CFoo {}
         }
         """
-        let findings = Lint.Rule.Naming.RedundantPrefix.Test.findings(in: source)
+        let findings = Lint.Rule.`redundant prefix Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -92,7 +89,7 @@ extension Lint.Rule.Naming.RedundantPrefix.Test.Unit {
             class FooBar {}
         }
         """
-        let findings = Lint.Rule.Naming.RedundantPrefix.Test.findings(in: source)
+        let findings = Lint.Rule.`redundant prefix Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -103,7 +100,7 @@ extension Lint.Rule.Naming.RedundantPrefix.Test.Unit {
             struct ServiceState {}
         }
         """
-        let findings = Lint.Rule.Naming.RedundantPrefix.Test.findings(in: source)
+        let findings = Lint.Rule.`redundant prefix Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -116,12 +113,12 @@ extension Lint.Rule.Naming.RedundantPrefix.Test.Unit {
             enum WalkError {}
         }
         """
-        let findings = Lint.Rule.Naming.RedundantPrefix.Test.findings(in: source)
+        let findings = Lint.Rule.`redundant prefix Tests`.findings(in: source)
         #expect(findings.count == 3)
     }
 }
 
-extension Lint.Rule.Naming.RedundantPrefix.Test.`Edge Case` {
+extension Lint.Rule.`redundant prefix Tests`.`Edge Case` {
     @Test
     func `bare Options inside Walk is NOT flagged`() {
         let source = """
@@ -129,14 +126,14 @@ extension Lint.Rule.Naming.RedundantPrefix.Test.`Edge Case` {
             struct Options {}
         }
         """
-        let findings = Lint.Rule.Naming.RedundantPrefix.Test.findings(in: source)
+        let findings = Lint.Rule.`redundant prefix Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
     @Test
     func `top-level Walk has no enclosing - NOT flagged`() {
         let source = "enum Walk {}"
-        let findings = Lint.Rule.Naming.RedundantPrefix.Test.findings(in: source)
+        let findings = Lint.Rule.`redundant prefix Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -144,7 +141,7 @@ extension Lint.Rule.Naming.RedundantPrefix.Test.`Edge Case` {
     func `top-level WalkOptions outside Walk is NOT flagged`() {
         // No enclosing namespace; CompoundType (API-NAME-001) handles this case.
         let source = "struct WalkOptions {}"
-        let findings = Lint.Rule.Naming.RedundantPrefix.Test.findings(in: source)
+        let findings = Lint.Rule.`redundant prefix Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -155,7 +152,7 @@ extension Lint.Rule.Naming.RedundantPrefix.Test.`Edge Case` {
             struct Bar {}
         }
         """
-        let findings = Lint.Rule.Naming.RedundantPrefix.Test.findings(in: source)
+        let findings = Lint.Rule.`redundant prefix Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -168,7 +165,7 @@ extension Lint.Rule.Naming.RedundantPrefix.Test.`Edge Case` {
             struct Foobar {}
         }
         """
-        let findings = Lint.Rule.Naming.RedundantPrefix.Test.findings(in: source)
+        let findings = Lint.Rule.`redundant prefix Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -180,7 +177,7 @@ extension Lint.Rule.Naming.RedundantPrefix.Test.`Edge Case` {
             struct Foo {}
         }
         """
-        let findings = Lint.Rule.Naming.RedundantPrefix.Test.findings(in: source)
+        let findings = Lint.Rule.`redundant prefix Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -193,7 +190,7 @@ extension Lint.Rule.Naming.RedundantPrefix.Test.`Edge Case` {
             }
         }
         """
-        let findings = Lint.Rule.Naming.RedundantPrefix.Test.findings(in: source)
+        let findings = Lint.Rule.`redundant prefix Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -207,7 +204,7 @@ extension Lint.Rule.Naming.RedundantPrefix.Test.`Edge Case` {
             }
         }
         """
-        let findings = Lint.Rule.Naming.RedundantPrefix.Test.findings(in: source)
+        let findings = Lint.Rule.`redundant prefix Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 }

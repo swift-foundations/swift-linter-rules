@@ -13,27 +13,24 @@ import Testing
 import SwiftSyntax
 import SwiftParser
 import Linter_Primitives
+import Linter_Rules_Test_Support
 @testable import Linter_Rule_Testing
 
-extension Lint.Rule.Testing.BenchmarkTimedRequired {
+extension Lint.Rule {
     @Suite
-    struct Test {
+    struct `benchmark timed required Tests` {
         @Suite struct Unit {}
     }
 }
 
-extension Lint.Rule.Testing.BenchmarkTimedRequired.Test {
+extension Lint.Rule.`benchmark timed required Tests` {
     static func findings(in source: String, file: String = "Sources/X/Test.swift") -> [Diagnostic.Record] {
-        let tree = Parser.parse(source: source)
-        let converter = SourceLocationConverter(fileName: file, tree: tree)
-        var manager = Source.Manager()
-        let id = manager.register(fileID: file, filePath: file, content: Array(source.utf8))
-        let parsed = Lint.Source.Parsed(file: manager.file(for: id), tree: tree, converter: converter)
-        return Lint.Rule.Testing.BenchmarkTimedRequired().findings(in: parsed)
+        let parsed = Lint.Source.parsed(from: source, file: file)
+        return Lint.Rule.`benchmark timed required`.findings(parsed, .warning)
     }
 }
 
-extension Lint.Rule.Testing.BenchmarkTimedRequired.Test.Unit {
+extension Lint.Rule.`benchmark timed required Tests`.Unit {
     @Test
     func `Test inside Performance suite without timed is flagged`() {
         let source = """
@@ -42,7 +39,7 @@ extension Lint.Rule.Testing.BenchmarkTimedRequired.Test.Unit {
             func `runs fast`() {}
         }
         """
-        let findings = Lint.Rule.Testing.BenchmarkTimedRequired.Test.findings(in: source)
+        let findings = Lint.Rule.`benchmark timed required Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -54,7 +51,7 @@ extension Lint.Rule.Testing.BenchmarkTimedRequired.Test.Unit {
             func `runs fast`() {}
         }
         """
-        let findings = Lint.Rule.Testing.BenchmarkTimedRequired.Test.findings(in: source)
+        let findings = Lint.Rule.`benchmark timed required Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -66,7 +63,7 @@ extension Lint.Rule.Testing.BenchmarkTimedRequired.Test.Unit {
             func `something`() {}
         }
         """
-        let findings = Lint.Rule.Testing.BenchmarkTimedRequired.Test.findings(in: source)
+        let findings = Lint.Rule.`benchmark timed required Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -78,7 +75,7 @@ extension Lint.Rule.Testing.BenchmarkTimedRequired.Test.Unit {
             func `runs fast`() {}
         }
         """
-        let findings = Lint.Rule.Testing.BenchmarkTimedRequired.Test.findings(in: source)
+        let findings = Lint.Rule.`benchmark timed required Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -90,7 +87,7 @@ extension Lint.Rule.Testing.BenchmarkTimedRequired.Test.Unit {
             func `meets budget`() {}
         }
         """
-        let findings = Lint.Rule.Testing.BenchmarkTimedRequired.Test.findings(in: source)
+        let findings = Lint.Rule.`benchmark timed required Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 }

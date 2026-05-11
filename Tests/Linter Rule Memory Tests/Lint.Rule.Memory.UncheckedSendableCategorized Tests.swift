@@ -13,33 +13,30 @@ import Testing
 import SwiftSyntax
 import SwiftParser
 import Linter_Primitives
+import Linter_Rules_Test_Support
 @testable import Linter_Rule_Memory
 
-extension Lint.Rule.Memory.UncheckedSendableCategorized {
+extension Lint.Rule {
     @Suite
-    struct Test {
+    struct `unchecked sendable categorization Tests` {
         @Suite struct Unit {}
     }
 }
 
-extension Lint.Rule.Memory.UncheckedSendableCategorized.Test {
-    static func findings(in source: String, file: String = "Sources/X/Test.swift") -> [Diagnostic.Record] {
-        let tree = Parser.parse(source: source)
-        let converter = SourceLocationConverter(fileName: file, tree: tree)
-        var manager = Source.Manager()
-        let id = manager.register(fileID: file, filePath: file, content: Array(source.utf8))
-        let parsed = Lint.Source.Parsed(file: manager.file(for: id), tree: tree, converter: converter)
-        return Lint.Rule.Memory.UncheckedSendableCategorized().findings(in: parsed)
+extension Lint.Rule.`unchecked sendable categorization Tests` {
+    static func findings(in source: Swift.String, file: Swift.String = "Sources/X/Test.swift") -> [Diagnostic.Record] {
+        let parsed = Lint.Source.parsed(from: source, file: file)
+        return Lint.Rule.`unchecked sendable categorization`.findings(parsed, .warning)
     }
 }
 
-extension Lint.Rule.Memory.UncheckedSendableCategorized.Test.Unit {
+extension Lint.Rule.`unchecked sendable categorization Tests`.Unit {
     @Test
     func `unchecked Sendable without unsafe is flagged`() {
         let source = """
         final class Foo: @unchecked Sendable {}
         """
-        let findings = Lint.Rule.Memory.UncheckedSendableCategorized.Test.findings(in: source)
+        let findings = Lint.Rule.`unchecked sendable categorization Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -48,7 +45,7 @@ extension Lint.Rule.Memory.UncheckedSendableCategorized.Test.Unit {
         let source = """
         final class Foo: @unsafe @unchecked Sendable {}
         """
-        let findings = Lint.Rule.Memory.UncheckedSendableCategorized.Test.findings(in: source)
+        let findings = Lint.Rule.`unchecked sendable categorization Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -57,7 +54,7 @@ extension Lint.Rule.Memory.UncheckedSendableCategorized.Test.Unit {
         let source = """
         struct Foo: Sendable {}
         """
-        let findings = Lint.Rule.Memory.UncheckedSendableCategorized.Test.findings(in: source)
+        let findings = Lint.Rule.`unchecked sendable categorization Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -66,7 +63,7 @@ extension Lint.Rule.Memory.UncheckedSendableCategorized.Test.Unit {
         let source = """
         extension Bar: @unchecked Sendable {}
         """
-        let findings = Lint.Rule.Memory.UncheckedSendableCategorized.Test.findings(in: source)
+        let findings = Lint.Rule.`unchecked sendable categorization Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -75,7 +72,7 @@ extension Lint.Rule.Memory.UncheckedSendableCategorized.Test.Unit {
         let source = """
         extension Bar: @unsafe @unchecked Sendable {}
         """
-        let findings = Lint.Rule.Memory.UncheckedSendableCategorized.Test.findings(in: source)
+        let findings = Lint.Rule.`unchecked sendable categorization Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -84,7 +81,7 @@ extension Lint.Rule.Memory.UncheckedSendableCategorized.Test.Unit {
         let source = """
         actor Foo: @unchecked Sendable {}
         """
-        let findings = Lint.Rule.Memory.UncheckedSendableCategorized.Test.findings(in: source)
+        let findings = Lint.Rule.`unchecked sendable categorization Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 }

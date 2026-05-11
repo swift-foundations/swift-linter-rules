@@ -13,28 +13,25 @@ import Testing
 import SwiftSyntax
 import SwiftParser
 import Linter_Primitives
+import Linter_Rules_Test_Support
 @testable import Linter_Rule_Structure
 
-extension Lint.Rule.Structure.RawValueAccess {
+extension Lint.Rule {
     @Suite
-    struct Test {
+    struct `raw value access Tests` {
         @Suite struct Unit {}
         @Suite struct `Edge Case` {}
     }
 }
 
-extension Lint.Rule.Structure.RawValueAccess.Test {
+extension Lint.Rule.`raw value access Tests` {
     static func findings(in source: String, file: String = "test.swift") -> [Diagnostic.Record] {
-        let tree = Parser.parse(source: source)
-        let converter = SourceLocationConverter(fileName: file, tree: tree)
-        var manager = Source.Manager()
-        let id = manager.register(fileID: file, filePath: file, content: Array(source.utf8))
-        let parsed = Lint.Source.Parsed(file: manager.file(for: id), tree: tree, converter: converter)
-        return Lint.Rule.Structure.RawValueAccess().findings(in: parsed)
+        let parsed = Lint.Source.parsed(from: source, file: file)
+        return Lint.Rule.`raw value access`.findings(parsed, .warning)
     }
 }
 
-extension Lint.Rule.Structure.RawValueAccess.Test.Unit {
+extension Lint.Rule.`raw value access Tests`.Unit {
     @Test
     func `rawValue access inside function body is flagged`() {
         let source = """
@@ -43,7 +40,7 @@ extension Lint.Rule.Structure.RawValueAccess.Test.Unit {
             use(raw)
         }
         """
-        let findings = Lint.Rule.Structure.RawValueAccess.Test.findings(in: source)
+        let findings = Lint.Rule.`raw value access Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
             #expect(findings[0].identifier == "raw_value_access")
@@ -58,12 +55,12 @@ extension Lint.Rule.Structure.RawValueAccess.Test.Unit {
             use(p)
         }
         """
-        let findings = Lint.Rule.Structure.RawValueAccess.Test.findings(in: source)
+        let findings = Lint.Rule.`raw value access Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 }
 
-extension Lint.Rule.Structure.RawValueAccess.Test.`Edge Case` {
+extension Lint.Rule.`raw value access Tests`.`Edge Case` {
     @Test
     func `rawValue at top-level type scope is NOT flagged`() {
         let source = """
@@ -71,7 +68,7 @@ extension Lint.Rule.Structure.RawValueAccess.Test.`Edge Case` {
             static let max = MyTag.maxRawValue
         }
         """
-        let findings = Lint.Rule.Structure.RawValueAccess.Test.findings(in: source)
+        let findings = Lint.Rule.`raw value access Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -83,7 +80,7 @@ extension Lint.Rule.Structure.RawValueAccess.Test.`Edge Case` {
             use(n)
         }
         """
-        let findings = Lint.Rule.Structure.RawValueAccess.Test.findings(in: source)
+        let findings = Lint.Rule.`raw value access Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 }

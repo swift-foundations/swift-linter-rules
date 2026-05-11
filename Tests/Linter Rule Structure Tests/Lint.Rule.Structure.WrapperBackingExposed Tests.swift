@@ -13,28 +13,25 @@ import Testing
 import SwiftSyntax
 import SwiftParser
 import Linter_Primitives
+import Linter_Rules_Test_Support
 @testable import Linter_Rule_Structure
 
-extension Lint.Rule.Structure.WrapperBackingExposed {
+extension Lint.Rule {
     @Suite
-    struct Test {
+    struct `wrapper backing exposed Tests` {
         @Suite struct Unit {}
         @Suite struct `Edge Case` {}
     }
 }
 
-extension Lint.Rule.Structure.WrapperBackingExposed.Test {
+extension Lint.Rule.`wrapper backing exposed Tests` {
     static func findings(in source: String, file: String = "test.swift") -> [Diagnostic.Record] {
-        let tree = Parser.parse(source: source)
-        let converter = SourceLocationConverter(fileName: file, tree: tree)
-        var manager = Source.Manager()
-        let id = manager.register(fileID: file, filePath: file, content: Array(source.utf8))
-        let parsed = Lint.Source.Parsed(file: manager.file(for: id), tree: tree, converter: converter)
-        return Lint.Rule.Structure.WrapperBackingExposed().findings(in: parsed)
+        let parsed = Lint.Source.parsed(from: source, file: file)
+        return Lint.Rule.`wrapper backing exposed`.findings(parsed, .warning)
     }
 }
 
-extension Lint.Rule.Structure.WrapperBackingExposed.Test.Unit {
+extension Lint.Rule.`wrapper backing exposed Tests`.Unit {
     @Test
     func `default-internal _backing in struct is flagged`() {
         let source = """
@@ -42,7 +39,7 @@ extension Lint.Rule.Structure.WrapperBackingExposed.Test.Unit {
             let _backing: IO.Blocking.Lane
         }
         """
-        let findings = Lint.Rule.Structure.WrapperBackingExposed.Test.findings(in: source)
+        let findings = Lint.Rule.`wrapper backing exposed Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
             #expect(findings[0].identifier == "wrapper_backing_exposed")
@@ -57,7 +54,7 @@ extension Lint.Rule.Structure.WrapperBackingExposed.Test.Unit {
             internal var _wrapped: Underlying
         }
         """
-        let findings = Lint.Rule.Structure.WrapperBackingExposed.Test.findings(in: source)
+        let findings = Lint.Rule.`wrapper backing exposed Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -68,12 +65,12 @@ extension Lint.Rule.Structure.WrapperBackingExposed.Test.Unit {
             package var _underlying: Storage
         }
         """
-        let findings = Lint.Rule.Structure.WrapperBackingExposed.Test.findings(in: source)
+        let findings = Lint.Rule.`wrapper backing exposed Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 }
 
-extension Lint.Rule.Structure.WrapperBackingExposed.Test.`Edge Case` {
+extension Lint.Rule.`wrapper backing exposed Tests`.`Edge Case` {
     @Test
     func `private _backing is NOT flagged`() {
         let source = """
@@ -81,7 +78,7 @@ extension Lint.Rule.Structure.WrapperBackingExposed.Test.`Edge Case` {
             private let _backing: IO.Blocking.Lane
         }
         """
-        let findings = Lint.Rule.Structure.WrapperBackingExposed.Test.findings(in: source)
+        let findings = Lint.Rule.`wrapper backing exposed Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -92,7 +89,7 @@ extension Lint.Rule.Structure.WrapperBackingExposed.Test.`Edge Case` {
             fileprivate var _wrapped: Underlying
         }
         """
-        let findings = Lint.Rule.Structure.WrapperBackingExposed.Test.findings(in: source)
+        let findings = Lint.Rule.`wrapper backing exposed Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -104,7 +101,7 @@ extension Lint.Rule.Structure.WrapperBackingExposed.Test.`Edge Case` {
             var _backing: IO.Blocking.Lane
         }
         """
-        let findings = Lint.Rule.Structure.WrapperBackingExposed.Test.findings(in: source)
+        let findings = Lint.Rule.`wrapper backing exposed Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -116,7 +113,7 @@ extension Lint.Rule.Structure.WrapperBackingExposed.Test.`Edge Case` {
             var _internal: String
         }
         """
-        let findings = Lint.Rule.Structure.WrapperBackingExposed.Test.findings(in: source)
+        let findings = Lint.Rule.`wrapper backing exposed Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -125,7 +122,7 @@ extension Lint.Rule.Structure.WrapperBackingExposed.Test.`Edge Case` {
         let source = """
         let _backing = 0
         """
-        let findings = Lint.Rule.Structure.WrapperBackingExposed.Test.findings(in: source)
+        let findings = Lint.Rule.`wrapper backing exposed Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -138,7 +135,7 @@ extension Lint.Rule.Structure.WrapperBackingExposed.Test.`Edge Case` {
             var _backing: Underlying { get }
         }
         """
-        let findings = Lint.Rule.Structure.WrapperBackingExposed.Test.findings(in: source)
+        let findings = Lint.Rule.`wrapper backing exposed Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -150,7 +147,7 @@ extension Lint.Rule.Structure.WrapperBackingExposed.Test.`Edge Case` {
             var wrapped: Other
         }
         """
-        let findings = Lint.Rule.Structure.WrapperBackingExposed.Test.findings(in: source)
+        let findings = Lint.Rule.`wrapper backing exposed Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 }

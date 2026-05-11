@@ -13,33 +13,30 @@ import Testing
 import SwiftSyntax
 import SwiftParser
 import Linter_Primitives
+import Linter_Rules_Test_Support
 @testable import Linter_Rule_Memory
 
-extension Lint.Rule.Memory.ErrorNoncopyable {
+extension Lint.Rule {
     @Suite
-    struct Test {
+    struct `noncopyable error Tests` {
         @Suite struct Unit {}
     }
 }
 
-extension Lint.Rule.Memory.ErrorNoncopyable.Test {
-    static func findings(in source: String, file: String = "Sources/X/Test.swift") -> [Diagnostic.Record] {
-        let tree = Parser.parse(source: source)
-        let converter = SourceLocationConverter(fileName: file, tree: tree)
-        var manager = Source.Manager()
-        let id = manager.register(fileID: file, filePath: file, content: Array(source.utf8))
-        let parsed = Lint.Source.Parsed(file: manager.file(for: id), tree: tree, converter: converter)
-        return Lint.Rule.Memory.ErrorNoncopyable().findings(in: parsed)
+extension Lint.Rule.`noncopyable error Tests` {
+    static func findings(in source: Swift.String, file: Swift.String = "Sources/X/Test.swift") -> [Diagnostic.Record] {
+        let parsed = Lint.Source.parsed(from: source, file: file)
+        return Lint.Rule.`noncopyable error`.findings(parsed, .warning)
     }
 }
 
-extension Lint.Rule.Memory.ErrorNoncopyable.Test.Unit {
+extension Lint.Rule.`noncopyable error Tests`.Unit {
     @Test
     func `Error and noncopyable struct is flagged`() {
         let source = """
         struct MyError: Error, ~Copyable {}
         """
-        let findings = Lint.Rule.Memory.ErrorNoncopyable.Test.findings(in: source)
+        let findings = Lint.Rule.`noncopyable error Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -48,7 +45,7 @@ extension Lint.Rule.Memory.ErrorNoncopyable.Test.Unit {
         let source = """
         struct MyError: Error {}
         """
-        let findings = Lint.Rule.Memory.ErrorNoncopyable.Test.findings(in: source)
+        let findings = Lint.Rule.`noncopyable error Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -57,7 +54,7 @@ extension Lint.Rule.Memory.ErrorNoncopyable.Test.Unit {
         let source = """
         struct Token: ~Copyable {}
         """
-        let findings = Lint.Rule.Memory.ErrorNoncopyable.Test.findings(in: source)
+        let findings = Lint.Rule.`noncopyable error Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -68,7 +65,7 @@ extension Lint.Rule.Memory.ErrorNoncopyable.Test.Unit {
             case oops
         }
         """
-        let findings = Lint.Rule.Memory.ErrorNoncopyable.Test.findings(in: source)
+        let findings = Lint.Rule.`noncopyable error Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -77,7 +74,7 @@ extension Lint.Rule.Memory.ErrorNoncopyable.Test.Unit {
         let source = """
         struct MyError: Swift.Error, ~Copyable {}
         """
-        let findings = Lint.Rule.Memory.ErrorNoncopyable.Test.findings(in: source)
+        let findings = Lint.Rule.`noncopyable error Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -86,7 +83,7 @@ extension Lint.Rule.Memory.ErrorNoncopyable.Test.Unit {
         let source = """
         struct Token: Sendable, ~Copyable {}
         """
-        let findings = Lint.Rule.Memory.ErrorNoncopyable.Test.findings(in: source)
+        let findings = Lint.Rule.`noncopyable error Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 }

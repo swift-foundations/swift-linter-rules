@@ -13,28 +13,25 @@ import Testing
 import SwiftSyntax
 import SwiftParser
 import Linter_Primitives
+import Linter_Rules_Test_Support
 @testable import Linter_Rule_Structure
 
-extension Lint.Rule.Structure.MinimalTypeBody {
+extension Lint.Rule {
     @Suite
-    struct Test {
+    struct `minimal type body Tests` {
         @Suite struct Unit {}
         @Suite struct `Edge Case` {}
     }
 }
 
-extension Lint.Rule.Structure.MinimalTypeBody.Test {
+extension Lint.Rule.`minimal type body Tests` {
     static func findings(in source: String, file: String = "test.swift") -> [Diagnostic.Record] {
-        let tree = Parser.parse(source: source)
-        let converter = SourceLocationConverter(fileName: file, tree: tree)
-        var manager = Source.Manager()
-        let id = manager.register(fileID: file, filePath: file, content: Array(source.utf8))
-        let parsed = Lint.Source.Parsed(file: manager.file(for: id), tree: tree, converter: converter)
-        return Lint.Rule.Structure.MinimalTypeBody().findings(in: parsed)
+        let parsed = Lint.Source.parsed(from: source, file: file)
+        return Lint.Rule.`minimal type body`.findings(parsed, .warning)
     }
 }
 
-extension Lint.Rule.Structure.MinimalTypeBody.Test.Unit {
+extension Lint.Rule.`minimal type body Tests`.Unit {
     @Test
     func `method in type body is flagged`() {
         let source = """
@@ -43,7 +40,7 @@ extension Lint.Rule.Structure.MinimalTypeBody.Test.Unit {
             func append(_ value: Int) {}
         }
         """
-        let findings = Lint.Rule.Structure.MinimalTypeBody.Test.findings(in: source)
+        let findings = Lint.Rule.`minimal type body Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
             #expect(findings[0].identifier == "minimal_type_body")
@@ -59,7 +56,7 @@ extension Lint.Rule.Structure.MinimalTypeBody.Test.Unit {
             var isEmpty: Bool { raw == 0 }
         }
         """
-        let findings = Lint.Rule.Structure.MinimalTypeBody.Test.findings(in: source)
+        let findings = Lint.Rule.`minimal type body Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -71,7 +68,7 @@ extension Lint.Rule.Structure.MinimalTypeBody.Test.Unit {
             static let shared = Foo(x: 0)
         }
         """
-        let findings = Lint.Rule.Structure.MinimalTypeBody.Test.findings(in: source)
+        let findings = Lint.Rule.`minimal type body Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -83,7 +80,7 @@ extension Lint.Rule.Structure.MinimalTypeBody.Test.Unit {
             struct Inner {}
         }
         """
-        let findings = Lint.Rule.Structure.MinimalTypeBody.Test.findings(in: source)
+        let findings = Lint.Rule.`minimal type body Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -95,7 +92,7 @@ extension Lint.Rule.Structure.MinimalTypeBody.Test.Unit {
             typealias Element = Int
         }
         """
-        let findings = Lint.Rule.Structure.MinimalTypeBody.Test.findings(in: source)
+        let findings = Lint.Rule.`minimal type body Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -109,12 +106,12 @@ extension Lint.Rule.Structure.MinimalTypeBody.Test.Unit {
             static let shared = 0
         }
         """
-        let findings = Lint.Rule.Structure.MinimalTypeBody.Test.findings(in: source)
+        let findings = Lint.Rule.`minimal type body Tests`.findings(in: source)
         #expect(findings.count == 3)
     }
 }
 
-extension Lint.Rule.Structure.MinimalTypeBody.Test.`Edge Case` {
+extension Lint.Rule.`minimal type body Tests`.`Edge Case` {
     @Test
     func `stored properties and init only - NOT flagged`() {
         let source = """
@@ -132,7 +129,7 @@ extension Lint.Rule.Structure.MinimalTypeBody.Test.`Edge Case` {
             }
         }
         """
-        let findings = Lint.Rule.Structure.MinimalTypeBody.Test.findings(in: source)
+        let findings = Lint.Rule.`minimal type body Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -145,7 +142,7 @@ extension Lint.Rule.Structure.MinimalTypeBody.Test.`Edge Case` {
             deinit {}
         }
         """
-        let findings = Lint.Rule.Structure.MinimalTypeBody.Test.findings(in: source)
+        let findings = Lint.Rule.`minimal type body Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -158,7 +155,7 @@ extension Lint.Rule.Structure.MinimalTypeBody.Test.`Edge Case` {
             }
         }
         """
-        let findings = Lint.Rule.Structure.MinimalTypeBody.Test.findings(in: source)
+        let findings = Lint.Rule.`minimal type body Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -171,7 +168,7 @@ extension Lint.Rule.Structure.MinimalTypeBody.Test.`Edge Case` {
             }
         }
         """
-        let findings = Lint.Rule.Structure.MinimalTypeBody.Test.findings(in: source)
+        let findings = Lint.Rule.`minimal type body Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -183,7 +180,7 @@ extension Lint.Rule.Structure.MinimalTypeBody.Test.`Edge Case` {
             case bar
         }
         """
-        let findings = Lint.Rule.Structure.MinimalTypeBody.Test.findings(in: source)
+        let findings = Lint.Rule.`minimal type body Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -195,7 +192,7 @@ extension Lint.Rule.Structure.MinimalTypeBody.Test.`Edge Case` {
             var name: String { get }
         }
         """
-        let findings = Lint.Rule.Structure.MinimalTypeBody.Test.findings(in: source)
+        let findings = Lint.Rule.`minimal type body Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -210,7 +207,7 @@ extension Lint.Rule.Structure.MinimalTypeBody.Test.`Edge Case` {
             var doubled: Int { x * 2 }
         }
         """
-        let findings = Lint.Rule.Structure.MinimalTypeBody.Test.findings(in: source)
+        let findings = Lint.Rule.`minimal type body Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 }

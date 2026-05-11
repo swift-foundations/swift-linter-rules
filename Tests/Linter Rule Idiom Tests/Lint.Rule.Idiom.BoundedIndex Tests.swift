@@ -13,28 +13,25 @@ import Testing
 import SwiftSyntax
 import SwiftParser
 import Linter_Primitives
+import Linter_Rules_Test_Support
 @testable import Linter_Rule_Idiom
 
-extension Lint.Rule.Idiom.BoundedIndex {
+extension Lint.Rule {
     @Suite
-    struct Test {
+    struct `bounded index static capacity Tests` {
         @Suite struct Unit {}
         @Suite struct `Edge Case` {}
     }
 }
 
-extension Lint.Rule.Idiom.BoundedIndex.Test {
+extension Lint.Rule.`bounded index static capacity Tests` {
     static func findings(in source: String, file: String = "test.swift") -> [Diagnostic.Record] {
-        let tree = Parser.parse(source: source)
-        let converter = SourceLocationConverter(fileName: file, tree: tree)
-        var manager = Source.Manager()
-        let id = manager.register(fileID: file, filePath: file, content: Array(source.utf8))
-        let parsed = Lint.Source.Parsed(file: manager.file(for: id), tree: tree, converter: converter)
-        return Lint.Rule.Idiom.BoundedIndex().findings(in: parsed)
+        let parsed = Lint.Source.parsed(from: source, file: file)
+        return Lint.Rule.`bounded index static capacity`.findings(parsed, .warning)
     }
 }
 
-extension Lint.Rule.Idiom.BoundedIndex.Test.Unit {
+extension Lint.Rule.`bounded index static capacity Tests`.Unit {
     @Test
     func `Int subscript on value-generic struct is flagged`() {
         let source = """
@@ -42,7 +39,7 @@ extension Lint.Rule.Idiom.BoundedIndex.Test.Unit {
             subscript(index: Int) -> Int { 0 }
         }
         """
-        let findings = Lint.Rule.Idiom.BoundedIndex.Test.findings(in: source)
+        let findings = Lint.Rule.`bounded index static capacity Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
             #expect(findings[0].identifier == "bounded_index_static_capacity")
@@ -57,7 +54,7 @@ extension Lint.Rule.Idiom.BoundedIndex.Test.Unit {
             subscript(i: Swift.Int) -> Element { fatalError() }
         }
         """
-        let findings = Lint.Rule.Idiom.BoundedIndex.Test.findings(in: source)
+        let findings = Lint.Rule.`bounded index static capacity Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -68,7 +65,7 @@ extension Lint.Rule.Idiom.BoundedIndex.Test.Unit {
             subscript(i: Int) -> Element { fatalError() }
         }
         """
-        let findings = Lint.Rule.Idiom.BoundedIndex.Test.findings(in: source)
+        let findings = Lint.Rule.`bounded index static capacity Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -79,12 +76,12 @@ extension Lint.Rule.Idiom.BoundedIndex.Test.Unit {
             subscript(i: Int) -> Job { fatalError() }
         }
         """
-        let findings = Lint.Rule.Idiom.BoundedIndex.Test.findings(in: source)
+        let findings = Lint.Rule.`bounded index static capacity Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 }
 
-extension Lint.Rule.Idiom.BoundedIndex.Test.`Edge Case` {
+extension Lint.Rule.`bounded index static capacity Tests`.`Edge Case` {
     @Test
     func `Bounded subscript on value-generic is NOT flagged`() {
         let source = """
@@ -92,7 +89,7 @@ extension Lint.Rule.Idiom.BoundedIndex.Test.`Edge Case` {
             subscript(i: Index<Element>.Bounded<N>) -> Element { fatalError() }
         }
         """
-        let findings = Lint.Rule.Idiom.BoundedIndex.Test.findings(in: source)
+        let findings = Lint.Rule.`bounded index static capacity Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -103,7 +100,7 @@ extension Lint.Rule.Idiom.BoundedIndex.Test.`Edge Case` {
             subscript(i: Int) -> Element { fatalError() }
         }
         """
-        let findings = Lint.Rule.Idiom.BoundedIndex.Test.findings(in: source)
+        let findings = Lint.Rule.`bounded index static capacity Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -114,7 +111,7 @@ extension Lint.Rule.Idiom.BoundedIndex.Test.`Edge Case` {
             subscript(i: Int) -> Int { 0 }
         }
         """
-        let findings = Lint.Rule.Idiom.BoundedIndex.Test.findings(in: source)
+        let findings = Lint.Rule.`bounded index static capacity Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -127,7 +124,7 @@ extension Lint.Rule.Idiom.BoundedIndex.Test.`Edge Case` {
             subscript(i: Int) -> Element { fatalError() }
         }
         """
-        let findings = Lint.Rule.Idiom.BoundedIndex.Test.findings(in: source)
+        let findings = Lint.Rule.`bounded index static capacity Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -140,7 +137,7 @@ extension Lint.Rule.Idiom.BoundedIndex.Test.`Edge Case` {
             subscript(other: Int) -> Bool { false }
         }
         """
-        let findings = Lint.Rule.Idiom.BoundedIndex.Test.findings(in: source)
+        let findings = Lint.Rule.`bounded index static capacity Tests`.findings(in: source)
         // Two raw-Int subscripts flagged; the bounded one not.
         #expect(findings.count == 2)
     }

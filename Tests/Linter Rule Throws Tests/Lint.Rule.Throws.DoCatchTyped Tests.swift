@@ -13,28 +13,25 @@ import Testing
 import SwiftSyntax
 import SwiftParser
 import Linter_Primitives
+import Linter_Rules_Test_Support
 @testable import Linter_Rule_Throws
 
-extension Lint.Rule.Throws.DoCatchTyped {
+extension Lint.Rule {
     @Suite
-    struct Test {
+    struct `do throws for typed catch Tests` {
         @Suite struct Unit {}
         @Suite struct `Edge Case` {}
     }
 }
 
-extension Lint.Rule.Throws.DoCatchTyped.Test {
-    static func findings(in source: String, file: String = "Sources/X/Test.swift") -> [Diagnostic.Record] {
-        let tree = Parser.parse(source: source)
-        let converter = SourceLocationConverter(fileName: file, tree: tree)
-        var manager = Source.Manager()
-        let id = manager.register(fileID: file, filePath: file, content: Array(source.utf8))
-        let parsed = Lint.Source.Parsed(file: manager.file(for: id), tree: tree, converter: converter)
-        return Lint.Rule.Throws.DoCatchTyped().findings(in: parsed)
+extension Lint.Rule.`do throws for typed catch Tests` {
+    static func findings(in source: Swift.String, file: Swift.String = "Sources/X/Test.swift") -> [Diagnostic.Record] {
+        let parsed = Lint.Source.parsed(from: source, file: file)
+        return Lint.Rule.`do throws for typed catch`.findings(parsed, .warning)
     }
 }
 
-extension Lint.Rule.Throws.DoCatchTyped.Test.Unit {
+extension Lint.Rule.`do throws for typed catch Tests`.Unit {
     @Test
     func `bare do try catch is flagged`() {
         let source = """
@@ -46,7 +43,7 @@ extension Lint.Rule.Throws.DoCatchTyped.Test.Unit {
             }
         }
         """
-        let findings = Lint.Rule.Throws.DoCatchTyped.Test.findings(in: source)
+        let findings = Lint.Rule.`do throws for typed catch Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -61,7 +58,7 @@ extension Lint.Rule.Throws.DoCatchTyped.Test.Unit {
             }
         }
         """
-        let findings = Lint.Rule.Throws.DoCatchTyped.Test.findings(in: source)
+        let findings = Lint.Rule.`do throws for typed catch Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -75,7 +72,7 @@ extension Lint.Rule.Throws.DoCatchTyped.Test.Unit {
             } catch {}
         }
         """
-        let findings = Lint.Rule.Throws.DoCatchTyped.Test.findings(in: source)
+        let findings = Lint.Rule.`do throws for typed catch Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -88,12 +85,12 @@ extension Lint.Rule.Throws.DoCatchTyped.Test.Unit {
             }
         }
         """
-        let findings = Lint.Rule.Throws.DoCatchTyped.Test.findings(in: source)
+        let findings = Lint.Rule.`do throws for typed catch Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 }
 
-extension Lint.Rule.Throws.DoCatchTyped.Test.`Edge Case` {
+extension Lint.Rule.`do throws for typed catch Tests`.`Edge Case` {
     @Test
     func `nested do-catch tracked independently`() {
         // Outer do has no direct `try` (the inner do scopes its own try),
@@ -111,7 +108,7 @@ extension Lint.Rule.Throws.DoCatchTyped.Test.`Edge Case` {
             }
         }
         """
-        let findings = Lint.Rule.Throws.DoCatchTyped.Test.findings(in: source)
+        let findings = Lint.Rule.`do throws for typed catch Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -127,7 +124,7 @@ extension Lint.Rule.Throws.DoCatchTyped.Test.`Edge Case` {
             } catch {}
         }
         """
-        let findings = Lint.Rule.Throws.DoCatchTyped.Test.findings(in: source)
+        let findings = Lint.Rule.`do throws for typed catch Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -138,7 +135,7 @@ extension Lint.Rule.Throws.DoCatchTyped.Test.`Edge Case` {
             try x()
         } catch {}
         """
-        let findings = Lint.Rule.Throws.DoCatchTyped.Test.findings(in: source)
+        let findings = Lint.Rule.`do throws for typed catch Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 }

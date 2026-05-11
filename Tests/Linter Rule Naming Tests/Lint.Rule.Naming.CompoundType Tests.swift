@@ -13,32 +13,29 @@ import Testing
 import SwiftSyntax
 import SwiftParser
 import Linter_Primitives
+import Linter_Rules_Test_Support
 @testable import Linter_Rule_Naming
 
-extension Lint.Rule.Naming.CompoundType {
+extension Lint.Rule {
     @Suite
-    struct Test {
+    struct `compound type name Tests` {
         @Suite struct Unit {}
         @Suite struct `Edge Case` {}
     }
 }
 
-extension Lint.Rule.Naming.CompoundType.Test {
+extension Lint.Rule.`compound type name Tests` {
     static func findings(in source: String, file: String = "test.swift") -> [Diagnostic.Record] {
-        let tree = Parser.parse(source: source)
-        let converter = SourceLocationConverter(fileName: file, tree: tree)
-        var manager = Source.Manager()
-        let id = manager.register(fileID: file, filePath: file, content: Array(source.utf8))
-        let parsed = Lint.Source.Parsed(file: manager.file(for: id), tree: tree, converter: converter)
-        return Lint.Rule.Naming.CompoundType().findings(in: parsed)
+        let parsed = Lint.Source.parsed(from: source, file: file)
+        return Lint.Rule.`compound type name`.findings(parsed, .warning)
     }
 }
 
-extension Lint.Rule.Naming.CompoundType.Test.Unit {
+extension Lint.Rule.`compound type name Tests`.Unit {
     @Test
     func `struct FooBar is flagged`() {
         let source = "struct FooBar {}"
-        let findings = Lint.Rule.Naming.CompoundType.Test.findings(in: source)
+        let findings = Lint.Rule.`compound type name Tests`.findings(in: source)
         let count = findings.count
         #expect(count == 1)
         if count == 1 {
@@ -50,28 +47,28 @@ extension Lint.Rule.Naming.CompoundType.Test.Unit {
     @Test
     func `enum FileDirectoryWalk is flagged`() {
         let source = "enum FileDirectoryWalk {}"
-        let findings = Lint.Rule.Naming.CompoundType.Test.findings(in: source)
+        let findings = Lint.Rule.`compound type name Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
     @Test
     func `class DirectoryWalk is flagged`() {
         let source = "class DirectoryWalk {}"
-        let findings = Lint.Rule.Naming.CompoundType.Test.findings(in: source)
+        let findings = Lint.Rule.`compound type name Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
     @Test
     func `actor NonBlockingSelector is flagged`() {
         let source = "actor NonBlockingSelector {}"
-        let findings = Lint.Rule.Naming.CompoundType.Test.findings(in: source)
+        let findings = Lint.Rule.`compound type name Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
     @Test
     func `protocol IteratorProtocol is flagged`() {
         let source = "protocol IteratorProtocol {}"
-        let findings = Lint.Rule.Naming.CompoundType.Test.findings(in: source)
+        let findings = Lint.Rule.`compound type name Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -79,14 +76,14 @@ extension Lint.Rule.Naming.CompoundType.Test.Unit {
     func `acronym-prefix IOError is flagged`() {
         // Acronym (IO) followed by a CamelCase word (Error) is a compound.
         let source = "struct IOError {}"
-        let findings = Lint.Rule.Naming.CompoundType.Test.findings(in: source)
+        let findings = Lint.Rule.`compound type name Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
     @Test
     func `acronym-prefix URLPath is flagged`() {
         let source = "struct URLPath {}"
-        let findings = Lint.Rule.Naming.CompoundType.Test.findings(in: source)
+        let findings = Lint.Rule.`compound type name Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -97,65 +94,65 @@ extension Lint.Rule.Naming.CompoundType.Test.Unit {
         enum FileSystem {}
         class HTTPClient {}
         """
-        let findings = Lint.Rule.Naming.CompoundType.Test.findings(in: source)
+        let findings = Lint.Rule.`compound type name Tests`.findings(in: source)
         #expect(findings.count == 3)
     }
 }
 
-extension Lint.Rule.Naming.CompoundType.Test.`Edge Case` {
+extension Lint.Rule.`compound type name Tests`.`Edge Case` {
     @Test
     func `single-word struct Foo is NOT flagged`() {
         let source = "struct Foo {}"
-        let findings = Lint.Rule.Naming.CompoundType.Test.findings(in: source)
+        let findings = Lint.Rule.`compound type name Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
     @Test
     func `single-word enum Walk is NOT flagged`() {
         let source = "enum Walk {}"
-        let findings = Lint.Rule.Naming.CompoundType.Test.findings(in: source)
+        let findings = Lint.Rule.`compound type name Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
     @Test
     func `acronym URL is NOT flagged`() {
         let source = "struct URL {}"
-        let findings = Lint.Rule.Naming.CompoundType.Test.findings(in: source)
+        let findings = Lint.Rule.`compound type name Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
     @Test
     func `acronym UUID is NOT flagged`() {
         let source = "struct UUID {}"
-        let findings = Lint.Rule.Naming.CompoundType.Test.findings(in: source)
+        let findings = Lint.Rule.`compound type name Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
     @Test
     func `short acronym IO is NOT flagged`() {
         let source = "enum IO {}"
-        let findings = Lint.Rule.Naming.CompoundType.Test.findings(in: source)
+        let findings = Lint.Rule.`compound type name Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
     @Test
     func `spec namespace RFC_4122 is NOT flagged`() {
         let source = "enum RFC_4122 {}"
-        let findings = Lint.Rule.Naming.CompoundType.Test.findings(in: source)
+        let findings = Lint.Rule.`compound type name Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
     @Test
     func `spec namespace ISO_9945 is NOT flagged`() {
         let source = "enum ISO_9945 {}"
-        let findings = Lint.Rule.Naming.CompoundType.Test.findings(in: source)
+        let findings = Lint.Rule.`compound type name Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
     @Test
     func `package-scoped FooBar is NOT flagged`() {
         let source = "package struct FooBar {}"
-        let findings = Lint.Rule.Naming.CompoundType.Test.findings(in: source)
+        let findings = Lint.Rule.`compound type name Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -167,7 +164,7 @@ extension Lint.Rule.Naming.CompoundType.Test.`Edge Case` {
             struct InnerType {}
         }
         """
-        let findings = Lint.Rule.Naming.CompoundType.Test.findings(in: source)
+        let findings = Lint.Rule.`compound type name Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -180,7 +177,7 @@ extension Lint.Rule.Naming.CompoundType.Test.`Edge Case` {
         // underscore too — exempted. Document the limitation as edge case;
         // a follow-up could special-case leading underscore.
         let source = "struct _BoxStorage {}"
-        let findings = Lint.Rule.Naming.CompoundType.Test.findings(in: source)
+        let findings = Lint.Rule.`compound type name Tests`.findings(in: source)
         // Documented behavior: leading-underscore SPI types are not flagged.
         #expect(findings.isEmpty)
     }
@@ -188,7 +185,7 @@ extension Lint.Rule.Naming.CompoundType.Test.`Edge Case` {
     @Test
     func `single uppercase F is NOT flagged`() {
         let source = "struct F {}"
-        let findings = Lint.Rule.Naming.CompoundType.Test.findings(in: source)
+        let findings = Lint.Rule.`compound type name Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -200,7 +197,7 @@ extension Lint.Rule.Naming.CompoundType.Test.`Edge Case` {
             func walk() {}
         }
         """
-        let findings = Lint.Rule.Naming.CompoundType.Test.findings(in: source)
+        let findings = Lint.Rule.`compound type name Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 }

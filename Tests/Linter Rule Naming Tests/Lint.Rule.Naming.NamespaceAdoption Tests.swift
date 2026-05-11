@@ -13,34 +13,31 @@ import Testing
 import SwiftSyntax
 import SwiftParser
 import Linter_Primitives
+import Linter_Rules_Test_Support
 @testable import Linter_Rule_Naming
 
-extension Lint.Rule.Naming.NamespaceAdoption {
+extension Lint.Rule {
     @Suite
-    struct Test {
+    struct `namespace adoption typealias Tests` {
         @Suite struct Unit {}
         @Suite struct `Edge Case` {}
     }
 }
 
-extension Lint.Rule.Naming.NamespaceAdoption.Test {
+extension Lint.Rule.`namespace adoption typealias Tests` {
     static func findings(in source: String, file: String = "test.swift") -> [Diagnostic.Record] {
-        let tree = Parser.parse(source: source)
-        let converter = SourceLocationConverter(fileName: file, tree: tree)
-        var manager = Source.Manager()
-        let id = manager.register(fileID: file, filePath: file, content: Array(source.utf8))
-        let parsed = Lint.Source.Parsed(file: manager.file(for: id), tree: tree, converter: converter)
-        return Lint.Rule.Naming.NamespaceAdoption().findings(in: parsed)
+        let parsed = Lint.Source.parsed(from: source, file: file)
+        return Lint.Rule.`namespace adoption typealias`.findings(parsed, .warning)
     }
 }
 
-extension Lint.Rule.Naming.NamespaceAdoption.Test.Unit {
+extension Lint.Rule.`namespace adoption typealias Tests`.Unit {
     @Test
     func `same-leaf typealias is flagged for review`() {
         let source = """
         public typealias Event = Kernel.Event
         """
-        let findings = Lint.Rule.Naming.NamespaceAdoption.Test.findings(in: source)
+        let findings = Lint.Rule.`namespace adoption typealias Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
             #expect(findings[0].identifier == "namespace_adoption_typealias")
@@ -52,18 +49,18 @@ extension Lint.Rule.Naming.NamespaceAdoption.Test.Unit {
         let source = """
         public typealias Channel = Kernel.IO.Channel
         """
-        let findings = Lint.Rule.Naming.NamespaceAdoption.Test.findings(in: source)
+        let findings = Lint.Rule.`namespace adoption typealias Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 }
 
-extension Lint.Rule.Naming.NamespaceAdoption.Test.`Edge Case` {
+extension Lint.Rule.`namespace adoption typealias Tests`.`Edge Case` {
     @Test
     func `different-leaf typealias is NOT flagged`() {
         let source = """
         public typealias SourceLocation = Text.Location
         """
-        let findings = Lint.Rule.Naming.NamespaceAdoption.Test.findings(in: source)
+        let findings = Lint.Rule.`namespace adoption typealias Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -72,7 +69,7 @@ extension Lint.Rule.Naming.NamespaceAdoption.Test.`Edge Case` {
         let source = """
         public typealias Foo = Int
         """
-        let findings = Lint.Rule.Naming.NamespaceAdoption.Test.findings(in: source)
+        let findings = Lint.Rule.`namespace adoption typealias Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 }

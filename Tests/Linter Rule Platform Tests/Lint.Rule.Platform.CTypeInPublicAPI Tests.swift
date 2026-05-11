@@ -13,34 +13,31 @@ import Testing
 import SwiftSyntax
 import SwiftParser
 import Linter_Primitives
+import Linter_Rules_Test_Support
 @testable import Linter_Rule_Platform
 
-extension Lint.Rule.Platform.CTypeInPublicAPI {
+extension Lint.Rule {
     @Suite
-    struct Test {
+    struct `c type in public api Tests` {
         @Suite struct Unit {}
         @Suite struct `Edge Case` {}
     }
 }
 
-extension Lint.Rule.Platform.CTypeInPublicAPI.Test {
-    static func findings(in source: String, file: String = "test.swift") -> [Diagnostic.Record] {
-        let tree = Parser.parse(source: source)
-        let converter = SourceLocationConverter(fileName: file, tree: tree)
-        var manager = Source.Manager()
-        let id = manager.register(fileID: file, filePath: file, content: Array(source.utf8))
-        let parsed = Lint.Source.Parsed(file: manager.file(for: id), tree: tree, converter: converter)
-        return Lint.Rule.Platform.CTypeInPublicAPI().findings(in: parsed)
+extension Lint.Rule.`c type in public api Tests` {
+    static func findings(in source: Swift.String, file: Swift.String = "test.swift") -> [Diagnostic.Record] {
+        let parsed = Lint.Source.parsed(from: source, file: file)
+        return Lint.Rule.`c type in public api`.findings(parsed, .warning)
     }
 }
 
-extension Lint.Rule.Platform.CTypeInPublicAPI.Test.Unit {
+extension Lint.Rule.`c type in public api Tests`.Unit {
     @Test
     func `public func with kevent parameter is flagged`() {
         let source = """
         public func register(events: [kevent]) -> Int { 0 }
         """
-        let findings = Lint.Rule.Platform.CTypeInPublicAPI.Test.findings(in: source)
+        let findings = Lint.Rule.`c type in public api Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
             #expect(findings[0].identifier == "c_type_in_public_api")
@@ -52,7 +49,7 @@ extension Lint.Rule.Platform.CTypeInPublicAPI.Test.Unit {
         let source = """
         public func open() -> HANDLE { fatalError() }
         """
-        let findings = Lint.Rule.Platform.CTypeInPublicAPI.Test.findings(in: source)
+        let findings = Lint.Rule.`c type in public api Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -63,18 +60,18 @@ extension Lint.Rule.Platform.CTypeInPublicAPI.Test.Unit {
             public init(event: epoll_event) {}
         }
         """
-        let findings = Lint.Rule.Platform.CTypeInPublicAPI.Test.findings(in: source)
+        let findings = Lint.Rule.`c type in public api Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 }
 
-extension Lint.Rule.Platform.CTypeInPublicAPI.Test.`Edge Case` {
+extension Lint.Rule.`c type in public api Tests`.`Edge Case` {
     @Test
     func `internal func with C type is NOT flagged`() {
         let source = """
         internal func raw(event: kevent) {}
         """
-        let findings = Lint.Rule.Platform.CTypeInPublicAPI.Test.findings(in: source)
+        let findings = Lint.Rule.`c type in public api Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -83,7 +80,7 @@ extension Lint.Rule.Platform.CTypeInPublicAPI.Test.`Edge Case` {
         let source = """
         public func register(events: [Kernel.Kqueue.Event]) {}
         """
-        let findings = Lint.Rule.Platform.CTypeInPublicAPI.Test.findings(in: source)
+        let findings = Lint.Rule.`c type in public api Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 }

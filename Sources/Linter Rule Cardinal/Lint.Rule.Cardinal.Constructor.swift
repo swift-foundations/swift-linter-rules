@@ -23,91 +23,85 @@ internal import SwiftSyntax
 /// References:
 /// - `swift-institute/Research/cardinal-ordinal-vector-enforcement-design.md`
 ///   §"R2. `Cardinal(0)` and `Cardinal(1)`"
-extension Lint.Rule.Cardinal {
-    public struct Constructor: Lint.Rule.`Protocol` {
-        public static let id: Lint.Rule.ID = "cardinal_zero_one_constructor"
-        public static let defaultSeverity: Diagnostic.Severity = .warning
-
-        public let severity: Diagnostic.Severity
-
-        @inlinable
-        public init(severity: Diagnostic.Severity = .warning) {
-            self.severity = severity
-        }
-
-        public func findings(in source: Lint.Source.Parsed) -> [Diagnostic.Record] {
-            let visitor = Visitor(source: source.file, severity: severity, converter: source.converter)
+extension Lint.Rule {
+    public static let `zero or one literal` = Lint.Rule(
+        id: "cardinal_zero_one_constructor",
+        defaultSeverity: .warning,
+        findings: { source, severity in
+            let visitor = CardinalConstructorVisitor(
+                source: source.file,
+                severity: severity,
+                converter: source.converter
+            )
             visitor.walk(source.tree)
             return visitor.matches
         }
-    }
+    )
 }
 
-extension Lint.Rule.Cardinal.Constructor {
-    @usableFromInline
-    static let message: Swift.String =
-        "[cardinal_zero_one_constructor] [INFRA-101]: `Cardinal(0)` / `Cardinal(1)` "
-        + "constructor calls with literal `0` or `1` bypass the typed-system literal "
-        + "discipline. Use the canonical accessors `.zero` / `.one` instead. If this site "
-        + "is the typed-system bottom-out, escalate to supervisor and apply "
-        + "`// swiftlint:disable:next cardinal_zero_one_constructor  // reason: <citation>`."
+@usableFromInline
+internal let cardinalZeroOneConstructorMessage: Swift.String =
+    "[cardinal_zero_one_constructor] [INFRA-101]: `Cardinal(0)` / `Cardinal(1)` "
+    + "constructor calls with literal `0` or `1` bypass the typed-system literal "
+    + "discipline. Use the canonical accessors `.zero` / `.one` instead. If this site "
+    + "is the typed-system bottom-out, escalate to supervisor and apply "
+    + "`// swiftlint:disable:next cardinal_zero_one_constructor  // reason: <citation>`."
 
-    final class Visitor: SyntaxVisitor {
-        let source: Source.File
-        let severity: Diagnostic.Severity
-        let converter: SourceLocationConverter
-        var matches: [Diagnostic.Record] = []
+internal final class CardinalConstructorVisitor: SyntaxVisitor {
+    let source: Source.File
+    let severity: Diagnostic.Severity
+    let converter: SourceLocationConverter
+    var matches: [Diagnostic.Record] = []
 
-        init(source: Source.File, severity: Diagnostic.Severity, converter: SourceLocationConverter) {
-            self.source = source
-            self.severity = severity
-            self.converter = converter
-            super.init(viewMode: .sourceAccurate)
-        }
+    init(source: Source.File, severity: Diagnostic.Severity, converter: SourceLocationConverter) {
+        self.source = source
+        self.severity = severity
+        self.converter = converter
+        super.init(viewMode: .sourceAccurate)
+    }
 
-        override func visit(_ node: FunctionCallExprSyntax) -> SyntaxVisitorContinueKind {
-            guard Self.calleeTypeName(node.calledExpression) == "Cardinal" else {
-                return .visitChildren
-            }
-            guard node.arguments.count == 1, let arg = node.arguments.first else {
-                return .visitChildren
-            }
-            guard arg.label == nil else { return .visitChildren }
-            guard let lit = arg.expression.as(IntegerLiteralExprSyntax.self) else {
-                return .visitChildren
-            }
-            guard lit.literal.text == "0" || lit.literal.text == "1" else {
-                return .visitChildren
-            }
-            let token = node.calledExpression.firstToken(viewMode: .sourceAccurate) ?? lit.literal
-            let location = converter.location(for: token.positionAfterSkippingLeadingTrivia)
-            matches.append(Diagnostic.Record(
-                location: Source.Location(
-                    fileID: source.fileID,
-                    filePath: source.filePath,
-                    line: location.line,
-                    column: location.column
-                ),
-                severity: severity,
-                identifier: Lint.Rule.Cardinal.Constructor.id.underlying,
-                message: Lint.Rule.Cardinal.Constructor.message
-            ))
+    override func visit(_ node: FunctionCallExprSyntax) -> SyntaxVisitorContinueKind {
+        guard Self.calleeTypeName(node.calledExpression) == "Cardinal" else {
             return .visitChildren
         }
-
-        static func calleeTypeName(_ expr: ExprSyntax) -> Swift.String? {
-            if let ref = expr.as(DeclReferenceExprSyntax.self) {
-                return ref.baseName.text
-            }
-            if let generic = expr.as(GenericSpecializationExprSyntax.self) {
-                return calleeTypeName(generic.expression)
-            }
-            if let member = expr.as(MemberAccessExprSyntax.self),
-               member.declName.baseName.text == "init",
-               let base = member.base {
-                return calleeTypeName(base)
-            }
-            return nil
+        guard node.arguments.count == 1, let arg = node.arguments.first else {
+            return .visitChildren
         }
+        guard arg.label == nil else { return .visitChildren }
+        guard let lit = arg.expression.as(IntegerLiteralExprSyntax.self) else {
+            return .visitChildren
+        }
+        guard lit.literal.text == "0" || lit.literal.text == "1" else {
+            return .visitChildren
+        }
+        let token = node.calledExpression.firstToken(viewMode: .sourceAccurate) ?? lit.literal
+        let location = converter.location(for: token.positionAfterSkippingLeadingTrivia)
+        matches.append(Diagnostic.Record(
+            location: Source.Location(
+                fileID: source.fileID,
+                filePath: source.filePath,
+                line: location.line,
+                column: location.column
+            ),
+            severity: severity,
+            identifier: "cardinal_zero_one_constructor",
+            message: cardinalZeroOneConstructorMessage
+        ))
+        return .visitChildren
+    }
+
+    static func calleeTypeName(_ expr: ExprSyntax) -> Swift.String? {
+        if let ref = expr.as(DeclReferenceExprSyntax.self) {
+            return ref.baseName.text
+        }
+        if let generic = expr.as(GenericSpecializationExprSyntax.self) {
+            return calleeTypeName(generic.expression)
+        }
+        if let member = expr.as(MemberAccessExprSyntax.self),
+           member.declName.baseName.text == "init",
+           let base = member.base {
+            return calleeTypeName(base)
+        }
+        return nil
     }
 }

@@ -13,34 +13,31 @@ import Testing
 import SwiftSyntax
 import SwiftParser
 import Linter_Primitives
+import Linter_Rules_Test_Support
 @testable import Linter_Rule_Closure
 
-extension Lint.Rule.Closure.ParameterPosition {
+extension Lint.Rule {
     @Suite
-    struct Test {
+    struct `parameter position Tests` {
         @Suite struct Unit {}
         @Suite struct `Edge Case` {}
     }
 }
 
-extension Lint.Rule.Closure.ParameterPosition.Test {
+extension Lint.Rule.`parameter position Tests` {
     static func findings(in source: String, file: String = "Sources/X/Test.swift") -> [Diagnostic.Record] {
-        let tree = Parser.parse(source: source)
-        let converter = SourceLocationConverter(fileName: file, tree: tree)
-        var manager = Source.Manager()
-        let id = manager.register(fileID: file, filePath: file, content: Array(source.utf8))
-        let parsed = Lint.Source.Parsed(file: manager.file(for: id), tree: tree, converter: converter)
-        return Lint.Rule.Closure.ParameterPosition().findings(in: parsed)
+        let parsed = Lint.Source.parsed(from: source, file: file)
+        return Lint.Rule.`parameter position`.findings(parsed, .warning)
     }
 }
 
-extension Lint.Rule.Closure.ParameterPosition.Test.Unit {
+extension Lint.Rule.`parameter position Tests`.Unit {
     @Test
     func `closure-then-non-closure is flagged`() {
         let source = """
         func f(body: () -> Void, count: Int) {}
         """
-        let findings = Lint.Rule.Closure.ParameterPosition.Test.findings(in: source)
+        let findings = Lint.Rule.`parameter position Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -49,7 +46,7 @@ extension Lint.Rule.Closure.ParameterPosition.Test.Unit {
         let source = """
         func f(count: Int, body: () -> Void) {}
         """
-        let findings = Lint.Rule.Closure.ParameterPosition.Test.findings(in: source)
+        let findings = Lint.Rule.`parameter position Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -58,7 +55,7 @@ extension Lint.Rule.Closure.ParameterPosition.Test.Unit {
         let source = """
         func f(count: Int, body: () -> Void, completion: () -> Void) {}
         """
-        let findings = Lint.Rule.Closure.ParameterPosition.Test.findings(in: source)
+        let findings = Lint.Rule.`parameter position Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -67,7 +64,7 @@ extension Lint.Rule.Closure.ParameterPosition.Test.Unit {
         let source = """
         func f(count: Int, body: @escaping () -> Void) {}
         """
-        let findings = Lint.Rule.Closure.ParameterPosition.Test.findings(in: source)
+        let findings = Lint.Rule.`parameter position Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -76,7 +73,7 @@ extension Lint.Rule.Closure.ParameterPosition.Test.Unit {
         let source = """
         func f(body: @escaping () -> Void, label: String) {}
         """
-        let findings = Lint.Rule.Closure.ParameterPosition.Test.findings(in: source)
+        let findings = Lint.Rule.`parameter position Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -85,7 +82,7 @@ extension Lint.Rule.Closure.ParameterPosition.Test.Unit {
         let source = """
         func f(handler: (() -> Void)?, label: String) {}
         """
-        let findings = Lint.Rule.Closure.ParameterPosition.Test.findings(in: source)
+        let findings = Lint.Rule.`parameter position Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -96,25 +93,25 @@ extension Lint.Rule.Closure.ParameterPosition.Test.Unit {
             init(body: () -> Void, label: String) {}
         }
         """
-        let findings = Lint.Rule.Closure.ParameterPosition.Test.findings(in: source)
+        let findings = Lint.Rule.`parameter position Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 }
 
-extension Lint.Rule.Closure.ParameterPosition.Test.`Edge Case` {
+extension Lint.Rule.`parameter position Tests`.`Edge Case` {
     @Test
     func `typed-throws thunk counts as closure`() {
         let source = """
         func f(body: () throws(MyError) -> Int, label: String) {}
         """
-        let findings = Lint.Rule.Closure.ParameterPosition.Test.findings(in: source)
+        let findings = Lint.Rule.`parameter position Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
     @Test
     func `function with no params is not flagged`() {
         let source = "func f() {}"
-        let findings = Lint.Rule.Closure.ParameterPosition.Test.findings(in: source)
+        let findings = Lint.Rule.`parameter position Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 }
