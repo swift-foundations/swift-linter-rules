@@ -125,6 +125,17 @@ internal final class StructureMinimalTypeBodyVisitor: SyntaxVisitor {
                 continue
             }
             if let typealiasDecl = decl.as(TypeAliasDeclSyntax.self) {
+                // Protocol-sentinel exemption per [API-IMPL-009]: a
+                // `typealias \`Protocol\` = _FooProtocol` is the hoisted-
+                // protocol pattern, where the typealias IS intended to
+                // live in the type's namespace (the docs literally show
+                // it inside the type body). Forcing extraction yields
+                // empty-body + extension-with-one-typealias for zero
+                // semantic gain.
+                let aliasName = typealiasDecl.name.text
+                if aliasName == "Protocol" || aliasName == "`Protocol`" {
+                    continue
+                }
                 emit(at: typealiasDecl.typealiasKeyword.positionAfterSkippingLeadingTrivia)
                 continue
             }
