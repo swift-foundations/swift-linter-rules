@@ -50,7 +50,8 @@ internal let uncheckedCallSiteMessage: Swift.String =
     + "(Tier 2) before resorting to `__unchecked:`. If this site is the typed-system "
     + "bottom-out (extension-init internals, [CONV-001] permitted same-package use), "
     + "escalate to supervisor and apply "
-    + "`// swiftlint:disable:next unchecked_call_site  // reason: <citation>`."
+    + "`// swift-linter:disable:next unchecked call site` with a "
+    + "`// REASON: <citation>` continuation."
 
 internal final class UncheckedVisitor: SyntaxVisitor {
     let source: Source.File

@@ -38,8 +38,8 @@ internal let structureRawValueAccessMessage: Swift.String =
     + "consumer call site bypasses the typed-conversion ladder. These "
     + "accessors are reserved for extension initializers (the brand-newtype's "
     + "own boundary) and same-package implementations. Prefer the typed "
-    + "operation; suppress with `// swiftlint:disable:next raw_value_access` "
-    + "with a `// WHY:` reason for legitimate same-package use."
+    + "operation; suppress with `// swift-linter:disable:next raw value access` "
+    + "and a `// REASON:` continuation for legitimate same-package use."
 
 internal let structureRawValueAccessFlaggedAccessors: Swift.Set<Swift.String> = ["rawValue", "position"]
 

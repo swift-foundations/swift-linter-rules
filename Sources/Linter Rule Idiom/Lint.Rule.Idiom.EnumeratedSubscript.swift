@@ -37,8 +37,8 @@ internal let idiomEnumeratedSubscriptMessage: Swift.String =
     + "<seq>.enumerated() { ... <seq>[i] }` works on Array but silently "
     + "breaks on custom Collections whose `Index` is not a 0-based offset "
     + "(byte position, token offset). Prefer iterator-based comparison or "
-    + "`zip(a, b)`. Suppress with a `// swiftlint:disable:next` and "
-    + "`// WHY:` for confirmed Array call sites."
+    + "`zip(a, b)`. Suppress with a `// swift-linter:disable:next enumerated with subscript` "
+    + "and `// REASON:` continuation for confirmed Array call sites."
 
 internal func idiomLoopIndexName(_ pattern: PatternSyntax) -> Swift.String? {
     guard let tuple = pattern.as(TuplePatternSyntax.self) else { return nil }

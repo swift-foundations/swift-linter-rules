@@ -84,7 +84,8 @@ internal let cardinalCountMinusOneMessage: Swift.String =
     + "per [INFRA-025], or for stdlib-Int sites where no typed surface is available "
     + "either (α) use the stdlib's named idiom for the concept (`indices.dropLast()`, "
     + "`.last`, `endIndex - 1`) or (β) escalate to supervisor and apply "
-    + "`// swiftlint:disable:next cardinal_count_minus_one  // reason: <citation>`."
+    + "`// swift-linter:disable:next count minus one` with a "
+    + "`// REASON: <citation>` continuation."
 
 internal final class CardinalCountVisitor: SyntaxVisitor {
     let source: Source.File

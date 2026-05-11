@@ -40,10 +40,10 @@ internal import SwiftSyntax
 /// + 5 standard-library-extensions Builders. Consumers extend it via the
 /// `Lint.Rule.\`for loop in result builder\`(allowlist:)` factory.
 ///
-/// **Exemption**: `// swiftlint:disable:next for loop in result builder  //
-/// reason: <citation>`. Per institute discipline, the regex-evasion
-/// pattern (paren-wrap, typename-swap) is forbidden — escalate to
-/// supervisor at typed-system bottom-out sites.
+/// **Exemption**: `// swift-linter:disable:next for loop in result builder`
+/// with a `// REASON: <citation>` continuation. Per institute discipline,
+/// the regex-evasion pattern (paren-wrap, typename-swap) is forbidden —
+/// escalate to supervisor at typed-system bottom-out sites.
 ///
 /// References:
 /// - `swift-institute/Research/result-builder-performance-optimization.md`
@@ -118,7 +118,8 @@ internal let resultBuilderForLoopMessage: Swift.String =
     + "See swift-institute/Research/result-builder-performance-optimization.md for "
     + "the full design rationale. If iteration is genuinely required, escalate to "
     + "supervisor and apply "
-    + "`// swiftlint:disable:next for loop in result builder  // reason: <citation>`."
+    + "`// swift-linter:disable:next for loop in result builder` with a "
+    + "`// REASON: <citation>` continuation."
 
 internal final class ResultBuilderForLoopVisitor: SyntaxVisitor {
     let source: Source.File

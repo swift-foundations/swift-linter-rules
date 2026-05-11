@@ -45,7 +45,8 @@ internal let cardinalZeroOneConstructorMessage: Swift.String =
     + "constructor calls with literal `0` or `1` bypass the typed-system literal "
     + "discipline. Use the canonical accessors `.zero` / `.one` instead. If this site "
     + "is the typed-system bottom-out, escalate to supervisor and apply "
-    + "`// swiftlint:disable:next cardinal_zero_one_constructor  // reason: <citation>`."
+    + "`// swift-linter:disable:next zero or one literal` with a "
+    + "`// REASON: <citation>` continuation."
 
 internal final class CardinalConstructorVisitor: SyntaxVisitor {
     let source: Source.File
