@@ -122,4 +122,49 @@ extension Lint.Rule.`inlinable internal access Tests`.`Edge Case` {
         let findings = Lint.Rule.`inlinable internal access Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
+
+    @Test
+    func `inlinable init flagged message recommends package init not usableFromInline`() {
+        let source = """
+        struct S {
+            @inlinable
+            init() {}
+        }
+        """
+        let findings = Lint.Rule.`inlinable internal access Tests`.findings(in: source)
+        #expect(findings.count == 1)
+        if findings.count == 1 {
+            let message = findings[0].message
+            #expect(message.contains("`package init`"))
+            #expect(message.contains("has no effect"))
+            #expect(!message.contains("pair the attribute with `@usableFromInline`"))
+        }
+    }
+
+    @Test
+    func `inlinable func flagged message recommends usableFromInline pairing`() {
+        let source = """
+        @inlinable
+        func foo() {}
+        """
+        let findings = Lint.Rule.`inlinable internal access Tests`.findings(in: source)
+        #expect(findings.count == 1)
+        if findings.count == 1 {
+            let message = findings[0].message
+            #expect(message.contains("`@usableFromInline`"))
+            #expect(!message.contains("`package init`"))
+        }
+    }
+
+    @Test
+    func `package init satisfies the rule`() {
+        let source = """
+        struct S {
+            @inlinable
+            package init() {}
+        }
+        """
+        let findings = Lint.Rule.`inlinable internal access Tests`.findings(in: source)
+        #expect(findings.isEmpty)
+    }
 }

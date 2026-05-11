@@ -36,8 +36,22 @@ internal let structureInlinableInternalAccessMessage: Swift.String =
     "[inlinable internal access] [PATTERN-052]: `@inlinable` cross-module access "
     + "requires `@usableFromInline` (or `public` / `package`), not bare `internal`. "
     + "An `@inlinable` decl whose body references an `internal` identifier fails to "
-    + "compile across the module boundary; pair the attribute with `@usableFromInline "
-    + "package` (preferred for impl-only surface) or upgrade to `public`."
+    + "compile across the module boundary; pair the attribute with `@usableFromInline` "
+    + "(preferred for impl-only surface) or upgrade to `package` / `public`."
+
+/// Initializer-specific message: Swift rejects `@usableFromInline` on
+/// `@inlinable init` as `has no effect`, so the func/var advice doesn't
+/// apply. The canonical fix for `@inlinable internal init` is `package
+/// init` (without `@usableFromInline`), which satisfies both the lint
+/// rule and Swift's redundancy check while keeping the init bounded to
+/// the package's inline-into-consumer surface.
+@usableFromInline
+internal let structureInlinableInternalAccessInitializerMessage: Swift.String =
+    "[inlinable internal access] [PATTERN-052]: `@inlinable` cross-module access "
+    + "requires non-`internal` visibility. For initializers, prefer `package init` "
+    + "— Swift rejects `@usableFromInline` on `@inlinable init` as `has no "
+    + "effect` (the func/var pairing does not apply here). Use `package init` "
+    + "for impl-only surface, or upgrade to `public init`."
 
 internal final class StructureInlinableInternalAccessVisitor: SyntaxVisitor {
     let source: Source.File
@@ -84,7 +98,7 @@ internal final class StructureInlinableInternalAccessVisitor: SyntaxVisitor {
         return false
     }
 
-    private func emit(at position: AbsolutePosition) {
+    private func emit(at position: AbsolutePosition, message: Swift.String) {
         let location = converter.location(for: position)
         matches.append(Diagnostic.Record(
             location: Source.Location(
@@ -95,7 +109,7 @@ internal final class StructureInlinableInternalAccessVisitor: SyntaxVisitor {
             ),
             severity: severity,
             identifier: "inlinable internal access",
-            message: structureInlinableInternalAccessMessage
+            message: message
         ))
     }
 
@@ -104,7 +118,10 @@ internal final class StructureInlinableInternalAccessVisitor: SyntaxVisitor {
            !hasNonInternalAccess(node.modifiers),
            !hasUsableFromInline(node.attributes)
         {
-            emit(at: node.name.positionAfterSkippingLeadingTrivia)
+            emit(
+                at: node.name.positionAfterSkippingLeadingTrivia,
+                message: structureInlinableInternalAccessMessage
+            )
         }
         return .visitChildren
     }
@@ -114,7 +131,10 @@ internal final class StructureInlinableInternalAccessVisitor: SyntaxVisitor {
            !hasNonInternalAccess(node.modifiers),
            !hasUsableFromInline(node.attributes)
         {
-            emit(at: node.bindingSpecifier.positionAfterSkippingLeadingTrivia)
+            emit(
+                at: node.bindingSpecifier.positionAfterSkippingLeadingTrivia,
+                message: structureInlinableInternalAccessMessage
+            )
         }
         return .visitChildren
     }
@@ -124,7 +144,10 @@ internal final class StructureInlinableInternalAccessVisitor: SyntaxVisitor {
            !hasNonInternalAccess(node.modifiers),
            !hasUsableFromInline(node.attributes)
         {
-            emit(at: node.initKeyword.positionAfterSkippingLeadingTrivia)
+            emit(
+                at: node.initKeyword.positionAfterSkippingLeadingTrivia,
+                message: structureInlinableInternalAccessInitializerMessage
+            )
         }
         return .visitChildren
     }
