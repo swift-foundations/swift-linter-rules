@@ -267,6 +267,21 @@ b. **Pattern tightening**: require integer-typed source AND pointer-wrapping
 per HANDOFF Open Q1). Allowlist with `map` + `retag` keys; inline walker
 to enclosing FunctionDeclSyntax.
 
+### #12 — Borrowing-self-short-circuit — operand-identifier root tracing
+
+**Tier**: universal (Memory pack)
+**File**: `Sources/Linter Rule Memory/Lint.Rule.Memory.BorrowingSelfShortCircuit.swift`
+**Depends on**: nothing
+**Status**: LANDED 2026-05-11 — commit `c7d5035`.
+
+Surfaced by swift-equation-primitives (3 findings on operator bodies
+that comply with the rule's own recommendation). Detection now collects
+`borrowing Self` parameter names and traces each `&&` / `||` operand's
+root identifier; only fires if the root is a borrowing-Self param,
+exempting local lets and iteration variables.
+
+**Source signal**: equation.
+
 Add `taggedUncheckedExemptOperations: [String: String]`:
 - `"map": "preserve-shape transform; closure output is opaque-by-construction"`
 - `"retag": "phantom-tag swap; underlying validated upstream by Tagged construction invariant"`
@@ -278,7 +293,7 @@ Walk up to enclosing `FunctionDeclSyntax`; if name matches, exempt the
 
 ## Acceptance Criteria (Post-Dispatch)
 
-**ALL 11 AMENDMENTS LANDED 2026-05-11.** Empirical verification across 5 leaves:
+**ALL 12 AMENDMENTS LANDED 2026-05-11.** Empirical verification across 8 leaves:
 
 | Leaf | Pre-amendment | Expected | Actual | Status |
 |---|---:|---:|---:|---|
@@ -287,9 +302,12 @@ Walk up to enclosing `FunctionDeclSyntax`; if name matches, exempt the
 | swift-property-primitives | 13 | 1 AMBIGUOUS | **1** | ✓ (Cluster E held for [MEM-SAFE-025]) |
 | swift-carrier-primitives | 17 | 0 | **0** | ✓ |
 | swift-tagged-primitives | 21 | 0 | **0** | ✓ |
+| swift-comparison-primitives | 44 | 0 | **0** | ✓ (surfaced composition-Copyable + constraint-inexpressible refinements) |
+| swift-hash-primitives | 46 | 0 | **0** | ✓ (zero new amendments — full coverage by queued threads) |
+| swift-equation-primitives | 55 | 0 | **0** | ✓ (surfaced #12 borrowing-self-short-circuit) |
 
-**Aggregate**: 70 findings across 5 leaves → 1 finding (the [MEM-SAFE-025]
-ambiguity). 98.6% reduction. Source fixes accounted for: swift-property
+**Aggregate**: 215 findings across 8 leaves → 1 finding (the [MEM-SAFE-025]
+ambiguity). **99.5% reduction.** Source fixes accounted for: swift-property
 commit `7de1f5c` (2 Cluster C extractions + Cluster D :116 unsafe wrap),
 swift-property commit `099125c` (Property.Consume.State explicit
 Copyable scoping), swift-tagged Cluster G pending in subordinate's queue.
