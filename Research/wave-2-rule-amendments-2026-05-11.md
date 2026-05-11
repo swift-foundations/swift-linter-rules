@@ -267,6 +267,58 @@ b. **Pattern tightening**: require integer-typed source AND pointer-wrapping
 per HANDOFF Open Q1). Allowlist with `map` + `retag` keys; inline walker
 to enclosing FunctionDeclSyntax.
 
+### #14 — Minimal-type-body — @resultBuilder exemption
+
+**Tier**: universal (Structure pack)
+**File**: `Sources/Linter Rule Structure/Lint.Rule.Structure.MinimalTypeBody.swift`
+**Status**: LANDED 2026-05-11 — commit `1f6ee78`. Two-layer check: visited type's
+own attributes + nested-type's attributes during parent's checkMembers walk.
+Empirical: swift-standard-library-extensions 234 findings cleared.
+
+### #16 — ClosureTypedAnnotation — Result-materialization exemption
+
+**Tier**: universal (Throws pack)
+**File**: `Sources/Linter Rule Throws/Lint.Rule.Throws.ClosureAnnotation.swift`
+**Status**: LANDED 2026-05-11 — commit `f295588`. A `try` inside an enclosing
+`do { ... } catch { ... }` whose catch body contains no `ThrowStmt` is
+non-propagating (materialization via return-form or side-effect-form).
+Empirical: swift-standard-library-extensions 20 findings cleared.
+
+### #17 (extension) — MEM-COPY-004 allowlist additions
+
+**Status**: LANDED 2026-05-11 — commit `aa4f097`. Added Dictionary, Set,
+String, Substring, Result to `memoryExtensionConstraintInexpressibleTypes`.
+
+### #18 — BoolPublicParameter — conversion-init exemption
+
+**Tier**: institute (Naming pack)
+**File**: `Sources/Linter Rule Naming/Lint.Rule.Naming.BoolParameter.swift`
+**Status**: LANDED 2026-05-11 (UNCOMMITTED — institute-linter-rules not git-init'd).
+`init(_ x: Bool)` with single Bool parameter and wildcard first name = conversion
+init. Exempt.
+
+### #19 — SwiftQualification — stdlib-shadow extension exemption
+
+**Tier**: universal (Platform pack)
+**File**: `Sources/Linter Rule Platform/Lint.Rule.Platform.SwiftQualification.swift`
+**Status**: LANDED 2026-05-11 — commit `6ab1541`. Inside `extension <X> { ... }`
+where X is a stdlib type (Set, Array, Dictionary, etc.), `Swift.<Protocol>` is
+structurally inexpressible due to Swift name resolution. Exempt.
+Empirical: 1 finding cleared.
+
+### #2 (extension) — Compound citation dict
+
+**Status**: LANDED 2026-05-11 (UNCOMMITTED — institute-linter-rules). Added 18
+stdlib with-helper / Result / Dictionary / uniqued entries to
+`namingCompoundSwiftNativeIdiomCitations`.
+
+### #15 — IMPL-010 Tier-0 stdlib-boundary opt-out (DEFERRED)
+
+**Status**: DEFERRED to follow-up. Requires Lint.Rule.Configuration.override
+mechanism (verify exists in Linter Primitives; add if missing) plus
+swift-standard-library-extensions main.swift transition from `Lint.run(bundle:)`
+to `Lint.run(configuration: ...)` form. 17 findings pending.
+
 ### #12 — Borrowing-self-short-circuit — operand-identifier root tracing
 
 **Tier**: universal (Memory pack)
