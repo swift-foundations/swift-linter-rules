@@ -42,13 +42,83 @@ internal func throwsIsTypedThrows(_ clause: ThrowsClauseSyntax?) -> Swift.Bool {
     return clause.type != nil
 }
 
+/// Walks a closure body searching for `try` expressions that are NOT
+/// materialized into a Result-shape return via an enclosing
+/// `do { ... } catch { return ... }`. A `try` inside such a do-catch
+/// has its error captured into the catch's return value (the
+/// [IMPL-109] Result-materialization pattern) — the closure remains
+/// non-throwing by construction and doesn't need an explicit
+/// `throws(E)` annotation. A `try` NOT inside such a materializing
+/// do-catch escapes the closure and DOES need annotation.
+///
+/// The walker stops at nested closure boundaries (a try inside a
+/// nested closure is the nested closure's concern, not this one's).
 private final class ThrowsClosureTryFinder: SyntaxVisitor {
     var found = false
-    override func visit(_: TryExprSyntax) -> SyntaxVisitorContinueKind {
-        found = true
+    override func visit(_ node: TryExprSyntax) -> SyntaxVisitorContinueKind {
+        if !throwsClosureTryIsInsideMaterializingDoCatch(Syntax(node)) {
+            found = true
+        }
         return .skipChildren
     }
     override func visit(_: ClosureExprSyntax) -> SyntaxVisitorContinueKind {
+        return .skipChildren
+    }
+}
+
+/// Returns true if the node is inside an enclosing `DoStmtSyntax` whose
+/// `catchClauses` contain at least one catch body that ends with a
+/// `return` of a value (the Result-materialization shape). Stops the
+/// walk at any enclosing `ClosureExprSyntax` — the closure boundary.
+internal func throwsClosureTryIsInsideMaterializingDoCatch(_ node: Syntax) -> Swift.Bool {
+    var current: Syntax? = node.parent
+    while let candidate = current {
+        if let doStmt = candidate.as(DoStmtSyntax.self) {
+            // Check whether any catch body has a return-with-value
+            // (the materialization signature). Empty catchClauses or
+            // catches that re-throw / propagate without returning a
+            // value don't materialize — fall through to scan further.
+            for catchClause in doStmt.catchClauses {
+                if throwsClosureCatchReturnsValue(catchClause) {
+                    return true
+                }
+            }
+        }
+        if candidate.is(ClosureExprSyntax.self) { return false }
+        current = candidate.parent
+    }
+    return false
+}
+
+/// Returns true if the catch clause's body materializes the error
+/// rather than propagating it. Materialization takes one of two
+/// shapes in the [IMPL-109] pattern:
+///
+/// 1. Return-form: `catch { return .failure(error) }` — the catch
+///    returns a Result/Optional/etc. value to the enclosing scope.
+/// 2. Side-effect-form: `catch { result = .failure(error) }` — the
+///    catch assigns to a captured variable; the outer scope reads
+///    the variable after the closure returns.
+///
+/// Both shapes mean the closure itself doesn't propagate the error.
+/// A catch that contains a `ThrowStmt` IS propagating and DOES need
+/// the closure to be annotated. Detection: a catch is materializing
+/// iff its body contains NO `ThrowStmt` at any depth (excluding
+/// nested closures, which have their own boundary).
+private func throwsClosureCatchReturnsValue(_ clause: CatchClauseSyntax) -> Swift.Bool {
+    let finder = ThrowsClosureCatchThrowFinder(viewMode: .sourceAccurate)
+    finder.walk(clause.body)
+    return !finder.foundThrow
+}
+
+private final class ThrowsClosureCatchThrowFinder: SyntaxVisitor {
+    var foundThrow = false
+    override func visit(_: ThrowStmtSyntax) -> SyntaxVisitorContinueKind {
+        foundThrow = true
+        return .skipChildren
+    }
+    override func visit(_: ClosureExprSyntax) -> SyntaxVisitorContinueKind {
+        // Nested closures have their own boundary.
         return .skipChildren
     }
 }
