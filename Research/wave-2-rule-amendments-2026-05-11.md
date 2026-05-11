@@ -2,9 +2,9 @@
 
 <!--
 ---
-version: 1.0.0
+version: 1.1.0
 last_updated: 2026-05-11
-status: IN_PROGRESS
+status: IMPLEMENTED
 ---
 -->
 
@@ -93,7 +93,9 @@ c. **Protocol-required-method allowlist**: new dict
 **Tier**: universal
 **File**: `Sources/Linter Rule Memory/Lint.Rule.Memory.ExtensionNoncopyableConstraint.swift`
 **Depends on**: nothing
-**Status**: QUEUED
+**Status**: LANDED 2026-05-11 — commit `3baa419`. Pack walk widened from
+`memberBlock` to entire `node` after first run missed pack types in
+where clauses; refinement landed in same commit.
 
 a. **Pack-expansion exemption**: add `MemoryExtensionPackExpansionFinder` parallel
    to `MemoryExtensionNoncopyableOwnershipFinder` (lines 50-79). Walk the
@@ -126,7 +128,8 @@ c. **`* where *.swift` filename pattern**: before emitting, check
 **Tier**: universal
 **File**: `Sources/Linter Rule Throws/Lint.Rule.Throws.Existential.swift`
 **Depends on**: nothing (but parallels #1's conformance-context check)
-**Status**: QUEUED
+**Status**: LANDED 2026-05-11 — commit `8f49c35`. Inline conformance walker
+(Naming Shared helper is internal to institute tier).
 
 Add `throwsExistentialStdlibProtocolWitnessCitations: [String: String]`:
 - `"init(from:)": "Swift.Decodable.init(from:) throws — protocol requirement is untyped"`
@@ -164,10 +167,11 @@ property's). When dispatched, aggregate count drops sharply on its own.
 
 ### #6 — Unification-typealias — gerund-as-capability exemption
 
-**Tier**: universal
+**Tier**: institute (Naming pack)
 **File**: `Sources/Linter Rule Naming/Lint.Rule.Naming.UnificationTypealias.swift`
-**Depends on**: nothing (could share `isProtocolSentinelAlias` with #7)
-**Status**: QUEUED
+**Depends on**: nothing
+**Status**: LANDED 2026-05-11 (UNCOMMITTED — institute-linter-rules not git-init'd).
+Inline check for `rhsLeaf == "Protocol" || rhsLeaf == "\`Protocol\`"`.
 
 Exempt typealiases whose RHS targets a member named `Protocol` (raw or
 backtick-escaped). Mechanical detection: `MemberTypeSyntax` whose final
@@ -182,10 +186,11 @@ Suggested shared helper `isProtocolSentinelAlias(_:)` lives in
 
 ### #7 — Minimal-type-body — Protocol-sentinel exemption
 
-**Tier**: universal
-**File**: `Sources/Linter Rule .../Lint.Rule.Minimal.TypeBody.swift` (verify path)
-**Depends on**: nothing (could share `isProtocolSentinelAlias` with #6)
-**Status**: QUEUED
+**Tier**: universal (Structure pack)
+**File**: `Sources/Linter Rule Structure/Lint.Rule.Structure.MinimalTypeBody.swift`
+**Depends on**: nothing
+**Status**: LANDED 2026-05-11 — commit `a7bcd7a`. Inline check on both
+`"Protocol"` and `"\`Protocol\`"` token text forms.
 
 Exempt `TypealiasDeclSyntax` whose name token is `Protocol` (raw or backtick-escaped)
 from the body-vs-extension check. The [API-IMPL-009] hoisted-protocol-with-typealias
@@ -197,10 +202,12 @@ semantic gain.
 
 ### #8 — Tagged-extension-public-init — protocol-witness citation dict
 
-**Tier**: universal
-**File**: `Sources/Linter Rule Tagged/Lint.Rule.Tagged.ExtensionPublicInit.swift` (verify path)
-**Depends on**: #1 (for conformance-context check)
-**Status**: QUEUED
+**Tier**: primitives (RawValue pack in swift-primitives-linter-rules)
+**File**: `Sources/Linter Rule RawValue/Lint.Rule.RawValue.TaggedExtensionPublicInit.swift`
+**Depends on**: nothing (inline inheritance walker)
+**Status**: LANDED 2026-05-11 (UNCOMMITTED — primitives-linter-rules not git-init'd).
+Dict includes 14 entries (9 ExpressibleByXLiteral + LosslessStringConvertible +
+RawRepresentable + Decodable + Codable + Institute Protocol-sentinel).
 
 Add `taggedExtensionPublicInitProtocolWitnessCitations: [String: String]` seeded:
 - `"ExpressibleByIntegerLiteral": "Swift.ExpressibleByIntegerLiteral — init(integerLiteral:) protocol witness"`
@@ -216,10 +223,10 @@ names a protocol in the dict, exempt.
 
 ### #9 — Typealiased-namespace-bridge — associatedtype-satisfaction exemption
 
-**Tier**: universal
-**File**: `Sources/Linter Rule .../Lint.Rule.PlatformArch.TypealiasedNamespaceBridge.swift` (verify path)
-**Depends on**: #1
-**Status**: QUEUED
+**Tier**: universal (Platform pack)
+**File**: `Sources/Linter Rule Platform/Lint.Rule.Platform.TypealiasedNamespace.swift`
+**Depends on**: nothing (inline conformance walker)
+**Status**: LANDED 2026-05-11 — commit `fe010b9`.
 
 Parallel to Wave 1 TIGHTEN on `unification_typealias` / `namespace_adoption_typealias`.
 Typealias inside an `ExtensionDeclSyntax` with non-empty `inheritanceClause` → exempt;
@@ -231,10 +238,12 @@ Reuse existing `namingIsInsideConformingContext`.
 
 ### #10 — Mock-factory-zero-collision — scope + pattern tighten
 
-**Tier**: universal
-**File**: `Sources/Linter Rule Testing/Lint.Rule.MockFactoryZeroCollision.swift` (verify path)
+**Tier**: universal (Testing pack)
+**File**: `Sources/Linter Rule Testing/Lint.Rule.Testing.MockFactoryZeroCollision.swift`
 **Depends on**: nothing
-**Status**: QUEUED
+**Status**: LANDED 2026-05-11 — commit `dd7d56a`. Both fixes shipped:
+per-rule `/Tests/` scope-limit + function-reference reshape rejection
+(AsExprSyntax / MemberAccessExprSyntax).
 
 Two complementary fixes:
 
@@ -251,10 +260,12 @@ b. **Pattern tightening**: require integer-typed source AND pointer-wrapping
 
 ### #11 — Tagged-unchecked PoC — preserve-shape exemption
 
-**Tier**: universal (PoC)
-**File**: `Sources/Linter Rule Tagged/Lint.Rule.Tagged.UncheckedWithTypedAlternative.swift` (verify path; PoC)
+**Tier**: PoC custom rule (in swift-tagged-primitives/Lint/)
+**File**: `swift-primitives/swift-tagged-primitives/Lint/Sources/Linter Rule Tagged Domain Audit/Lint.Rule.TaggedDomainAudit.swift`
 **Depends on**: nothing
-**Status**: QUEUED
+**Status**: LANDED 2026-05-11 (UNCOMMITTED — Lint/ scaffold is gitignored
+per HANDOFF Open Q1). Allowlist with `map` + `retag` keys; inline walker
+to enclosing FunctionDeclSyntax.
 
 Add `taggedUncheckedExemptOperations: [String: String]`:
 - `"map": "preserve-shape transform; closure output is opaque-by-construction"`
@@ -267,18 +278,27 @@ Walk up to enclosing `FunctionDeclSyntax`; if name matches, exempt the
 
 ## Acceptance Criteria (Post-Dispatch)
 
-After all 11 amendments land, re-run the linter against the 5 leaves:
+**ALL 11 AMENDMENTS LANDED 2026-05-11.** Empirical verification across 5 leaves:
 
-| Leaf | Pre-amendment | Expected post-amendment (rough) |
-|---|---:|---:|
-| swift-either-primitives | 6 | 0 (all Compound-flatMap covered by #2a) |
-| swift-product-primitives | 13 | 0 (11 covered by #3a; 2 covered by #4) |
-| swift-property-primitives | 13 (15 - 2 committed) | 1 AMBIGUOUS only (12 covered by #5/#2b/#3b/#7) |
-| swift-carrier-primitives | 17 | 0 (13 covered by #5; 2 covered by #3c; 2 covered by #6/#7) |
-| swift-tagged-primitives | 21 (25 - 4 committed by tagged-Cluster-G) | 0 (11 covered by #8; 3 covered by #9; 3 covered by #2c; 2 covered by #10; 2 covered by #11) |
+| Leaf | Pre-amendment | Expected | Actual | Status |
+|---|---:|---:|---:|---|
+| swift-either-primitives | 6 | 0 | **0** | ✓ |
+| swift-product-primitives | 13 | 0 | **0** | ✓ |
+| swift-property-primitives | 13 | 1 AMBIGUOUS | **1** | ✓ (Cluster E held for [MEM-SAFE-025]) |
+| swift-carrier-primitives | 17 | 0 | **0** | ✓ |
+| swift-tagged-primitives | 21 | 0 | **0** | ✓ |
 
-If any leaf doesn't drop to expected count, that's signal a queued amendment
-under-fires or an unmodeled finding shape exists. Iterate.
+**Aggregate**: 70 findings across 5 leaves → 1 finding (the [MEM-SAFE-025]
+ambiguity). 98.6% reduction. Source fixes accounted for: swift-property
+commit `7de1f5c` (2 Cluster C extractions + Cluster D :116 unsafe wrap),
+swift-property commit `099125c` (Property.Consume.State explicit
+Copyable scoping), swift-tagged Cluster G pending in subordinate's queue.
+
+**Held**: swift-property-primitives Property.Consume.State.swift:54
+unchecked sendable categorization — entangled with [MEM-SAFE-025] policy
+reconciliation. Three-tier partition doc § Out-of-scope follow-ups
+already tracks the policy collision; this single finding is its concrete
+instance. Resolution follows from [MEM-SAFE-025], not this Wave.
 
 ## Open Questions
 
