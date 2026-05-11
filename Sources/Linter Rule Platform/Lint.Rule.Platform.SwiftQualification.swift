@@ -39,6 +39,57 @@ internal let platformSwiftQualificationShadowedProtocols: Swift.Set<Swift.String
     "Error",
 ]
 
+/// Stdlib types whose declaration lives in the `Swift` module. Inside
+/// `extension <X> { ... }` for `X` in this set, Swift's name resolution
+/// shadows the `Swift` module name with the type's nested scope —
+/// writing `Swift.Sequence` in a generic constraint yields a compile
+/// error like `'Sequence' is not a member type of struct 'Swift.X.Swift'`.
+/// The qualified form the rule prescribes is structurally inexpressible
+/// in this context; the rule exempts.
+@usableFromInline
+internal let platformSwiftQualificationStdlibShadowingTypes: Swift.Set<Swift.String> = [
+    "Set",
+    "Array",
+    "ArraySlice",
+    "ContiguousArray",
+    "Dictionary",
+    "String",
+    "Substring",
+    "Optional",
+    "Result",
+    "Range",
+    "ClosedRange",
+    "CollectionOfOne",
+    "EmptyCollection",
+    "KeyValuePairs",
+    "ReversedCollection",
+    "UnsafePointer",
+    "UnsafeMutablePointer",
+    "UnsafeRawPointer",
+    "UnsafeMutableRawPointer",
+    "UnsafeBufferPointer",
+    "UnsafeMutableBufferPointer",
+]
+
+internal func platformSwiftQualificationIsInsideStdlibExtension(_ node: Syntax) -> Swift.Bool {
+    var current: Syntax? = node.parent
+    while let candidate = current {
+        if let ext = candidate.as(ExtensionDeclSyntax.self) {
+            if let identifier = ext.extendedType.as(IdentifierTypeSyntax.self),
+               platformSwiftQualificationStdlibShadowingTypes.contains(identifier.name.text) {
+                return true
+            }
+            if let member = ext.extendedType.as(MemberTypeSyntax.self),
+               platformSwiftQualificationStdlibShadowingTypes.contains(member.name.text) {
+                return true
+            }
+            return false
+        }
+        current = candidate.parent
+    }
+    return false
+}
+
 @usableFromInline
 internal let platformSwiftQualificationMessage: Swift.String =
     "[swift protocol qualification] [PLAT-ARCH-022]: stdlib-shadowing "
@@ -124,11 +175,17 @@ internal final class PlatformSwiftQualificationVisitor: SyntaxVisitor {
     }
 
     override func visit(_ node: InheritedTypeSyntax) -> SyntaxVisitorContinueKind {
+        if platformSwiftQualificationIsInsideStdlibExtension(Syntax(node)) {
+            return .visitChildren
+        }
         check(node.type)
         return .visitChildren
     }
 
     override func visit(_ node: GenericParameterSyntax) -> SyntaxVisitorContinueKind {
+        if platformSwiftQualificationIsInsideStdlibExtension(Syntax(node)) {
+            return .visitChildren
+        }
         if let inherited = node.inheritedType {
             check(inherited)
         }
@@ -136,11 +193,17 @@ internal final class PlatformSwiftQualificationVisitor: SyntaxVisitor {
     }
 
     override func visit(_ node: ConformanceRequirementSyntax) -> SyntaxVisitorContinueKind {
+        if platformSwiftQualificationIsInsideStdlibExtension(Syntax(node)) {
+            return .visitChildren
+        }
         check(node.rightType)
         return .visitChildren
     }
 
     override func visit(_ node: SomeOrAnyTypeSyntax) -> SyntaxVisitorContinueKind {
+        if platformSwiftQualificationIsInsideStdlibExtension(Syntax(node)) {
+            return .visitChildren
+        }
         check(node.constraint)
         return .visitChildren
     }
