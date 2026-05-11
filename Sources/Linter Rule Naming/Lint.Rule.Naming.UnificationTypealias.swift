@@ -58,6 +58,24 @@ internal final class NamingUnificationTypealiasVisitor: SyntaxVisitor {
         if member.genericArgumentClause != nil { return .visitChildren }
         let rhsLeaf = member.name.text
         guard rhsLeaf != lhsName else { return .visitChildren }
+        // Exempt stdlib bridges: `public typealias Protocol = Swift.Equatable`
+        // (Equation/Hash/Comparison primitives under Swift 6.4+ SE-0499) is a
+        // namespace alias TO the stdlib, not a rename bridge between two
+        // co-equal type definitions. The structural signal is the RHS base
+        // identifier resolving to `Swift`.
+        if let baseIdentifier = member.baseType.as(IdentifierTypeSyntax.self),
+           baseIdentifier.name.text == "Swift" {
+            return .visitChildren
+        }
+        // Exempt typealiases that satisfy an associatedtype requirement of
+        // a protocol the enclosing context adopts — `extension X: Y {
+        // typealias Underlying = Unicode.Scalar }` declares conformance to
+        // `Y`; the LHS name is dictated by `Y`'s associatedtype, the RHS
+        // is whatever satisfies it. Forced by the protocol shape, not by
+        // a discretionary [API-NAME-004] rename-bridge choice.
+        if namingIsInsideConformingContext(Syntax(node)) {
+            return .visitChildren
+        }
         let location = converter.location(
             for: node.typealiasKeyword.positionAfterSkippingLeadingTrivia
         )

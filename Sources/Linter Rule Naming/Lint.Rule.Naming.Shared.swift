@@ -66,3 +66,35 @@ internal func namingHasResultBuilderAttribute(_ attributes: AttributeListSyntax)
     }
     return false
 }
+
+/// Returns true if `node` is declared inside an enclosing context that
+/// introduces a protocol conformance — either an extension with a
+/// non-empty inheritance clause, or a type declaration (struct, class,
+/// enum, actor) with a non-empty inheritance clause. Typealiases
+/// declared in such a context typically satisfy an associatedtype
+/// requirement of the adopted protocol (`Collection.Index`,
+/// `Sequence.Element`, `Ownership.Borrow.Protocol.Borrowed`) — they
+/// share the protocol's name by requirement, not by discretionary
+/// choice. The walk-up stops at the first decl context.
+internal func namingIsInsideConformingContext(_ node: Syntax) -> Bool {
+    var current: Syntax? = node.parent
+    while let candidate = current {
+        if let ext = candidate.as(ExtensionDeclSyntax.self) {
+            return ext.inheritanceClause != nil
+        }
+        if let typeDecl = candidate.as(StructDeclSyntax.self) {
+            return typeDecl.inheritanceClause != nil
+        }
+        if let typeDecl = candidate.as(ClassDeclSyntax.self) {
+            return typeDecl.inheritanceClause != nil
+        }
+        if let typeDecl = candidate.as(EnumDeclSyntax.self) {
+            return typeDecl.inheritanceClause != nil
+        }
+        if let typeDecl = candidate.as(ActorDeclSyntax.self) {
+            return typeDecl.inheritanceClause != nil
+        }
+        current = candidate.parent
+    }
+    return false
+}

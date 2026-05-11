@@ -72,4 +72,43 @@ extension Lint.Rule.`namespace adoption typealias Tests`.`Edge Case` {
         let findings = Lint.Rule.`namespace adoption typealias Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
+
+    @Test
+    func `associatedtype satisfier in conforming extension is NOT flagged`() {
+        // `extension X: Y { typealias Z = W.Z }` declares conformance to `Y`;
+        // the same-leaf typealias is satisfying an associatedtype requirement
+        // of `Y`, not a discretionary namespace-adoption choice.
+        let source = """
+        extension Tagged: Collection where Underlying: Collection {
+            public typealias Index = Underlying.Index
+        }
+        """
+        let findings = Lint.Rule.`namespace adoption typealias Tests`.findings(in: source)
+        #expect(findings.isEmpty)
+    }
+
+    @Test
+    func `associatedtype satisfier in conforming type body is NOT flagged`() {
+        let source = """
+        public struct Tagged: Collection {
+            public typealias Index = Int
+        }
+        """
+        let findings = Lint.Rule.`namespace adoption typealias Tests`.findings(in: source)
+        #expect(findings.isEmpty)
+    }
+
+    @Test
+    func `same-leaf typealias in plain extension IS still flagged`() {
+        // Extension WITHOUT an inheritance clause is not introducing a
+        // protocol conformance — the same-leaf typealias is a rename
+        // bridge, not an associatedtype satisfier.
+        let source = """
+        extension Tagged {
+            public typealias Event = Kernel.Event
+        }
+        """
+        let findings = Lint.Rule.`namespace adoption typealias Tests`.findings(in: source)
+        #expect(findings.count == 1)
+    }
 }

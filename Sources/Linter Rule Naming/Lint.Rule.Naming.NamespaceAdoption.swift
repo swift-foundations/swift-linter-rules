@@ -61,6 +61,16 @@ internal final class NamingNamespaceAdoptionVisitor: SyntaxVisitor {
         }
         let rhsLeaf = member.name.text
         guard rhsLeaf == lhsName else { return .visitChildren }
+        // Exempt typealiases declared inside a context that introduces
+        // protocol conformance — `extension Tagged: Collection where ...
+        // { typealias Index = Underlying.Index }`. The same-leaf typealias
+        // is satisfying an associatedtype requirement of the adopted
+        // protocol, not a discretionary namespace-adoption choice. The
+        // structural signal is a non-empty inheritance clause on the
+        // enclosing extension or type declaration.
+        if namingIsInsideConformingContext(Syntax(node)) {
+            return .visitChildren
+        }
         let location = converter.location(
             for: node.typealiasKeyword.positionAfterSkippingLeadingTrivia
         )
