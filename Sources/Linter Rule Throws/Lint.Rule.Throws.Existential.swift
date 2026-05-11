@@ -36,6 +36,27 @@ internal let throwsExistentialMessage: Swift.String =
     + "the error as an existential — semantically identical to untyped `throws`. "
     + "Use a concrete error type or make the container generic over the error type."
 
+/// Stdlib-protocol witnesses whose untyped-throws signature is dictated
+/// by the protocol requirement itself — the conformer cannot narrow the
+/// throws set because downstream stdlib calls propagate `any Error`.
+/// Citation key required at write time.
+///
+/// Gated on conformance context: the function name must match an entry
+/// AND the enclosing extension's inheritance clause must name the
+/// corresponding stdlib protocol. Outside that context, the same
+/// signature has no structural justification and still fires.
+@usableFromInline
+internal let throwsExistentialStdlibProtocolWitnessCitations: [Swift.String: (witness: Swift.String, protocols: [Swift.String])] = [
+    "init(from:)": (
+        witness: "Swift.Decodable.init(from:) throws — protocol requirement is untyped",
+        protocols: ["Decodable", "Codable"]
+    ),
+    "encode(to:)": (
+        witness: "Swift.Encodable.encode(to:) throws — protocol requirement is untyped",
+        protocols: ["Encodable", "Codable"]
+    ),
+]
+
 internal final class ThrowsExistentialVisitor: SyntaxVisitor {
     let source: Source.File
     let severity: Diagnostic.Severity
@@ -52,6 +73,15 @@ internal final class ThrowsExistentialVisitor: SyntaxVisitor {
     override func visit(_ node: ThrowsClauseSyntax) -> SyntaxVisitorContinueKind {
         guard let typed = node.type else { return .visitChildren }
         guard isAnyError(typed) else { return .visitChildren }
+        // Stdlib-protocol-witness exemption: walk up to the enclosing
+        // function / init decl, build the witness-key string, and check
+        // whether it matches a known stdlib-protocol untyped-throws
+        // requirement AND the enclosing extension conforms to the
+        // corresponding stdlib protocol. The protocol IS the gate —
+        // the typed-throws constraint is structurally inexpressible.
+        if isStdlibProtocolWitnessThrows(Syntax(node)) {
+            return .visitChildren
+        }
         let location = converter.location(for: typed.positionAfterSkippingLeadingTrivia)
         matches.append(Diagnostic.Record(
             location: Source.Location(
@@ -65,6 +95,64 @@ internal final class ThrowsExistentialVisitor: SyntaxVisitor {
             message: throwsExistentialMessage
         ))
         return .visitChildren
+    }
+
+    private func isStdlibProtocolWitnessThrows(_ node: Syntax) -> Swift.Bool {
+        // Walk up to enclosing function or initializer decl.
+        var current: Syntax? = node.parent
+        var witnessKey: Swift.String?
+        var enclosingExtension: ExtensionDeclSyntax?
+        while let candidate = current {
+            if let fn = candidate.as(FunctionDeclSyntax.self) {
+                witnessKey = throwsWitnessKey(name: fn.name.text, parameterClause: fn.signature.parameterClause)
+                current = candidate.parent
+                continue
+            }
+            if let initDecl = candidate.as(InitializerDeclSyntax.self) {
+                witnessKey = throwsWitnessKey(name: "init", parameterClause: initDecl.signature.parameterClause)
+                current = candidate.parent
+                continue
+            }
+            if let ext = candidate.as(ExtensionDeclSyntax.self) {
+                enclosingExtension = ext
+                break
+            }
+            if candidate.is(StructDeclSyntax.self)
+                || candidate.is(ClassDeclSyntax.self)
+                || candidate.is(EnumDeclSyntax.self)
+                || candidate.is(ActorDeclSyntax.self) {
+                break
+            }
+            current = candidate.parent
+        }
+        guard let key = witnessKey,
+              let entry = throwsExistentialStdlibProtocolWitnessCitations[key],
+              let ext = enclosingExtension,
+              let inheritance = ext.inheritanceClause
+        else { return false }
+        for inherited in inheritance.inheritedTypes {
+            let leaf: Swift.String?
+            if let identifier = inherited.type.as(IdentifierTypeSyntax.self) {
+                leaf = identifier.name.text
+            } else if let member = inherited.type.as(MemberTypeSyntax.self) {
+                leaf = member.name.text
+            } else {
+                leaf = nil
+            }
+            if let leaf, entry.protocols.contains(leaf) {
+                return true
+            }
+        }
+        return false
+    }
+
+    private func throwsWitnessKey(name: Swift.String, parameterClause: FunctionParameterClauseSyntax) -> Swift.String {
+        var key = name + "("
+        for parameter in parameterClause.parameters {
+            key += parameter.firstName.text + ":"
+        }
+        key += ")"
+        return key
     }
 
     private func isAnyError(_ type: TypeSyntax) -> Swift.Bool {
