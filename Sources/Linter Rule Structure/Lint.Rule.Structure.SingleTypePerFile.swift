@@ -10,6 +10,7 @@
 // ===----------------------------------------------------------------------===//
 
 public import Linter_Primitives
+internal import Cardinal_Primitives
 internal import SwiftSyntax
 
 /// Wave 2b finalization (2026-05-10) — one type declaration per file.
@@ -56,7 +57,7 @@ internal final class StructureSingleTypePerFileVisitor: SyntaxVisitor {
     let converter: SourceLocationConverter
     var matches: [Diagnostic.Record] = []
     var currentDepth: Int = 0
-    var topLevelCount: Int = 0
+    var topLevelCount: Cardinal = .zero
 
     init(source: Source.File, severity: Diagnostic.Severity, converter: SourceLocationConverter) {
         self.source = source
@@ -67,8 +68,8 @@ internal final class StructureSingleTypePerFileVisitor: SyntaxVisitor {
 
     private func handleTypeDecl(at position: AbsolutePosition) {
         guard currentDepth == 0 else { return }
-        topLevelCount += 1
-        guard topLevelCount > 1 else { return }
+        topLevelCount += .one
+        guard topLevelCount > .one else { return }
         let location = converter.location(for: position)
         matches.append(Diagnostic.Record(
             location: Source.Location(
