@@ -47,9 +47,19 @@ private final class ThrowsRethrowsTryFinder: SyntaxVisitor {
     var positions: [AbsolutePosition] = []
     var closureDepth: Swift.Int = -1
     override func visit(_ node: TryExprSyntax) -> SyntaxVisitorContinueKind {
-        if node.questionOrExclamationMark == nil {
-            positions.append(node.tryKeyword.positionAfterSkippingLeadingTrivia)
+        guard node.questionOrExclamationMark == nil else {
+            return .visitChildren
         }
+        // Admit `try` inside `do { ... } catch { ... }` whose catch
+        // materializes the error (the [IMPL-109] Result-shim
+        // remediation): the closure remains non-throwing by
+        // construction, so the rule's own prescribed fix shape MUST
+        // NOT re-fire. Helper lives in `Lint.Rule.Throws.ClosureAnnotation.swift`
+        // (API-ERR-004) and stops the walk at the closure boundary.
+        if throwsClosureTryIsInsideMaterializingDoCatch(Syntax(node)) {
+            return .visitChildren
+        }
+        positions.append(node.tryKeyword.positionAfterSkippingLeadingTrivia)
         return .visitChildren
     }
     override func visit(_: ClosureExprSyntax) -> SyntaxVisitorContinueKind {
@@ -93,6 +103,18 @@ internal final class ThrowsRethrowsResultShimVisitor: SyntaxVisitor {
             }
         }
         for closure in closures {
+            // Skip closures that carry an explicit typed-throws annotation
+            // (`{ ... throws(E) -> R in ... }`). Stdlib `rethrows` higher-
+            // order methods accept only untyped-throws closures; an
+            // explicitly typed-throws closure literal cannot be invoking
+            // stdlib rethrows form (it's an institute typed-throws API
+            // like `Tagged.map`). The AST-only heuristic catches the
+            // dominant institute case where authors annotate; inferred-
+            // throw-type closures (no explicit annotation) fall through
+            // to the existing check.
+            if throwsIsTypedThrows(closure.signature?.effectSpecifiers?.throwsClause) {
+                continue
+            }
             let finder = ThrowsRethrowsTryFinder(viewMode: .sourceAccurate)
             finder.walk(closure)
             for position in finder.positions {

@@ -119,4 +119,60 @@ extension Lint.Rule.`result wrapper for rethrows shim Tests`.`Edge Case` {
         let findings = Lint.Rule.`result wrapper for rethrows shim Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
+
+    @Test
+    func `closure with explicit typed-throws annotation is not flagged (bug 3a fix)`() {
+        let source = """
+        let result = try base.map { value throws(MyError) in try transform(value) }
+        """
+        let findings = Lint.Rule.`result wrapper for rethrows shim Tests`.findings(in: source)
+        // The closure carries `throws(MyError)`; stdlib `rethrows` accepts
+        // only untyped-throws closures. The call site is invoking a
+        // typed-throws institute API, not stdlib rethrows.
+        #expect(findings.isEmpty)
+    }
+
+    @Test
+    func `Tagged-style typed-throws closure is not flagged (bug 3a fix)`() {
+        let source = """
+        try base.map { ordinal throws(Ordinal.Error) in try ordinal.successor.exact() }
+        """
+        let findings = Lint.Rule.`result wrapper for rethrows shim Tests`.findings(in: source)
+        #expect(findings.isEmpty)
+    }
+
+    @Test
+    func `try inside do-catch with materializing return is not flagged (bug 3b fix)`() {
+        let source = """
+        let results = items.map { input -> Result<Int, MyError> in
+            do {
+                return .success(try transform(input))
+            } catch let error as MyError {
+                return .failure(error)
+            }
+        }
+        """
+        let findings = Lint.Rule.`result wrapper for rethrows shim Tests`.findings(in: source)
+        // The IMPL-109 message itself prescribes this shape. The rule
+        // MUST NOT fire on its own prescribed remediation.
+        #expect(findings.isEmpty)
+    }
+
+    @Test
+    func `try inside do-catch that rethrows is still flagged (bug 3b boundary)`() {
+        let source = """
+        let result = items.map { input -> Int in
+            do {
+                return try transform(input)
+            } catch {
+                throw error
+            }
+        }
+        """
+        let findings = Lint.Rule.`result wrapper for rethrows shim Tests`.findings(in: source)
+        // The catch re-throws (`throw error`) so the closure DOES
+        // propagate; not the Result-materialization pattern, the rule
+        // should still fire.
+        #expect(findings.count == 1)
+    }
 }
