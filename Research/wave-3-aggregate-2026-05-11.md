@@ -2,7 +2,7 @@
 
 <!--
 ---
-version: 1.4.0
+version: 1.5.0
 last_updated: 2026-05-12
 status: IMPLEMENTED
 ---
@@ -10,6 +10,15 @@ status: IMPLEMENTED
 
 ## Changelog
 
+- **v1.5.0 (2026-05-12)** — Wave 4 closed via Option B inversion (research-driven framework correction):
+  - **Wave 4 carve-out reverted in favor of inversion** per Tier 2 research at `swift-institute/Research/safe-attribute-absorber-pattern-fundamentals.md` v1.1.0 DECISION. The carve-out approach (v1.4.0's `[MEM-SAFE-025b]` exception for type-decl absorber pattern) was tool-capability-bound rather than structurally principled. Empirical surprise (~120 residuals vs <10 predicted) was the symptom of the underlying framing being wrong, not of carve-out being too narrow.
+  - **`[MEM-SAFE-025b]` inverted** (Skills `b72677a`): admit `@safe` per SE-0458's intent instead of forbidding; the Wave 4 absorber-pattern carve-out language is removed. The "direct `@safe` on funcs/vars/lets/inits/subscripts remains forbidden" clause from Wave 3 also removed — `@safe` admitted on all declaration kinds per SE-0458's permission.
+  - **`[MEM-SAFE-025c]` authored** (Skills `b72677a`): disclosure requirement. Every `@safe` declaration MUST carry an adjacent invariant disclosure — either a `// SAFETY:` / `// WHY:` line block OR a `## Safety Invariant` doc-comment section. Category citation per `[MEM-SAFE-024]` is SHOULD-strength (some sites don't categorize cleanly under A/B/C/D).
+  - **Rule rename + inversion** (swift-linter-rules `a881e0f`): `Lint.Rule.Memory.SafeForbidden` → `Lint.Rule.Memory.SafeAttributeUndocumented`. Predicate flipped — fires when `@safe` present without adjacent disclosure (drops the Wave 4 condition-1 unsafe-internals check entirely). Applies uniformly to struct/class/enum/actor/extension/protocol/func/var/init/deinit/subscript/typealias/associatedtype. 26 new tests + 577-test suite green.
+  - **Source migration cascade**: 29 packages touched, ~120 invariant disclosures added across the ecosystem. Per-package commits enumerated in the v1.5.0 References section below. Final ecosystem-wide lint sweep: **0 `safe attribute undocumented` findings** across all 150 `@safe` sites in 134 files.
+  - **Empirical correction**: live `@safe` count was 150 occurrences in 134 files, not the ~125 the research doc estimated. Three-cluster framing held; counts skewed higher (cluster C pure-documentation dominated).
+  - **Pre-existing unrelated build failure noted**: `swift-darwin-standard` has a Tagged.rawValue lookup error in `Darwin.Loader.Image.swift:121` that pre-dates this work; reproduces on unmodified tree. Not Wave 4 related; tracked separately.
+  - **Wave 4 carve-out doc status**: `wave-4-absorber-pattern-policy-lean-2026-05-12.md` flipped to **SUPERSEDED** v1.2.0 (swift-linter-rules `294393b`). The carve-out implementation commits (Skills `e4d66dd`, swift-linter-rules `cbf4922`) remain in history but are functionally replaced.
 - **v1.4.0 (2026-05-12)** — Wave 3 Open Q1 closed (post-Wave-3 Phase 2 closure):
   - **Re-triage of 2.1 (takeIfPresent / consumeIfStored)** at `HANDOFF-rule-triage-re-examination.md` Findings reversed the prior RECOMMENDATION (RULE-WRONG → stdlib-idiom exemption) to **SOURCE-WRONG**: refactor the compound-named sites to single-word verbs, drop the trapping siblings (Option A — the institute's `pop.first` usage in adjacent packages is the worked precedent; the cited `popFirst` stdlib analog has verb+target shape, not the verb+suffix-modifier shape of `takeIfPresent`).
   - **Implementation landed at swift-ownership-primitives `6adf223`** (pushed):
@@ -152,11 +161,16 @@ Zero residuals. Every finding in the original 12-residual ledger has a verified 
 - **3 pre-existing test failures closed in v1.2.0** (orthogonal to Wave 3): machine-primitives Tagged API drift, witnesses macro init-label cascade, MockFactoryZeroCollision fixture path.
 - **892 finding drop** ecosystem-wide (v1.2.0 11-package number: 896 → 4; 99.6%).
 
-## Residuals after Wave 3 (v1.4.0)
+## Residuals after Wave 3 (v1.5.0)
 
-**Zero.** Every original Wave 3 residual is closed. The v1.4.0 Open Q1
-closure (SOURCE-WRONG refactor on Latch + Transfer.*.Incoming, Option A)
-resolved the last 4 compound-identifier findings.
+**Zero on Wave 3 scope.** Every original Wave 3 residual was closed at
+v1.4.0 (Open Q1 takeIfPresent refactor).
+
+**Wave 4 (absorber-pattern carry-forward) also closed at v1.5.0** via
+Option B research-driven inversion. The ~128 carve-out target became
+150 sites empirically; all admitted under the inverted
+`[MEM-SAFE-025b]` + new `[MEM-SAFE-025c]` framework with disclosure
+required. Zero `safe attribute undocumented` findings ecosystem-wide.
 
 **Wave 4 carry-forward**: Thread 7's new `SafeForbidden` rule fires on
 ~80 `@safe` absorber-pattern sites ecosystem-wide ([MEM-SAFE-021] /
