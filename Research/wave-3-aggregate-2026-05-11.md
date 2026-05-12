@@ -2,7 +2,7 @@
 
 <!--
 ---
-version: 1.3.0
+version: 1.4.0
 last_updated: 2026-05-12
 status: IMPLEMENTED
 ---
@@ -10,6 +10,17 @@ status: IMPLEMENTED
 
 ## Changelog
 
+- **v1.4.0 (2026-05-12)** — Wave 3 Open Q1 closed (post-Wave-3 Phase 2 closure):
+  - **Re-triage of 2.1 (takeIfPresent / consumeIfStored)** at `HANDOFF-rule-triage-re-examination.md` Findings reversed the prior RECOMMENDATION (RULE-WRONG → stdlib-idiom exemption) to **SOURCE-WRONG**: refactor the compound-named sites to single-word verbs, drop the trapping siblings (Option A — the institute's `pop.first` usage in adjacent packages is the worked precedent; the cited `popFirst` stdlib analog has verb+target shape, not the verb+suffix-modifier shape of `takeIfPresent`).
+  - **Implementation landed at swift-ownership-primitives `6adf223`** (pushed):
+    - `Ownership.Latch.takeIfPresent()` → `Ownership.Latch.take()` (Optional-returning, canonical); trapping sibling `Latch.take() -> Value` **deleted**.
+    - `Ownership.Transfer.{Erased,Retained,Value}.Incoming.consumeIfStored(...)` → `Ownership.Transfer.{Erased,Retained,Value}.Incoming.consume(...)` (Optional-returning, canonical); trapping siblings **deleted** on each variant.
+    - `Ownership.Transfer.Value.Outgoing.Token.take() -> V` preserved (different surface, exactly-once semantics) — wraps the new Optional `Latch.take()` with `preconditionFailure`.
+  - **External consumer cascade**: `swift-foundations/swift-observations/Sources/Observations/withObservationTracking.swift` updated (1 production call site + 1 docstring), commit `13cff4d` — LOCAL ONLY (swift-observations has no remote configured).
+  - **Residual count**: 4 → 0. The compound-identifier residuals are fully closed.
+  - **Surface-label correction**: prior ledger entries (v1.0.0 through v1.3.0) named the residuals as on "Slot.Move + retained-incoming/outgoing." On inspection, the real surfaces were `Ownership.Latch` + `Ownership.Transfer.{Erased,Retained,Value}.Incoming`. `Slot.Move` itself (file `Ownership.Slot.Move.swift`) has `out` / `in(_:)` only. The "Slot.Move" label was a shorthand/misnomer carried forward from the initial Wave 3 dispatch. Subsequent ledger references should use the correct surface names.
+  - **Tests**: 115/115 pass on swift-ownership-primitives; swift-observations builds clean. Lint pass: 4 → 0 compound-identifier findings (verified).
+  - **Pattern note**: `Optional<T>` where `T: ~Copyable` cannot be borrowed twice across multiple `#expect` calls — initial test rewrite hit "consumed more than once"; corrected pattern is `guard let x = … else { Issue.record(…); return }`. Worth capturing as a corpus pattern (testing-swiftlang or memory-safety skill addendum) — surfaced for orchestrator awareness.
 - **v1.3.0 (2026-05-12)** — Post-closure empirical follow-ups (Phase 1.4
   of the post-Wave-3 quick-wins dispatch):
   - Open Follow-Up #4 answered — `nonisolated(unsafe)` site enumeration
@@ -77,12 +88,12 @@ deps onto rule packages pick up Wave 3 amendments locally without
 | swift-either-primitives | 6 | 0 | 0 | -6 | Compound `flatMap` exempted via stdlib-idiom citations (Wave 2 ledger #1) |
 | swift-equation-primitives | 55 | 0 | 0 | -55 | DocC + Wave 2 closeouts |
 | swift-hash-primitives | 46 | 0 | 0 | -46 | DocC + Wave 2 closeouts |
-| swift-ownership-primitives | 56 | 11 | 4 | -52 | v1.2.0: Thread 4 closes 2 Header.* (private surface); Thread 7 closes 3 nonisolated-unsafe vacuously (no sites in Sources); Thread 8 closes 2 unchecked-call-site (suppressed at Slot.Move). 4 takeIfPresent/consumeIfStored compound-name remain (HANDOFF Open Q3, breaking-API rename deferred) |
+| swift-ownership-primitives | 56 | 11 | 0 (v1.4.0) | -56 | v1.2.0: Thread 4 closes 2 Header.* (private surface); Thread 7 closes 3 nonisolated-unsafe vacuously; Thread 8 closes 2 unchecked-call-site (suppressed at Slot.Move). **v1.4.0**: Open Q1 closes via SOURCE-WRONG refactor — Latch.takeIfPresent → take(), Transfer.{Erased,Retained,Value}.Incoming.consumeIfStored → consume(), trapping siblings deleted. Zero residuals. |
 | swift-product-primitives | 13 | 0 | 0 | -13 | MEM-COPY pack-expansion + Existential — Wave 2 ledger amendments |
 | swift-property-primitives | 15 | 1 | 0 | -15 | v1.2.0: Thread 7 closes the 1 AMBIGUOUS vacuously (no nonisolated(unsafe) in Sources) |
 | swift-standard-library-extensions | 620 | 0 | 0 | -620 | v1.1.0: Lint sub-package build defect fixed (`02ac34f`); re-ran clean. All 620 baseline findings closed via combined engine DocC exclusion + Wave 2 source-fixes (d19e725) + `.disable(.\`int public parameter\`)` directive (54) + Wave 3 amendments |
 | swift-tagged-primitives | 22 | 0 | 0 | -22 | Tagged-init + bridge + Compound closeouts |
-| **Total (11 packages)** | **896** | **12** | **4** | **-892** | **99.6% drop ecosystem-wide; 4 takeIfPresent residuals deferred (HANDOFF Open Q3)** |
+| **Total (11 packages)** | **896** | **12** | **0 (v1.4.0)** | **-896** | **100% drop ecosystem-wide; all original Wave 3 residuals closed** |
 
 **Wave 4 emergence (out-of-scope for this ledger; tracked separately):**
 Thread 7's new `SafeForbidden` rule fires on ~80 `@safe` absorber-pattern
@@ -100,21 +111,18 @@ were dominated by DocC step-files (the per-leaf reports cited
 engine's `*.docc/**` exclusion (`86856c1`, landed pre-Wave-3 but
 post-baseline) removes those without rule changes.
 
-## Per-rule breakdown of remaining 4 findings (v1.2.0)
+## Per-rule breakdown — all original Wave 3 residuals closed (v1.4.0)
 
-All 4 residuals are in swift-ownership-primitives. All are
-`compound identifier` findings on `takeIfPresent` / `consumeIfStored`
-APIs deferred per HANDOFF Open Q3 (breaking-API rename held for next
-API-design pass).
+Zero residuals. Every finding in the original 12-residual ledger has a verified disposition.
 
-### swift-ownership-primitives — 4 findings
+### swift-ownership-primitives — 0 findings (v1.4.0)
 
 | Rule | Count | Disposition |
 |------|------:|-------------|
-| compound identifier | 4 | `takeIfPresent` / `consumeIfStored` × 4 on `Slot.Move` + retained-incoming/outgoing — API-rename decision deferred per HANDOFF Open Q3 (compound-name exception vs `take.ifPresent` nested-accessor refactor; breaking API for 4 call sites) |
+| ~~compound identifier (takeIfPresent / consumeIfStored)~~ | ~~4~~ | **CLOSED in v1.4.0** via SOURCE-WRONG refactor (swift-ownership-primitives `6adf223`): `Ownership.Latch.takeIfPresent` → `take()`, `Ownership.Transfer.{Erased,Retained,Value}.Incoming.consumeIfStored` → `consume()`; trapping siblings deleted (Option A). External cascade: swift-observations `13cff4d` (local-only). Prior surface label "Slot.Move" was a misnomer; correct surfaces are Latch + Transfer.*.Incoming. |
 | ~~compound identifier (Header)~~ | ~~2~~ | **CLOSED in v1.2.0** via Thread 4 (`1c06647`) — fileprivate/private exemption added to [API-NAME-002]; `destroyPayload` / `payloadOffset` on `Erased.Outgoing.Header` no longer flagged |
-| ~~unchecked sendable noncopyable~~ | ~~3~~ | **CLOSED in v1.2.0** vacuously via Thread 7 (`8e06283` + skill split `677ccaa`) — no `nonisolated(unsafe)` decls in swift-ownership-primitives Sources; the AMBIGUOUS findings predicate doesn't apply under the new [MEM-SAFE-025a] (invariant comment) + [MEM-SAFE-025b] (@safe forbidden) split |
-| ~~unchecked call site~~ | ~~2~~ | **CLOSED in v1.2.0** via Thread 8 (`f913d1b` engine + `cbce2cd` source) — `Slot.Move.in/out` suppressed with `// swift-linter:disable:next unchecked call site` + `// REASON:` citing [CONV-016] |
+| ~~unchecked sendable noncopyable~~ | ~~3~~ | **CLOSED in v1.2.0** vacuously via Thread 7 (`8e06283` + skill split `677ccaa`) — no `nonisolated(unsafe)` decls in swift-ownership-primitives Sources |
+| ~~unchecked call site~~ | ~~2~~ | **CLOSED in v1.2.0** via Thread 8 (`f913d1b` engine + `cbce2cd` source) — `Slot.Move.in/out` suppressed with `// swift-linter:disable:next` + REASON |
 | ~~extension noncopyable constraint~~ | ~~1~~ | **CLOSED in v1.1.0** via Thread 2 extension (`ac40ca1`) |
 
 ### swift-property-primitives — 0 findings (v1.2.0)
@@ -144,15 +152,11 @@ API-design pass).
 - **3 pre-existing test failures closed in v1.2.0** (orthogonal to Wave 3): machine-primitives Tagged API drift, witnesses macro init-label cascade, MockFactoryZeroCollision fixture path.
 - **892 finding drop** ecosystem-wide (v1.2.0 11-package number: 896 → 4; 99.6%).
 
-## Residuals after Wave 3 (v1.2.0)
+## Residuals after Wave 3 (v1.4.0)
 
-The 4 remaining findings are all in one rule class:
-
-- **4 API-rename decisions** (HANDOFF Open Q3: takeIfPresent / consumeIfStored rename to nested accessor; breaking API for 4 call sites)
-
-The Wave 3 dispatch is **fully closed**. Every original residual is
-either resolved (8 of 12) or mapped to the deferred API-rename pass
-(4 of 12). The v1.0.0 Thread 2 partial-gap closed in v1.1.0.
+**Zero.** Every original Wave 3 residual is closed. The v1.4.0 Open Q1
+closure (SOURCE-WRONG refactor on Latch + Transfer.*.Incoming, Option A)
+resolved the last 4 compound-identifier findings.
 
 **Wave 4 carry-forward**: Thread 7's new `SafeForbidden` rule fires on
 ~80 `@safe` absorber-pattern sites ecosystem-wide ([MEM-SAFE-021] /
