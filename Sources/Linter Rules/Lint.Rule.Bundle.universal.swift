@@ -62,7 +62,7 @@ extension Lint.Rule.Bundle {
         .enable(.`noncopyable error`),
         .enable(.`extension noncopyable constraint`),
         .enable(.`nonisolated unsafe without invariant`),
-        .enable(.`safe attribute forbidden`),
+        .enable(.`safe attribute undocumented`),
         .enable(.`pointer advanced by`),
         .enable(.`unsafe storage visibility`),
         .enable(.`sendable struct with class member`),
