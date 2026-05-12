@@ -259,4 +259,45 @@ extension Lint.Rule.`minimal type body Tests`.`Edge Case` {
         let findings = Lint.Rule.`minimal type body Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
+
+    // Exemption shape: [RULE-EXEMPT-5] (Protocol-sentinel). The
+    // institute hoisted-protocol pattern per [API-IMPL-009] /
+    // [PKG-NAME-001] places a `typealias Protocol = _FooProtocol`
+    // inside the type body intentionally; extraction yields empty-body
+    // + extension-with-one-typealias for zero semantic gain.
+
+    @Test
+    func `typealias Protocol in type body is exempt per RULE-EXEMPT-5`() {
+        let source = """
+        enum Carrier {
+            typealias Protocol = _CarrierProtocol
+        }
+        """
+        let findings = Lint.Rule.`minimal type body Tests`.findings(in: source)
+        #expect(findings.isEmpty)
+    }
+
+    @Test
+    func `typealias backtick-Protocol in type body is exempt per RULE-EXEMPT-5`() {
+        let source = """
+        enum Carrier {
+            public typealias `Protocol` = Swift.Equatable
+        }
+        """
+        let findings = Lint.Rule.`minimal type body Tests`.findings(in: source)
+        #expect(findings.isEmpty)
+    }
+
+    @Test
+    func `typealias with other name in type body is still flagged`() {
+        // Negative case — the sentinel exemption is name-narrow, not a
+        // typealias-blanket exemption.
+        let source = """
+        enum Carrier {
+            typealias Underlying = SomeOtherType
+        }
+        """
+        let findings = Lint.Rule.`minimal type body Tests`.findings(in: source)
+        #expect(findings.count == 1)
+    }
 }
