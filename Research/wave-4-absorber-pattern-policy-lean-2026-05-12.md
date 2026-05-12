@@ -2,14 +2,15 @@
 
 <!--
 ---
-version: 1.1.0
+version: 1.2.0
 last_updated: 2026-05-12
-status: DECISION
+status: SUPERSEDED
 ---
 -->
 
 ## Changelog
 
+- **v1.2.0 (2026-05-12)** — **SUPERSEDED** by [`swift-institute/Research/safe-attribute-absorber-pattern-fundamentals.md`](../../../../swift-institute/Research/safe-attribute-absorber-pattern-fundamentals.md) v1.1.0 DECISION. The Tier 2 fundamentals re-examination found that the carve-out stamped at v1.1.0 was tool-capability-bound rather than structurally principled: the "type-level vs method-level" cut and the "direct vs transitive unsafe storage" cut were artifacts of AST-only linter capability, not principled design boundaries. SE-0458 designs `@safe` as the language-level absorber mechanism; the institute's "forbid `@safe`" policy contradicts both SE-0458's intent and the institute's own Tier 2 canonical reference (`swift-safety-model-reference.md` 2026-03-25). The replacement direction inverts `[MEM-SAFE-025b]` to admit `@safe` per SE-0458 while requiring an accompanying invariant disclosure (`[MEM-SAFE-025c]` new). The Wave 4 carve-out logic in `Lint.Rule.Memory.SafeForbidden.swift` is replaced by an inverted predicate in `Lint.Rule.Memory.SafeAttributeUndocumented.swift`. See the fundamentals doc for full structural rationale, prior-art survey, and migration plan. Historical commits `e4d66dd` (Skills carve-out) and `cbf4922` (rule predicate) remain in git history but are functionally replaced.
 - **v1.1.0 (2026-05-12)** — Stamped **DECISION** (Option a). Two defect-fixes applied per orchestrator audit:
   1. **Strike "Category E"** from condition (2a). `[MEM-SAFE-024]` defines Categories A/B/C/D only and explicitly forbids silent extension (the rule body states *"A fifth category requires explicit conversation per Wave 2b Decision 8 — do not silently extend the allowlist"*). If a genuine Category-E site surfaces during the per-site verification pass (Step 2 below), it becomes the trigger for a deliberate `[MEM-SAFE-024]` amendment surfaced individually — not smuggled into the carve-out.
   2. **Drop condition (1d)** (*"An invocation of an `@unsafe`-marked function inside an inline method"*). The AST-only linter cannot resolve which functions carry the `@unsafe` declaration attribute across file boundaries — that's a SourceKit / compiler-level question. Conditions (1a)/(1b)/(1c) cover type-level absorption (the carve-out's stated intent). Method-level absorption (the type's interface looks safe but methods use unsafe ops) is out of the carve-out's principled scope — those sites should use `[MEM-SAFE-025a]` invariant comments instead.
