@@ -210,4 +210,53 @@ extension Lint.Rule.`minimal type body Tests`.`Edge Case` {
         let findings = Lint.Rule.`minimal type body Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
+
+    // Exemption shape: [RULE-EXEMPT-4] (@resultBuilder). Types marked
+    // `@resultBuilder` carry static methods dictated by Swift's
+    // `@resultBuilder` informal protocol contract per SE-0289. Forcing
+    // extraction yields empty-body + extension-with-only-witnesses for
+    // zero semantic gain.
+
+    @Test
+    func `@resultBuilder enum with buildBlock is exempt per RULE-EXEMPT-4`() {
+        let source = """
+        @resultBuilder
+        enum MyBuilder {
+            static func buildBlock(_ x: Int) -> Int { x }
+            static func buildExpression(_ x: Int) -> Int { x }
+        }
+        """
+        let findings = Lint.Rule.`minimal type body Tests`.findings(in: source)
+        #expect(findings.isEmpty)
+    }
+
+    @Test
+    func `nested @resultBuilder struct is exempt per RULE-EXEMPT-4`() {
+        // The nested-type's @resultBuilder attribute is checked at the
+        // parent's checkMembers walk; the nested type is exempt even
+        // though it's a nested type-decl, which the rule normally flags.
+        let source = """
+        struct Outer {
+            var x: Int
+            @resultBuilder
+            struct InnerBuilder {
+                static func buildBlock(_ x: Int) -> Int { x }
+            }
+        }
+        """
+        let findings = Lint.Rule.`minimal type body Tests`.findings(in: source)
+        #expect(findings.isEmpty)
+    }
+
+    @Test
+    func `non-resultBuilder struct with static method is still flagged`() {
+        let source = """
+        struct PlainType {
+            var x: Int
+            static func make() -> PlainType { PlainType(x: 0) }
+        }
+        """
+        let findings = Lint.Rule.`minimal type body Tests`.findings(in: source)
+        #expect(findings.count == 1)
+    }
 }

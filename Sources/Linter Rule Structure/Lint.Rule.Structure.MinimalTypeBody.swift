@@ -166,15 +166,19 @@ internal final class StructureMinimalTypeBodyVisitor: SyntaxVisitor {
         }
     }
 
-    /// Returns true if the attribute list contains `@resultBuilder`.
-    /// Types marked `@resultBuilder` are protocol-witness-shaped — their
-    /// static methods (buildBlock, buildExpression, etc.) are dictated
-    /// by Swift's `@resultBuilder` informal protocol contract, not by
-    /// discretionary author choice. Forcing extraction yields
-    /// empty-body + extension-with-only-witnesses for zero semantic
-    /// gain. Inline detection (parallel to the rule's own pattern;
-    /// `namingHasResultBuilderAttribute` lives in the institute
-    /// Naming pack and isn't cross-target visible).
+    /// Implements [RULE-EXEMPT-4] (@resultBuilder) for the
+    /// MinimalTypeBody rule. Types marked `@resultBuilder` are
+    /// protocol-witness-shaped — their static methods (buildBlock,
+    /// buildExpression, etc.) are dictated by Swift's `@resultBuilder`
+    /// informal protocol contract per SE-0289. The attribute IS the
+    /// spec; forcing extraction yields empty-body + extension-with-only-
+    /// witnesses for zero semantic gain.
+    ///
+    /// Pack-local duplicate of `namingHasResultBuilderAttribute` in
+    /// `Lint.Rule.Naming.Shared.swift` — cross-pack visibility isn't
+    /// available across the universal/institute tier boundary, so the
+    /// helper is duplicated; semantics match. See
+    /// swift-institute/Skills/rule-exemptions/SKILL.md.
     private func hasResultBuilderAttribute(_ attributes: AttributeListSyntax) -> Swift.Bool {
         for attribute in attributes {
             guard let attr = attribute.as(AttributeSyntax.self) else { continue }
