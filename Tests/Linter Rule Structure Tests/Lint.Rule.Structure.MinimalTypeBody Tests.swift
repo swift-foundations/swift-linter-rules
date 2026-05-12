@@ -260,6 +260,55 @@ extension Lint.Rule.`minimal type body Tests`.`Edge Case` {
         #expect(findings.count == 1)
     }
 
+    // Exemption shape: [RULE-EXEMPT-4] broadened to extension-pattern
+    // attribute. swift-testing's `@Suite` legitimately holds nested
+    // `@Suite` substructures per [SWIFT-TEST-002]; the attribute IS the
+    // spec, mirroring the @resultBuilder rationale.
+
+    @Test
+    func `@Suite struct holding nested @Suite struct is exempt per RULE-EXEMPT-4`() {
+        let source = """
+        @Suite
+        struct OuterSuite {
+            @Suite struct Unit {}
+            @Suite struct EdgeCase {}
+        }
+        """
+        let findings = Lint.Rule.`minimal type body Tests`.findings(in: source)
+        #expect(findings.isEmpty)
+    }
+
+    @Test
+    func `nested @Suite struct inside non-@Suite parent is exempt per RULE-EXEMPT-4`() {
+        // Mirrors the existing @resultBuilder nested-type test. The
+        // nested @Suite is recognized at the parent's checkMembers walk
+        // and skipped without firing the nested-type-in-body branch.
+        let source = """
+        struct Outer {
+            var x: Int
+            @Suite
+            struct InnerSuite {}
+        }
+        """
+        let findings = Lint.Rule.`minimal type body Tests`.findings(in: source)
+        #expect(findings.isEmpty)
+    }
+
+    @Test
+    func `non-@Suite nested type inside non-@Suite parent is still flagged`() {
+        // Negative case: the @Suite recognition is narrow — a plain
+        // nested struct inside a plain parent still fires (no spurious
+        // @Suite exemption from the broadened helper).
+        let source = """
+        struct Outer {
+            var x: Int
+            struct Helper {}
+        }
+        """
+        let findings = Lint.Rule.`minimal type body Tests`.findings(in: source)
+        #expect(findings.count == 1)
+    }
+
     // Exemption shape: [RULE-EXEMPT-5] (Protocol-sentinel). The
     // institute hoisted-protocol pattern per [API-IMPL-009] /
     // [PKG-NAME-001] places a `typealias Protocol = _FooProtocol`

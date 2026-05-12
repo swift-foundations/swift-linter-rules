@@ -141,22 +141,22 @@ internal final class StructureMinimalTypeBodyVisitor: SyntaxVisitor {
                 continue
             }
             if let nested = decl.as(StructDeclSyntax.self) {
-                if hasResultBuilderAttribute(nested.attributes) { continue }
+                if hasExtensionPatternAttribute(nested.attributes) { continue }
                 emit(at: nested.structKeyword.positionAfterSkippingLeadingTrivia)
                 continue
             }
             if let nested = decl.as(ClassDeclSyntax.self) {
-                if hasResultBuilderAttribute(nested.attributes) { continue }
+                if hasExtensionPatternAttribute(nested.attributes) { continue }
                 emit(at: nested.classKeyword.positionAfterSkippingLeadingTrivia)
                 continue
             }
             if let nested = decl.as(EnumDeclSyntax.self) {
-                if hasResultBuilderAttribute(nested.attributes) { continue }
+                if hasExtensionPatternAttribute(nested.attributes) { continue }
                 emit(at: nested.enumKeyword.positionAfterSkippingLeadingTrivia)
                 continue
             }
             if let nested = decl.as(ActorDeclSyntax.self) {
-                if hasResultBuilderAttribute(nested.attributes) { continue }
+                if hasExtensionPatternAttribute(nested.attributes) { continue }
                 emit(at: nested.actorKeyword.positionAfterSkippingLeadingTrivia)
                 continue
             }
@@ -167,23 +167,25 @@ internal final class StructureMinimalTypeBodyVisitor: SyntaxVisitor {
         }
     }
 
-    /// Implements [RULE-EXEMPT-4] (@resultBuilder) for the
-    /// MinimalTypeBody rule. Types marked `@resultBuilder` are
-    /// protocol-witness-shaped — their static methods (buildBlock,
-    /// buildExpression, etc.) are dictated by Swift's `@resultBuilder`
-    /// informal protocol contract per SE-0289. The attribute IS the
-    /// spec; forcing extraction yields empty-body + extension-with-only-
-    /// witnesses for zero semantic gain.
+    /// Implements [RULE-EXEMPT-4] (extension-pattern attribute) for the
+    /// MinimalTypeBody rule. Types marked `@resultBuilder` or `@Suite`
+    /// have their member shape dictated by an external informal-protocol
+    /// contract — SE-0289 for `@resultBuilder` (static builder methods)
+    /// and swift-testing for `@Suite` (nested `@Suite` substructures per
+    /// the extension-pattern). The attribute IS the spec; forcing
+    /// extraction yields empty-body + extension-with-only-witnesses for
+    /// zero semantic gain.
     ///
-    /// Pack-local duplicate of `namingHasResultBuilderAttribute` in
+    /// Pack-local duplicate of `namingHasExtensionPatternAttribute` in
     /// `Lint.Rule.Naming.Shared.swift` — cross-pack visibility isn't
     /// available across the universal/institute tier boundary, so the
     /// helper is duplicated; semantics match. See
     /// swift-institute/Skills/rule-exemptions/SKILL.md.
-    private func hasResultBuilderAttribute(_ attributes: AttributeListSyntax) -> Swift.Bool {
+    private func hasExtensionPatternAttribute(_ attributes: AttributeListSyntax) -> Swift.Bool {
         for attribute in attributes {
             guard let attr = attribute.as(AttributeSyntax.self) else { continue }
-            if attr.attributeName.trimmedDescription == "resultBuilder" {
+            let name = attr.attributeName.trimmedDescription
+            if name == "resultBuilder" || name == "Suite" {
                 return true
             }
         }
@@ -191,7 +193,7 @@ internal final class StructureMinimalTypeBodyVisitor: SyntaxVisitor {
     }
 
     override func visit(_ node: StructDeclSyntax) -> SyntaxVisitorContinueKind {
-        if hasResultBuilderAttribute(node.attributes) {
+        if hasExtensionPatternAttribute(node.attributes) {
             return .visitChildren
         }
         checkMembers(node.memberBlock.members)
@@ -199,7 +201,7 @@ internal final class StructureMinimalTypeBodyVisitor: SyntaxVisitor {
     }
 
     override func visit(_ node: ClassDeclSyntax) -> SyntaxVisitorContinueKind {
-        if hasResultBuilderAttribute(node.attributes) {
+        if hasExtensionPatternAttribute(node.attributes) {
             return .visitChildren
         }
         checkMembers(node.memberBlock.members)
@@ -207,7 +209,7 @@ internal final class StructureMinimalTypeBodyVisitor: SyntaxVisitor {
     }
 
     override func visit(_ node: ActorDeclSyntax) -> SyntaxVisitorContinueKind {
-        if hasResultBuilderAttribute(node.attributes) {
+        if hasExtensionPatternAttribute(node.attributes) {
             return .visitChildren
         }
         checkMembers(node.memberBlock.members)
@@ -215,7 +217,7 @@ internal final class StructureMinimalTypeBodyVisitor: SyntaxVisitor {
     }
 
     override func visit(_ node: EnumDeclSyntax) -> SyntaxVisitorContinueKind {
-        if hasResultBuilderAttribute(node.attributes) {
+        if hasExtensionPatternAttribute(node.attributes) {
             return .visitChildren
         }
         checkMembers(node.memberBlock.members)
