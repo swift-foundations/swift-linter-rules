@@ -204,6 +204,19 @@ internal final class StructureMinimalTypeBodyVisitor: SyntaxVisitor {
         if hasExtensionPatternAttribute(node.attributes) {
             return .visitChildren
         }
+        // Exempt per [RULE-EXEMPT-7] (syntax-visitor-subclass): a
+        // `final class XVisitor: SyntaxVisitor` (or other SwiftSyntax
+        // visitor-family member) has its member shape dictated by the
+        // base class's open visit hooks (`override func visit(_:)`,
+        // `visitPost`). The overrides are protocol-shaped members per
+        // the SwiftSyntax visitor contract — moving them to an
+        // extension yields stored-properties + extension-of-overrides
+        // for zero semantic gain. Helper lives in
+        // `Lint.Rule.Structure.Shared.swift`. See
+        // `swift-institute/Skills/rule-exemptions/SKILL.md`.
+        if structureExtendsSyntaxVisitor(node.inheritanceClause) {
+            return .visitChildren
+        }
         checkMembers(node.memberBlock.members)
         return .visitChildren
     }
