@@ -128,4 +128,44 @@ extension Lint.Rule.`existential throws Tests`.`Edge Case` {
         let findings = Lint.Rule.`existential throws Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
+
+    // Exemption shape: [RULE-EXEMPT-2] (protocol-witness-citation-dict).
+    // `init(from:)` inside a Decodable / Codable conformance and
+    // `encode(to:)` inside an Encodable / Codable conformance carry
+    // the protocol's untyped `throws` signature; the conformer cannot
+    // narrow it. Tuple-valued dict lets one witness satisfy multiple
+    // protocols.
+
+    @Test
+    func `init from inside Decodable conformance is exempt per RULE-EXEMPT-2`() {
+        let source = """
+        extension MyType: Decodable {
+            public init(from decoder: any Decoder) throws(any Error) { fatalError() }
+        }
+        """
+        let findings = Lint.Rule.`existential throws Tests`.findings(in: source)
+        #expect(findings.isEmpty)
+    }
+
+    @Test
+    func `encode to inside Encodable conformance is exempt per RULE-EXEMPT-2`() {
+        let source = """
+        extension MyType: Encodable {
+            public func encode(to encoder: any Encoder) throws(any Error) { fatalError() }
+        }
+        """
+        let findings = Lint.Rule.`existential throws Tests`.findings(in: source)
+        #expect(findings.isEmpty)
+    }
+
+    @Test
+    func `init from outside Decodable conformance is still flagged`() {
+        let source = """
+        extension MyType {
+            public init(from decoder: any Decoder) throws(any Error) { fatalError() }
+        }
+        """
+        let findings = Lint.Rule.`existential throws Tests`.findings(in: source)
+        #expect(findings.count == 1)
+    }
 }

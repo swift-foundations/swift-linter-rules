@@ -73,12 +73,15 @@ internal final class ThrowsExistentialVisitor: SyntaxVisitor {
     override func visit(_ node: ThrowsClauseSyntax) -> SyntaxVisitorContinueKind {
         guard let typed = node.type else { return .visitChildren }
         guard isAnyError(typed) else { return .visitChildren }
-        // Stdlib-protocol-witness exemption: walk up to the enclosing
-        // function / init decl, build the witness-key string, and check
-        // whether it matches a known stdlib-protocol untyped-throws
-        // requirement AND the enclosing extension conforms to the
-        // corresponding stdlib protocol. The protocol IS the gate —
-        // the typed-throws constraint is structurally inexpressible.
+        // Exempt per [RULE-EXEMPT-2] (protocol-witness-citation-dict):
+        // walk up to the enclosing function / init decl, build the
+        // witness-key string, and check whether it matches a known
+        // stdlib-protocol untyped-throws requirement AND the enclosing
+        // extension conforms to the corresponding stdlib protocol. The
+        // protocol IS the gate — the typed-throws constraint is
+        // structurally inexpressible. Tuple-valued dict form lets one
+        // witness key satisfy multiple protocols (Decodable, Codable).
+        // Skill: swift-institute/Skills/rule-exemptions/SKILL.md.
         if isStdlibProtocolWitnessThrows(Syntax(node)) {
             return .visitChildren
         }
