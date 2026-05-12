@@ -125,4 +125,36 @@ extension Lint.Rule.`typealiased namespace bridge Tests`.`Edge Case` {
         // First two flagged (leaf match), third not (different leaf).
         #expect(findings.count == 2)
     }
+
+    // Exemption shape: [RULE-EXEMPT-3] (conformance-context). A
+    // typealias inside an extension with a non-empty inheritance clause
+    // satisfies an associatedtype requirement of the conformed protocol;
+    // the LHS name is dictated by the protocol shape, not by a
+    // discretionary foreign-namespace bridge.
+
+    @Test
+    func `typealias inside conforming extension is exempt per RULE-EXEMPT-3`() {
+        // `typealias Index = Underlying.Index` inside
+        // `extension Tagged: Collection` satisfies `Collection.Index`.
+        let source = """
+        extension Tagged: Collection {
+            typealias Index = Underlying.Index
+        }
+        """
+        let findings = Lint.Rule.`typealiased namespace bridge Tests`.findings(in: source)
+        #expect(findings.isEmpty)
+    }
+
+    @Test
+    func `typealias outside conforming extension is still flagged`() {
+        // Same shape, but no inheritance clause — purely a namespace
+        // bridge; rule MUST fire.
+        let source = """
+        extension Tagged {
+            typealias Index = Underlying.Index
+        }
+        """
+        let findings = Lint.Rule.`typealiased namespace bridge Tests`.findings(in: source)
+        #expect(findings.count == 1)
+    }
 }

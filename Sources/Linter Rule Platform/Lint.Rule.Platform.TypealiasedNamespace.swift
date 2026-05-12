@@ -64,14 +64,16 @@ internal final class PlatformTypealiasedNamespaceVisitor: SyntaxVisitor {
             return .visitChildren
         }
         guard member.name.text == aliasName else { return .visitChildren }
-        // Associatedtype-satisfaction exemption: a typealias inside an
-        // extension whose inheritance clause names a protocol satisfies
-        // the protocol's associatedtype requirement, not a foreign-
-        // namespace bridge. The shape `typealias Index = Underlying.Index`
-        // inside `extension Tagged: Collection` provides
-        // `Collection.Index`, not silent namespace re-pointing.
+        // Exempt per [RULE-EXEMPT-3] (conformance-context): a typealias
+        // inside an extension whose inheritance clause names a protocol
+        // satisfies the protocol's associatedtype requirement, not a
+        // foreign-namespace bridge. The shape `typealias Index =
+        // Underlying.Index` inside `extension Tagged: Collection`
+        // provides `Collection.Index`, not silent namespace re-pointing.
         // Parallels Wave 1 TIGHTEN on unification_typealias /
-        // namespace_adoption_typealias.
+        // namespace_adoption_typealias. Pack-local `isInsideConformingExtension`
+        // duplicates the institute Naming.Shared helper because
+        // cross-pack visibility isn't available; semantics match.
         if isInsideConformingExtension(Syntax(node)) {
             return .visitChildren
         }
