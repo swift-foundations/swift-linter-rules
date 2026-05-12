@@ -2,11 +2,21 @@
 
 <!--
 ---
-version: 1.0.0
+version: 1.1.0
 last_updated: 2026-05-12
-status: RECOMMENDATION
+status: DECISION
 ---
 -->
+
+## Changelog
+
+- **v1.1.0 (2026-05-12)** — Stamped **DECISION** (Option a). Two defect-fixes applied per orchestrator audit:
+  1. **Strike "Category E"** from condition (2a). `[MEM-SAFE-024]` defines Categories A/B/C/D only and explicitly forbids silent extension (the rule body states *"A fifth category requires explicit conversation per Wave 2b Decision 8 — do not silently extend the allowlist"*). If a genuine Category-E site surfaces during the per-site verification pass (Step 2 below), it becomes the trigger for a deliberate `[MEM-SAFE-024]` amendment surfaced individually — not smuggled into the carve-out.
+  2. **Drop condition (1d)** (*"An invocation of an `@unsafe`-marked function inside an inline method"*). The AST-only linter cannot resolve which functions carry the `@unsafe` declaration attribute across file boundaries — that's a SourceKit / compiler-level question. Conditions (1a)/(1b)/(1c) cover type-level absorption (the carve-out's stated intent). Method-level absorption (the type's interface looks safe but methods use unsafe ops) is out of the carve-out's principled scope — those sites should use `[MEM-SAFE-025a]` invariant comments instead.
+
+  Corrected carve-out text appears in §"Proposed Amendment Shape" below.
+
+- **v1.0.0 (2026-05-12)** — Initial RECOMMENDATION (Options a/b/c surfaced; lean: Option a). Carry-forward from `wave-3-aggregate-2026-05-11.md` v1.2.0 Wave 4 emergence + v1.3.0 scope refinement (~128 sites, not ~80).
 
 ## Context
 
@@ -54,7 +64,7 @@ Observable signal:
   ~22 direct (on individual funcs/vars). The absorber form is the dominant
   shape by ~6:1.
 
-## Recommendation: Option (a) — Rule Carve-Out
+## Decision: Option (a) — Rule Carve-Out (stamped 2026-05-12)
 
 **RULE-WRONG.** The `@safe` absorber-pattern is a deliberate institute idiom for
 type-level invariant absorption: when a type encapsulates unsafe storage / pointer
@@ -90,16 +100,22 @@ when BOTH of the following hold:
      a) An `@unsafe` or `@unchecked Sendable` clause on the type itself.
      b) A `nonisolated(unsafe)` stored property.
      c) An internal storage of `Unsafe*Pointer<...>` / `OpaquePointer` / raw bytes.
-     d) An invocation of an `@unsafe`-marked function inside an inline method.
 
   2. The type declaration is accompanied by EITHER:
-     a) An adjacent `// WHY: Category <A|B|C|D|E> — <reason>` line citing a
+     a) An adjacent `// WHY: Category <A|B|C|D> — <reason>` line citing a
         [MEM-SAFE-021]/[MEM-SAFE-022]/[MEM-SAFE-023]/[MEM-SAFE-024] taxonomy entry, OR
      b) A `## Safety Invariant` doc-comment section per [MEM-SAFE-025a].
 
 Direct @safe on funcs, vars, lets, inits, subscripts remains forbidden — the
 [MEM-SAFE-025a] invariant-comment form is the canonical mechanism for those.
 ```
+
+**Note on dropped condition (1d)** (per v1.1.0 defect-fix): an earlier draft included
+*"An invocation of an `@unsafe`-marked function inside an inline method"* as a fourth
+qualifier under condition (1). The AST-only linter cannot resolve cross-file `@unsafe`
+declaration markings; the condition was unenforceable. More importantly, method-level
+absorption sits outside the carve-out's principled scope — it should use
+`[MEM-SAFE-025a]` invariant comments instead of the type-decl carve-out.
 
 The two conditions together prevent the carve-out from degenerating into a free
 escape hatch: condition (1) demands evidence that the type genuinely absorbs
