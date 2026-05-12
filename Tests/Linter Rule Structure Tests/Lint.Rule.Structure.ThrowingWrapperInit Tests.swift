@@ -76,4 +76,49 @@ extension Lint.Rule.`throwing wrapper init Tests`.`Edge Case` {
         let findings = Lint.Rule.`throwing wrapper init Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
+
+    @Test
+    func `extension on Int with throwing init from institute type is admitted`() {
+        let source = """
+        extension Int {
+            public init<Tag: ~Copyable>(_ position: Tagged<Tag, Ordinal>) throws(Ordinal.Error) {
+                self = try Int(position.underlying)
+            }
+        }
+        """
+        let findings = Lint.Rule.`throwing wrapper init Tests`.findings(in: source)
+        // Int is the LAX type; the rule's "wrapper specializes stricter
+        // invariant" premise is inverted when the enclosing type is the
+        // lax primitive and the parameter is the stricter institute
+        // type. The body's overflow check IS the validation.
+        #expect(findings.isEmpty)
+    }
+
+    @Test
+    func `extension on UInt with throwing init is admitted`() {
+        let source = """
+        extension UInt {
+            public init<Tag: ~Copyable>(_ position: Tagged<Tag, Cardinal>) throws(Cardinal.Error) {
+                self = try UInt(position.underlying)
+            }
+        }
+        """
+        let findings = Lint.Rule.`throwing wrapper init Tests`.findings(in: source)
+        #expect(findings.isEmpty)
+    }
+
+    @Test
+    func `throwing init on institute wrapper struct is still flagged`() {
+        let source = """
+        struct Wrapper {
+            init(_ raw: Int) throws {
+                try self.init(base: raw)
+            }
+        }
+        """
+        let findings = Lint.Rule.`throwing wrapper init Tests`.findings(in: source)
+        // Institute wrapper struct (not on the lax allowlist) — the
+        // rule's premise applies and the init should still fire.
+        #expect(findings.count == 1)
+    }
 }
