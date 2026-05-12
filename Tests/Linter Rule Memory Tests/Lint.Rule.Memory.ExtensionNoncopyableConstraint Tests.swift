@@ -213,4 +213,42 @@ extension Lint.Rule.`extension noncopyable constraint Tests`.Unit {
         let findings = Lint.Rule.`extension noncopyable constraint Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
+
+    // Exemption shape: [RULE-EXEMPT-1] (positive-Copyable). Author has
+    // explicitly scoped the extension to a Copyable surface; the
+    // "silent shrink to Copyable" premise is inverted by the explicit
+    // conformance and the rule MUST NOT fire.
+
+    @Test
+    func `extension with positive Copyable constraint is exempt per RULE-EXEMPT-1`() {
+        let source = """
+        extension Container where Element: Copyable {
+            consuming func transfer() {}
+        }
+        """
+        let findings = Lint.Rule.`extension noncopyable constraint Tests`.findings(in: source)
+        #expect(findings.isEmpty)
+    }
+
+    @Test
+    func `extension with composition positive Copyable constraint is exempt per RULE-EXEMPT-1`() {
+        let source = """
+        extension Container where Element: SomeProtocol & Copyable {
+            consuming func transfer() {}
+        }
+        """
+        let findings = Lint.Rule.`extension noncopyable constraint Tests`.findings(in: source)
+        #expect(findings.isEmpty)
+    }
+
+    @Test
+    func `extension with Swift-qualified positive Copyable constraint is exempt per RULE-EXEMPT-1`() {
+        let source = """
+        extension Container where Element: Swift.Copyable {
+            consuming func transfer() {}
+        }
+        """
+        let findings = Lint.Rule.`extension noncopyable constraint Tests`.findings(in: source)
+        #expect(findings.isEmpty)
+    }
 }

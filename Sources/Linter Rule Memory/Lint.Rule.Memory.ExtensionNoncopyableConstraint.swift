@@ -279,53 +279,6 @@ internal final class MemoryExtensionNoncopyableConstraintVisitor: SyntaxVisitor 
         return false
     }
 
-    /// Returns true if `clause` carries an explicit positive `Copyable`
-    /// conformance requirement on any generic parameter. The author has
-    /// deliberately scoped the extension to copyable element types — the
-    /// rule's "implicit shrink to Copyable" warning is the opposite of
-    /// the author's intent and should not fire.
-    ///
-    /// Matches `where Base: Copyable` (and any name on the LHS).
-    /// Tilde-prefixed `~Copyable` is excluded by the substring check on
-    /// the right-side trim.
-    private func whereClauseHasPositiveCopyable(_ clause: GenericWhereClauseSyntax?) -> Bool {
-        guard let clause else { return false }
-        for requirement in clause.requirements {
-            guard let conformance = requirement.requirement.as(ConformanceRequirementSyntax.self) else {
-                continue
-            }
-            if typeMentionsPositiveCopyable(conformance.rightType) {
-                return true
-            }
-        }
-        return false
-    }
-
-    /// Detects positive Copyable in either standalone (`Wrapped: Copyable`)
-    /// or composition (`Element: Comparison.Protocol & Copyable`) form.
-    /// Walks into CompositionTypeSyntax members so the constraint is
-    /// recognized regardless of how the author wrote it.
-    private func typeMentionsPositiveCopyable(_ type: TypeSyntax) -> Bool {
-        if let identifier = type.as(IdentifierTypeSyntax.self),
-           identifier.name.text == "Copyable" {
-            return true
-        }
-        if let member = type.as(MemberTypeSyntax.self),
-           member.name.text == "Copyable",
-           let base = member.baseType.as(IdentifierTypeSyntax.self),
-           base.name.text == "Swift" {
-            return true
-        }
-        if let composition = type.as(CompositionTypeSyntax.self) {
-            for element in composition.elements {
-                if typeMentionsPositiveCopyable(element.type) {
-                    return true
-                }
-            }
-        }
-        return false
-    }
-
     override func visit(_ node: ExtensionDeclSyntax) -> SyntaxVisitorContinueKind {
         // Filename-pattern exemption: `* where *.swift` files use the
         // [API-IMPL-007] where-clause-discriminator naming convention.
@@ -362,10 +315,11 @@ internal final class MemoryExtensionNoncopyableConstraintVisitor: SyntaxVisitor 
         guard !whereClauseHasNoncopyable(node.genericWhereClause) else {
             return .visitChildren
         }
-        // Positive-Copyable exemption: author has explicitly scoped to
-        // a Copyable surface; the rule's "silent shrink" premise is
-        // inverted by the explicit conformance.
-        guard !whereClauseHasPositiveCopyable(node.genericWhereClause) else {
+        // Exempt per [RULE-EXEMPT-1] (positive-Copyable): author has
+        // explicitly scoped to a Copyable surface; the rule's "silent
+        // shrink" premise is inverted by the explicit conformance.
+        // Helper lives in `Lint.Rule.Memory.Shared.swift`.
+        guard !memoryWhereClauseHasPositiveCopyable(node.genericWhereClause) else {
             return .visitChildren
         }
         let location = converter.location(for: node.extendedType.positionAfterSkippingLeadingTrivia)
