@@ -2,11 +2,24 @@
 
 <!--
 ---
-version: 1.0.0
+version: 1.1.0
 last_updated: 2026-05-12
-status: RECOMMENDATION
+status: DECISION
 ---
 -->
+
+## Changelog
+
+- **v1.1.0 (2026-05-12) — DECISION.** All four defects closed via the
+  amendments outlined in v1.0.0's Summary Disposition Table.
+  Per-defect closure SHAs:
+  - PATTERN-019 (generic-Tag premise gap) — `swift-primitives-linter-rules` commit `c19f862` (recognizer + 4 tests, 18/18 pass)
+  - PATTERN-020 (stdlib-bridge inversion) — `swift-linter-rules` commit `ba8b750` (lax-type allowlist + 3 tests, 6/6 pass)
+  - IMPL-109 3a (typed-throws conflation) — `swift-linter-rules` commit `1e02181` (typed-throws-closure skip)
+  - IMPL-109 3b (own-fix fires) — `swift-linter-rules` commit `1e02181` (reuse `throwsClosureTryIsInsideMaterializingDoCatch` helper)
+  IMPL-109's 4 tests landed in the same commit (13/13 pass).
+- **v1.0.0 (2026-05-12)** — RECOMMENDATION. Triage from Agent A
+  SOURCE-WRONG sweep.
 
 ## Context
 
