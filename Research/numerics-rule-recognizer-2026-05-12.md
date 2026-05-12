@@ -2,13 +2,118 @@
 
 <!--
 ---
-version: 1.0.0
+version: 1.2.0
 last_updated: 2026-05-12
-status: RECOMMENDATION
+status: DECISION
 tier: 2
 scope: cross-package
 ---
 -->
+
+## Decision (2026-05-12) — Option 7, NOT Option 1
+
+**Landed shape**: **Option (7) — Rule decomposition via bundle composition**
+(`Lint.Rule.Bundle.brandOwner` defined in `swift-primitives-linter-rules`;
+brand-newtype-owning numerics packages declare a Shape-γ `Lint.swift`
+loading that bundle instead of `Bundle.primitives`).
+
+**v1.0 recommended Option 1; v1.1 landed Option 1; v1.2 reverts Option 1
+and lands Option 7.** The reversal occurred in two stages:
+
+1. **Option 1 attempt A — JSON sidecars** (landed by subordinate). Each
+   numerics package declared its brand-newtypes via a `.swift-linter.json`
+   file at the package root (e.g.,
+   `{"brandTypes": ["Affine.Discrete.Vector"]}`). The engine walked from
+   each linted source up to its owning `Package.swift`, read the adjacent
+   JSON, and threaded a `brandTypes: Set<Lint.Brand>` through every
+   parsed source. Each recognizer-class rule gated on the set. Reverted
+   per user direction codified at memory
+   `project_linter_config_all_swift.md`: the swift-linter config surface
+   stays in Swift, never JSON sidecars. Skill-promotion candidate.
+
+2. **Option 1 attempt B — `brands:` kwarg + typed `Lint.Brand`** (Shape
+   γ `Lint.run(dependencies:brands:rules:)` plus
+   `Lint.Configuration.brands` plus per-source `Parsed.brandTypes`).
+   Architectural review concluded the brand feature itself is bloat:
+   PATTERN-017 / CONV-016 / IMPL-010 / IMPL-011 encode "wrong at consumer
+   call sites"; brand-newtype-owning packages aren't consumer call sites.
+   Instead of loading the rule everywhere and admitting at runtime via
+   per-file brand context, don't load the rule in packages where it
+   doesn't apply. Same observable behavior; no engine machinery; no new
+   config types; no per-file metadata threading.
+
+**Precision tradeoff** (acknowledged): Option 1 attempt B could admit
+`Cardinal.underlying` while still flagging `OtherType.underlying` in the
+same file. Option 7 cannot (admission is per-package, not per-call-site).
+In practice a brand-newtype-owning primitive's cross-brand raw access is
+to sibling brand primitives it bridges to — legitimate by construction.
+The lost precision is theoretical, not empirical.
+
+**Rule decomposition shape** (the `brandOwner` bundle, in
+`swift-primitives-linter-rules/Sources/Linter Primitives Rules/Lint.Rule.Bundle.brandOwner.swift`):
+
+```swift
+extension Lint.Rule.Bundle {
+    public static let brandOwner: [Lint.Rule.Configuration] = {
+        let excludedIDs: Swift.Set<Lint.Rule.ID> = [
+            "raw value access",
+            "chained rawvalue access",
+            "int public parameter",
+            "pointer advanced by",
+        ]
+        return Lint.Rule.Bundle.primitives.filter { !excludedIDs.contains($0.rule.id) }
+    }()
+}
+```
+
+Numerics-package `Lint.swift` (one file per brand-owner package):
+
+```swift
+// swift-linter-tools-version: 0.1
+import Linter
+import Linter_Primitives_Rules
+
+Lint.run(dependencies: [
+    .package(
+        path: "../swift-primitives-linter-rules",
+        products: ["Linter Primitives Rules"]
+    ),
+]) {
+    Lint.Rule.Bundle.brandOwner
+}
+```
+
+**Cross-package consumers continue to see the four rules fire** — they
+load `Bundle.primitives` (the full bundle); they don't load
+`Bundle.brandOwner`. Strict-superset is preserved structurally rather
+than via per-package config.
+
+**Rationale**: the all-Swift convention rules out JSON sidecars
+([project_linter_config_all_swift.md]). Among Swift-native alternatives,
+the brand-feature (Option 1 attempt B) requires engine machinery
+(`Lint.Brand` typealias, `Configuration.brands` / `effectiveBrands()`,
+`Parsed.brandTypes` field + threading, `Lint.run(brands:)` kwarg) for
+behavior that bundle composition achieves with zero engine machinery.
+Option 7 was enumerated in the Tier 2 research as a fallback to Option
+1's "lowest per-site burden" framing; that framing turned out to require
+per-package config (first JSON, then `brands:` kwarg) — strictly more
+burden than Option 7's ~5-line bundle selection per package.
+
+**Verified 2026-05-12** by dogfooding `swift-linter` (debug build) on
+`swift-cardinal-primitives` after authoring its Shape-γ `Lint.swift`
+loading `Bundle.brandOwner`: zero findings for the four excluded rule
+IDs; many findings for other rules. The `.rawValue` access sites in
+`Cardinal Primitives Core/Cardinal.swift` and the stdlib-integration
+files would fire under `Bundle.primitives` but are silent under
+`Bundle.brandOwner` — confirming the exclusion is structural.
+
+**Superseded by this decision**:
+- The v1.0/v1.1 Recommendation section (kept below as historical
+  context) — Option 1 was the v1.0 recommendation.
+- Brand-feature engine machinery — reverted across 5 linter packages
+  (12 REVERT commits enumerated in
+  `swift-linter-rules/Research/wave-3-aggregate-2026-05-11.md`
+  v1.6.0).
 
 ## Context
 

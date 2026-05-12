@@ -2,7 +2,7 @@
 
 <!--
 ---
-version: 1.6.0
+version: 1.7.0
 last_updated: 2026-05-12
 status: IMPLEMENTED
 ---
@@ -10,6 +10,30 @@ status: IMPLEMENTED
 
 ## Changelog
 
+- **v1.7.0 (2026-05-12)** — Brand-feature reverted; numerics rule-recognizer landed Option 7 (rule decomposition via bundle composition):
+  - **Architectural reversal**. The v1.6.0 brand-feature (Option 1 attempt B — `brands:` kwarg + typed `Lint.Brand` + per-source `Parsed.brandTypes` engine threading) was reverted across 5 linter packages. Architectural review concluded the brand feature itself is bloat: PATTERN-017 / CONV-016 / IMPL-010 / IMPL-011 encode "wrong at consumer call sites"; brand-newtype-owning primitive packages aren't consumer call sites. Loading the rule everywhere and admitting at runtime via per-file brand context is strictly more machinery than not loading the rule in packages where it doesn't apply.
+  - **Landed shape**: `Lint.Rule.Bundle.brandOwner` (in `swift-primitives-linter-rules/Sources/Linter Primitives Rules/Lint.Rule.Bundle.brandOwner.swift`) filters `Bundle.primitives` to exclude the four consumer-side rule IDs (`"raw value access"`, `"chained rawvalue access"`, `"int public parameter"`, `"pointer advanced by"`). Brand-newtype-owning numerics packages declare a Shape-γ `Lint.swift` loading `Bundle.brandOwner` instead of `Bundle.primitives`. Cross-package consumers continue to load `Bundle.primitives` and see all four rules fire — strict-superset is preserved structurally rather than via per-package config.
+  - **Reverted (12 commits across 5 linter packages)**:
+    - `swift-primitives/swift-linter-primitives`: `77e062a` (Parsed.brandTypes field), `f16abd7` (Configuration.brands + effectiveBrands), `e9500cb` (Lint.Brand type).
+    - `swift-foundations/swift-linter`: `d0cbd73` (Lint.run brands: kwarg), `0f59532` (engine effectiveBrands sourcing), `611b42f` (typed-Brand engine threading).
+    - `swift-foundations/swift-linter-rules`: `4f83196` / `82e0537` (PATTERN-017 brand-admission code; rule fires as pre-recognizer).
+    - `swift-primitives/swift-primitives-linter-rules`: `56df8fc` / `65729b1` (CONV-016 chain + bitpattern brand-admission).
+    - `swift-foundations/swift-institute-linter-rules`: `3641811` / `8fc3bba` (IMPL-010 brand-admission + test retypes).
+  - **Kept** (architecturally useful independent of the brand feature):
+    - `595c138` (Shape γ SingleFile Lint.swift dispatch with self-reference path fix) — the dispatch infrastructure that supports the new `Lint.swift` per numerics package.
+    - `e6d1fb5` (`Lint.Rule.Bundle` namespace) — the namespace that hosts `Bundle.universal`, `Bundle.institute`, `Bundle.primitives`, and now `Bundle.brandOwner`.
+    - `fe2c18e` (typed-path `resolveConsumerPath` via `File.Path.appending`) — ecosystem-reuse fix.
+    - `411670a` (dep-form aligned back to `path:`) — neutral.
+    - `21c2136` (delete `Lint.Package.Brands.swift`) — JSON cache; gone regardless.
+    - `d7e7b7f` (delete `Schemas/swift-linter-v1.json`) — no JSON config surface remains.
+    - `3d8cb46` / `57ceef6` / `5445a13` (numerics `.swift-linter.json` deletions) — JSON sidecars removed per `project_linter_config_all_swift.md`.
+  - **New shape — added**:
+    - `Lint.Rule.Bundle.brandOwner` (in `swift-primitives-linter-rules/Sources/Linter Primitives Rules/Lint.Rule.Bundle.brandOwner.swift`). One file, one extension, one static-let; filters `Bundle.primitives` to exclude the four consumer-side rule IDs. ~10 LOC of substance + docstring.
+    - `Lint.swift` in each of the three numerics packages (`swift-ordinal-primitives/Lint.swift`, `swift-cardinal-primitives/Lint.swift`, `swift-affine-primitives/Lint.swift`). Shape γ: declares the rule pack dep + activates `Bundle.brandOwner`. ~15 LOC per file.
+  - **Dogfood verified** 2026-05-12 by running `swift-linter` debug build against `swift-cardinal-primitives` (which has multiple `.rawValue` access sites in `Cardinal Primitives Core/Cardinal.swift` and the stdlib-integration files): zero findings for the four excluded rule IDs; many findings for other rules. Bundle.brandOwner correctly excludes the four rules structurally — verified by `.rawValue` sites that would fire under `Bundle.primitives` being silent under `Bundle.brandOwner`.
+  - **Test state**: all 5 linter packages green. swift-linter-primitives 36 tests, swift-linter-rules 587 tests, swift-primitives-linter-rules 47 tests, swift-institute-linter-rules 190 tests, swift-linter 36 tests. All pass after revert. The Package Scope test suites previously added in v1.6.0 (5 PATTERN-017, 4 Chain, 4 BitPattern, 4 IMPL-010 = 17 tests) and the Configuration.brands tests (3) were removed alongside the engine machinery.
+  - **Rationale**: all-Swift convention (no JSON sidecars per `project_linter_config_all_swift.md`) plus bloat-avoidance (rule decomposition achieves the same observable behavior as the brand feature with zero engine machinery, zero new types, zero per-file metadata threading). The precision tradeoff (Option 1 could admit `Cardinal.underlying` while still flagging `OtherType.underlying` in the same file; Option 7 cannot) is theoretical, not empirical — a brand-newtype-owning primitive's cross-brand raw access is to sibling brand primitives it bridges to, legitimate by construction.
+  - **Cross-link**: numerics rule-recognizer doc at `swift-foundations/swift-linter-rules/Research/numerics-rule-recognizer-2026-05-12.md` v1.2.0 DECISION captures the same architectural conclusion from the rule-recognizer side.
 - **v1.6.0 (2026-05-12)** — Numerics rule-recognizer landed (Option 1, package-scoped admission):
   - **Tier 2 research-to-implementation**: closure of the numerics cluster (~180 sites across `swift-ordinal-primitives`, `swift-cardinal-primitives`, `swift-affine-primitives`) per the RECOMMENDATION at `swift-foundations/swift-linter-rules/Research/numerics-rule-recognizer-2026-05-12.md` (Option 1 — Package-scoped admission). The rule prose's "same-package implementation" clause is now structurally honored by the engine; per-site `disable:next` directives are no longer required for the numerics cluster.
   - **Engine layer** (`swift-foundations/swift-linter`): added `Lint.Brands` discovery + cache. For each linted file the engine walks up to find the nearest `Package.swift`, reads any adjacent `.swift-linter.json`, validates it against the schema, and caches `(packageRoot → brandTypes)`. Cache amortizes across all files in the same package per run. The `Lint.Source.Parsed.brandTypes` field is populated by `Lint.Run.parsedSource(...)` and surfaced to every rule's `findings(...)` closure. The engine extension is one new file (`Lint.Package.Brands.swift`, ~220 LOC) plus a small wire-in to `Lint.Run`. Run-error type extended with `invalidLintConfiguration(reason:)` for schema-validation failures.
