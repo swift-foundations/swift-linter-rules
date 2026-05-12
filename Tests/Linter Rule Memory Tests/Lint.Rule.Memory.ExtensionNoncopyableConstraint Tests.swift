@@ -251,4 +251,37 @@ extension Lint.Rule.`extension noncopyable constraint Tests`.Unit {
         let findings = Lint.Rule.`extension noncopyable constraint Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
+
+    @Test
+    func `extension on Affine_Discrete_Vector is not flagged via qualified-name allowlist`() {
+        let source = """
+        extension Affine.Discrete.Vector {
+            consuming func transfer() {}
+        }
+        """
+        let findings = Lint.Rule.`extension noncopyable constraint Tests`.findings(in: source)
+        #expect(findings.isEmpty)
+    }
+
+    @Test
+    func `extension on bare Vector leaf still fires because the qualified-name gate is strict`() {
+        let source = """
+        extension Vector {
+            consuming func transfer() {}
+        }
+        """
+        let findings = Lint.Rule.`extension noncopyable constraint Tests`.findings(in: source)
+        #expect(findings.count == 1)
+    }
+
+    @Test
+    func `extension on Ordinal leaf is not flagged regression check`() {
+        let source = """
+        extension Ordinal {
+            consuming func transfer() {}
+        }
+        """
+        let findings = Lint.Rule.`extension noncopyable constraint Tests`.findings(in: source)
+        #expect(findings.isEmpty)
+    }
 }

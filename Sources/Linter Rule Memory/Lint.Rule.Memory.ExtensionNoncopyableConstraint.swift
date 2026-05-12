@@ -92,6 +92,23 @@ internal let memoryExtensionConstraintInexpressibleTypes: Swift.Set<Swift.String
     "Cardinal",
 ]
 
+/// Curated allowlist for nested institute types whose leaf names are
+/// shared by generic types elsewhere in the ecosystem (so the bare leaf
+/// cannot safely admit). Matched against the full qualified path of the
+/// extension target (e.g. `Affine.Discrete.Vector`). `Vector` deliberately
+/// does NOT appear in `memoryExtensionConstraintInexpressibleTypes`
+/// because generic `Vector` types exist in `swift-dimension-primitives`
+/// (`Displacement.Vector<let N: Int, Space>`, `Coordinate.Vector`,
+/// `Extent.Vector`) and `swift-index-primitives` (`Vector<Element, N>`),
+/// and silently admitting all of them would mask legitimate
+/// `~Copyable`-constraint omissions.
+@usableFromInline
+internal let memoryExtensionConstraintInexpressibleQualifiedTypes: Swift.Set<Swift.String> = [
+    // Non-generic — the institute discrete-affine vector. Lives in
+    // `swift-affine-primitives/Sources/Affine Primitives Core/`.
+    "Affine.Discrete.Vector",
+]
+
 @usableFromInline
 internal let memoryExtensionNoncopyableConstraintMessage: Swift.String =
     "[extension noncopyable constraint] [MEM-COPY-004]: extensions on `~Copyable`-"
@@ -269,6 +286,19 @@ internal final class MemoryExtensionNoncopyableConstraintVisitor: SyntaxVisitor 
         return nil
     }
 
+    private func extendedTypeQualifiedName(_ type: TypeSyntax) -> Swift.String? {
+        if let identifier = type.as(IdentifierTypeSyntax.self) {
+            return identifier.name.text
+        }
+        if let member = type.as(MemberTypeSyntax.self) {
+            guard let base = extendedTypeQualifiedName(member.baseType) else {
+                return nil
+            }
+            return "\(base).\(member.name.text)"
+        }
+        return nil
+    }
+
     private func whereClauseHasNoncopyable(_ clause: GenericWhereClauseSyntax?) -> Bool {
         guard let clause else { return false }
         for requirement in clause.requirements {
@@ -293,6 +323,17 @@ internal final class MemoryExtensionNoncopyableConstraintVisitor: SyntaxVisitor 
         // rejects `~Copyable` at type-check (stdlib Copyable-bounded
         // generic) or has no generic parameter at all (non-generic
         // institute type). The rule's premise doesn't apply.
+        //
+        // The qualified-name lookup runs first for nested institute types
+        // whose bare leaf name collides with generic types elsewhere in
+        // the ecosystem (see comment on
+        // `memoryExtensionConstraintInexpressibleQualifiedTypes`). The
+        // leaf lookup remains for stdlib types and unambiguous institute
+        // leaves.
+        if let qualified = extendedTypeQualifiedName(node.extendedType),
+           memoryExtensionConstraintInexpressibleQualifiedTypes.contains(qualified) {
+            return .visitChildren
+        }
         if let leaf = extendedTypeLeafName(node.extendedType),
            memoryExtensionConstraintInexpressibleTypes.contains(leaf) {
             return .visitChildren
