@@ -154,4 +154,45 @@ extension Lint.Rule.`swift protocol qualification Tests`.`Edge Case` {
         let findings = Lint.Rule.`swift protocol qualification Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
+
+    // Exemption shape: [RULE-EXEMPT-6] (stdlib-shadow). Inside an
+    // extension on a stdlib type, the `Swift.<Protocol>` form is
+    // structurally inexpressible — Swift name resolution treats the
+    // bare `Swift` identifier as the type's nested scope.
+
+    @Test
+    func `Sequence inside Array extension is exempt per RULE-EXEMPT-6`() {
+        let source = """
+        extension Array {
+            func process<T>(_ items: some Sequence<T>) {}
+        }
+        """
+        let findings = Lint.Rule.`swift protocol qualification Tests`.findings(in: source)
+        #expect(findings.isEmpty)
+    }
+
+    @Test
+    func `Sequence inside Dictionary extension is exempt per RULE-EXEMPT-6`() {
+        let source = """
+        extension Dictionary {
+            func process<T>(_ items: some Sequence<T>) {}
+        }
+        """
+        let findings = Lint.Rule.`swift protocol qualification Tests`.findings(in: source)
+        #expect(findings.isEmpty)
+    }
+
+    @Test
+    func `Sequence outside stdlib extension is still flagged`() {
+        // Negative case — the same bare `Sequence` outside an extension
+        // on a stdlib type is structurally expressible as `Swift.Sequence`,
+        // so the rule MUST still fire.
+        let source = """
+        extension MyType {
+            func process<T>(_ items: some Sequence<T>) {}
+        }
+        """
+        let findings = Lint.Rule.`swift protocol qualification Tests`.findings(in: source)
+        #expect(findings.count == 1)
+    }
 }

@@ -46,6 +46,9 @@ internal let platformSwiftQualificationShadowedProtocols: Swift.Set<Swift.String
 /// error like `'Sequence' is not a member type of struct 'Swift.X.Swift'`.
 /// The qualified form the rule prescribes is structurally inexpressible
 /// in this context; the rule exempts.
+///
+/// Citation: [RULE-EXEMPT-6] (stdlib-shadow) in
+/// `swift-institute/Skills/rule-exemptions/SKILL.md`.
 @usableFromInline
 internal let platformSwiftQualificationStdlibShadowingTypes: Swift.Set<Swift.String> = [
     "Set",
@@ -175,6 +178,9 @@ internal final class PlatformSwiftQualificationVisitor: SyntaxVisitor {
     }
 
     override func visit(_ node: InheritedTypeSyntax) -> SyntaxVisitorContinueKind {
+        // Exempt per [RULE-EXEMPT-6] (stdlib-shadow): inside an extension
+        // on a stdlib type, the `Swift.<Protocol>` form the rule prescribes
+        // is structurally inexpressible due to Swift name resolution.
         if platformSwiftQualificationIsInsideStdlibExtension(Syntax(node)) {
             return .visitChildren
         }
@@ -183,6 +189,7 @@ internal final class PlatformSwiftQualificationVisitor: SyntaxVisitor {
     }
 
     override func visit(_ node: GenericParameterSyntax) -> SyntaxVisitorContinueKind {
+        // Exempt per [RULE-EXEMPT-6] (stdlib-shadow).
         if platformSwiftQualificationIsInsideStdlibExtension(Syntax(node)) {
             return .visitChildren
         }
@@ -193,6 +200,7 @@ internal final class PlatformSwiftQualificationVisitor: SyntaxVisitor {
     }
 
     override func visit(_ node: ConformanceRequirementSyntax) -> SyntaxVisitorContinueKind {
+        // Exempt per [RULE-EXEMPT-6] (stdlib-shadow).
         if platformSwiftQualificationIsInsideStdlibExtension(Syntax(node)) {
             return .visitChildren
         }
@@ -201,6 +209,7 @@ internal final class PlatformSwiftQualificationVisitor: SyntaxVisitor {
     }
 
     override func visit(_ node: SomeOrAnyTypeSyntax) -> SyntaxVisitorContinueKind {
+        // Exempt per [RULE-EXEMPT-6] (stdlib-shadow).
         if platformSwiftQualificationIsInsideStdlibExtension(Syntax(node)) {
             return .visitChildren
         }
