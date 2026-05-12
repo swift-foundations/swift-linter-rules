@@ -69,11 +69,10 @@ internal final class StructureRawValueAccessVisitor: SyntaxVisitor {
     let source: Source.File
     let severity: Diagnostic.Severity
     let converter: SourceLocationConverter
-    /// Brand-newtype names declared by the file's owning SwiftPM
-    /// package. Empty for files outside a declaring package or for
-    /// packages without a `.swift-linter.json`. See the package-scoped
-    /// admission notes on `Lint.Rule.\`raw value access\``.
-    let brandTypes: Swift.Set<Swift.String>
+    /// Brand-newtype names declared by the consumer for this run.
+    /// Empty when the consumer declares no brands. See the package-
+    /// scoped admission notes on ``Lint/Rule/raw value access``.
+    let brandTypes: Swift.Set<Lint.Brand>
     var matches: [Diagnostic.Record] = []
     var bodyDepth: Swift.Int = 0
 
@@ -81,7 +80,7 @@ internal final class StructureRawValueAccessVisitor: SyntaxVisitor {
         source: Source.File,
         severity: Diagnostic.Severity,
         converter: SourceLocationConverter,
-        brandTypes: Swift.Set<Swift.String> = []
+        brandTypes: Swift.Set<Lint.Brand> = []
     ) {
         self.source = source
         self.severity = severity
@@ -147,7 +146,7 @@ internal final class StructureRawValueAccessVisitor: SyntaxVisitor {
 }
 
 /// Returns `true` when the `.rawValue` access at `node` is admitted by
-/// the file's owning-package brand-types set.
+/// the consumer's declared brand-types set.
 ///
 /// Two admission paths:
 ///
@@ -157,25 +156,24 @@ internal final class StructureRawValueAccessVisitor: SyntaxVisitor {
 ///    - `Affine.Discrete.Vector.rawValue` (nested) — base =
 ///      `Affine.Discrete.Vector`.
 ///    The dotted name is reassembled from the `MemberAccessExprSyntax`
-///    chain so consumers can declare nested brand-newtypes verbatim
-///    in `.swift-linter.json`.
+///    chain and wrapped as a ``Lint/Brand`` at the AST boundary so
+///    consumers can declare nested brand-newtypes verbatim in
+///    `Lint.swift`'s `brands:` kwarg.
 /// 2. **Package-scope fallback**: the base is a variable / chain (no
 ///    syntactic type-name to extract — e.g., `lhs.rawValue`), AND the
-///    package declares at least one brand. The file is inside a
+///    consumer declares at least one brand. The file is inside a
 ///    brand-newtype's own implementation; per the rule prose's
 ///    "same-package implementations" clause, the access is admitted.
 ///
 /// Returns `false` (and the rule fires as today) when `brandTypes` is
-/// empty (no declaring package, no `.swift-linter.json`, or empty
-/// `brandTypes` list) — preserving strict-superset for cross-package
-/// consumers.
+/// empty — preserving strict-superset for cross-package consumers.
 internal func structureRawValueAccessIsAdmitted(
     node: MemberAccessExprSyntax,
-    brandTypes: Swift.Set<Swift.String>
+    brandTypes: Swift.Set<Lint.Brand>
 ) -> Swift.Bool {
     guard !brandTypes.isEmpty else { return false }
     if let baseName = structureRawValueAccessExtractTypeName(base: node.base) {
-        return brandTypes.contains(baseName)
+        return brandTypes.contains(Lint.Brand(baseName))
     }
     // Base is a variable / chain — package-scope fallback admits.
     return true

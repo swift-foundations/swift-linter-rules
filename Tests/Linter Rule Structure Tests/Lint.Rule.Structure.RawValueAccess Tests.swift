@@ -39,7 +39,7 @@ extension Lint.Rule.`raw value access Tests` {
     static func findings(
         in source: String,
         file: String = "test.swift",
-        brandTypes: Set<String>
+        brandTypes: Set<Lint.Brand>
     ) -> [Diagnostic.Record] {
         let parsed = Lint.Source.parsed(from: source, file: file, brandTypes: brandTypes)
         return Lint.Rule.`raw value access`.findings(parsed, .warning)

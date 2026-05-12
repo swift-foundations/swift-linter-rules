@@ -25,9 +25,9 @@ extension Lint.Source {
     /// being constructed (`Lint.Source.Parsed`) rather than a free
     /// function, so call sites read `Lint.Source.Parsed.test(...)`.
     ///
-    /// `brandTypes` simulates the file's owning-SwiftPM-package's
-    /// declared brand-newtype names (per the package-scoped admission
-    /// mechanism added 2026-05-12 — see
+    /// `brandTypes` simulates the consumer's declared brand-newtype
+    /// names (per the package-scoped admission mechanism added
+    /// 2026-05-12 — see
     /// `swift-linter-rules/Research/numerics-rule-recognizer-2026-05-12.md`).
     /// Default-empty preserves existing test behaviour: rules see no
     /// declared brands, fire as today.
@@ -35,7 +35,7 @@ extension Lint.Source {
         from source: Swift.String,
         file: Swift.String = "test.swift",
         path: Lint.Source.Path? = nil,
-        brandTypes: Swift.Set<Swift.String> = []
+        brandTypes: Swift.Set<Lint.Brand> = []
     ) -> Lint.Source.Parsed {
         let tree = Parser.parse(source: source)
         let converter = SourceLocationConverter(fileName: file, tree: tree)
