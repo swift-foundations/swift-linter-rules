@@ -182,21 +182,34 @@ internal func structureRawValueAccessIsAdmitted(
 }
 
 /// Reassembles a dotted type-name from a `MemberAccessExprSyntax`
-/// chain when the leftmost token is a `DeclReferenceExprSyntax` (a
-/// bare identifier).
+/// chain when the leftmost token is an UPPERCASE-leading
+/// `DeclReferenceExprSyntax` (Swift type-naming convention).
 ///
 /// Examples of what extracts:
 ///   - `Ordinal` (base is a `DeclReferenceExprSyntax`) → `"Ordinal"`.
 ///   - `Affine.Discrete.Vector` (chain ending in
-///     `DeclReferenceExprSyntax`) → `"Affine.Discrete.Vector"`.
+///     `DeclReferenceExprSyntax` whose leftmost token is `Affine`)
+///     → `"Affine.Discrete.Vector"`.
 ///
-/// Returns `nil` when the chain bottoms out in anything else (a
-/// `self.`-prefixed access, a function call, a tuple, etc.) — those
-/// cases are handled by the package-scope fallback.
+/// Returns `nil` when:
+///   - the leftmost identifier starts with a lowercase letter
+///     (variable, function name) — `lhs.rawValue` returns `nil`,
+///     `position.foo.rawValue` returns `nil`. These cases are
+///     handled by the package-scope fallback in
+///     ``structureRawValueAccessIsAdmitted``.
+///   - the chain bottoms out in `self.`-prefix, a function call, a
+///     tuple, or another non-identifier expression.
+///
+/// The uppercase-leading heuristic is the standard Swift convention
+/// for types (per `[CODE-NAME-*]`). Edge cases (`_PrivateType`,
+/// lowercase-leading types from third-party code) are not in scope —
+/// the package-scope fallback catches them.
 internal func structureRawValueAccessExtractTypeName(base: ExprSyntax?) -> Swift.String? {
     guard let base else { return nil }
     if let identifier = base.as(DeclReferenceExprSyntax.self) {
-        return identifier.baseName.text
+        let text = identifier.baseName.text
+        guard structureRawValueAccessLooksLikeType(text) else { return nil }
+        return text
     }
     if let memberAccess = base.as(MemberAccessExprSyntax.self) {
         guard let lower = structureRawValueAccessExtractTypeName(base: memberAccess.base) else {
@@ -205,4 +218,11 @@ internal func structureRawValueAccessExtractTypeName(base: ExprSyntax?) -> Swift
         return lower + "." + memberAccess.declName.baseName.text
     }
     return nil
+}
+
+/// `true` when `text` begins with an uppercase letter — the standard
+/// Swift convention for type identifiers. Empty strings return false.
+internal func structureRawValueAccessLooksLikeType(_ text: Swift.String) -> Swift.Bool {
+    guard let first = text.first else { return false }
+    return first.isUppercase
 }

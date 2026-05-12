@@ -2,7 +2,7 @@
 
 <!--
 ---
-version: 1.5.0
+version: 1.6.0
 last_updated: 2026-05-12
 status: IMPLEMENTED
 ---
@@ -10,6 +10,40 @@ status: IMPLEMENTED
 
 ## Changelog
 
+- **v1.6.0 (2026-05-12)** — Numerics rule-recognizer landed (Option 1, package-scoped admission):
+  - **Tier 2 research-to-implementation**: closure of the numerics cluster (~180 sites across `swift-ordinal-primitives`, `swift-cardinal-primitives`, `swift-affine-primitives`) per the RECOMMENDATION at `swift-foundations/swift-linter-rules/Research/numerics-rule-recognizer-2026-05-12.md` (Option 1 — Package-scoped admission). The rule prose's "same-package implementation" clause is now structurally honored by the engine; per-site `disable:next` directives are no longer required for the numerics cluster.
+  - **Engine layer** (`swift-foundations/swift-linter`): added `Lint.Brands` discovery + cache. For each linted file the engine walks up to find the nearest `Package.swift`, reads any adjacent `.swift-linter.json`, validates it against the schema, and caches `(packageRoot → brandTypes)`. Cache amortizes across all files in the same package per run. The `Lint.Source.Parsed.brandTypes` field is populated by `Lint.Run.parsedSource(...)` and surfaced to every rule's `findings(...)` closure. The engine extension is one new file (`Lint.Package.Brands.swift`, ~220 LOC) plus a small wire-in to `Lint.Run`. Run-error type extended with `invalidLintConfiguration(reason:)` for schema-validation failures.
+  - **Primitives layer** (`swift-primitives/swift-linter-primitives`): `Lint.Source.Parsed` gained a `brandTypes: Set<String>` field with a default-empty parameter. Existing call sites (rule tests, test-support factories) inherit the back-compat empty default. Field is documented; tests pass.
+  - **Schema** (`swift-foundations/swift-linter-rules/Schemas/swift-linter-v1.json`): new draft-2020-12 JSON Schema. Top-level keys: `$schema` (string, optional), `brandTypes` (string array, optional). `additionalProperties: false` — unknown keys are an error at engine startup, not a silent ignore-typo. Empty `brandTypes` is permitted (no-op config).
+  - **Rule wirings** (4 rules):
+    - `Lint.Rule.Structure.RawValueAccess` (PATTERN-017) — `swift-foundations/swift-linter-rules`. Visitor now threads `brandTypes`; admission gate is `structureRawValueAccessIsAdmitted` (type-name match for direct `Brand.rawValue` access, package-scope fallback for variable/chain access).
+    - `Lint.Rule.RawValue.Chain` (CONV-016 chain) — `swift-primitives/swift-primitives-linter-rules`. Same shape as PATTERN-017's recognizer.
+    - `Lint.Rule.RawValue.BitPattern` (CONV-016 bitpattern) — `swift-primitives/swift-primitives-linter-rules`. Admission inspects the contained `.rawValue` access's base.
+    - `Lint.Rule.Naming.IntParameter` (IMPL-010) — `swift-foundations/swift-institute-linter-rules`. Admission is coarser (package-scope only) because the rule fires on signatures, not on `.rawValue` access where the type-name extractor can apply.
+  - **IMPL-011 verification FAILED — not wired**: the dispatch added IMPL-011 (`Lint.Rule.Memory.PointerArithmetic`, "pointer advanced by") contingent on rule-body authorization for the recognizer ("this site IS the wrapper" / "bottom-out" / "same-package" / "integration target" language). Inspection of the rule body found: "raw pointer arithmetic via `.advanced(by:)` is mechanism. Types managing memory SHOULD expose a typed `pointer(at: Index<Element>)` primitive... Either (a) add the typed primitive to the storage type and call it, or (b) confine the `.advanced(by:)` to a designated pointer-primitives package." The semantics are different — confinement to a designated package, not admission inside the brand-newtype's own package. Per the dispatch's explicit STOP instruction, IMPL-011 was not wired; the 8 IMPL-011 fires (2 Ordinal, 6 Affine) remain.
+  - **Per-package `.swift-linter.json` files** (3 files):
+    - `swift-ordinal-primitives/.swift-linter.json` → `{"brandTypes": ["Ordinal"]}`.
+    - `swift-cardinal-primitives/.swift-linter.json` → `{"brandTypes": ["Cardinal"]}`.
+    - `swift-affine-primitives/.swift-linter.json` → `{"brandTypes": ["Affine.Discrete.Vector"]}` (verified by reading `Affine.Discrete.Vector.swift` — Vector has `public let rawValue: Int`; `Affine.Discrete.Ratio` uses `.factor`, not `.rawValue`, so it is not in the brand list).
+  - **Test coverage**: per-rule positive (matching brand admits), negative-mismatch (different brand still fires — strict-superset), negative-default (no `.swift-linter.json` still fires — back-compat), plus a variable-base package-scope-fallback row for the three `.rawValue` rules. 17 new tests across the 4 rules (5 PATTERN-017, 4 Chain, 4 BitPattern, 4 IMPL-010). The "Tagged extension public init" tests in primitives-linter-rules also exercised the path. Total test impact: 585 (swift-linter-rules), 51 (swift-primitives-linter-rules), 194 (swift-institute-linter-rules) — all green; 32 (swift-linter) — all green.
+  - **Empirical closure** (verified 2026-05-12, post-fix counts vs pre-fix counts):
+    - Ordinal: PATTERN-017 69→0, CONV-016 4→0, IMPL-010 2→0. **75/75 in-scope close.** Residue: 5 SOURCE-WRONG fires (Agent A) + 2 IMPL-011 (not wired).
+    - Cardinal: PATTERN-017 27→0, CONV-016 4→0, IMPL-010 2→0. **33/33 in-scope close.** Residue: 6 SOURCE-WRONG fires (Agent A) + 0 IMPL-011.
+    - Affine: PATTERN-017 63→0, CONV-016 4→0, IMPL-010 5→0. **72/72 in-scope close.** Residue: 7 SOURCE-WRONG fires (Agent A — all PATTERN-019 `tagged extension public init` in `Tagged+Affine.swift`) + 6 IMPL-011 (not wired).
+    - **Total target close: 180/180** (PATTERN-017: 159/159, CONV-016: 12/12, IMPL-010: 9/9). The re-verified IMPL-010 count was 9, matching the 2026-05-12 recommendation doc's verification, not the original dispatch's 18.
+  - **Strict-superset preservation** (verified): cross-package consumers without `.swift-linter.json` continue to face the rule as today; per-rule negative-default tests pin this contract. The dispatch's explicit cross-package regression check — running the linter from inside a nested `Lint/` package (which is itself a separate SwiftPM package with no `.swift-linter.json`) — was exercised empirically (the nested Lint/main.swift accesses no rawValue, so no fire is the expected output) and through the rule-level test matrix.
+  - **Files touched** (this v1.6.0 entry):
+    - Engine: `swift-foundations/swift-linter/Sources/Linter Core/Lint.Package.Brands.swift` (new), `Lint.Run.swift` (wire), `Lint.Run.Error.swift` (new case).
+    - Primitives: `swift-primitives/swift-linter-primitives/Sources/Linter Primitives/Lint.Source.Parsed.swift`.
+    - Schema: `swift-foundations/swift-linter-rules/Schemas/swift-linter-v1.json` (new).
+    - Rule (Structure): `swift-foundations/swift-linter-rules/Sources/Linter Rule Structure/Lint.Rule.Structure.RawValueAccess.swift`.
+    - Rule (RawValue): `swift-primitives/swift-primitives-linter-rules/Sources/Linter Rule RawValue/Lint.Rule.RawValue.Chain.swift`, `Lint.Rule.RawValue.BitPattern.swift`.
+    - Rule (Naming): `swift-foundations/swift-institute-linter-rules/Sources/Linter Rule Naming/Lint.Rule.Naming.IntParameter.swift`.
+    - Tests: `swift-foundations/swift-linter-rules/Tests/Linter Rule Structure Tests/Lint.Rule.Structure.RawValueAccess Tests.swift`, `swift-primitives/swift-primitives-linter-rules/Tests/Linter Rule RawValue Tests/Lint.Rule.RawValue.Chain Tests.swift`, `Lint.Rule.RawValue.BitPattern Tests.swift`, `swift-foundations/swift-institute-linter-rules/Tests/Linter Rule Naming Tests/Lint.Rule.Naming.IntParameter Tests.swift`. Test-support factory extended at `swift-foundations/swift-linter-rules/Tests/Support/Linter Rules Test Support.swift` (new `brandTypes:` parameter on `Lint.Source.parsed(...)`).
+    - Consumer configs: `swift-primitives/swift-ordinal-primitives/.swift-linter.json`, `swift-primitives/swift-cardinal-primitives/.swift-linter.json`, `swift-primitives/swift-affine-primitives/.swift-linter.json`.
+  - **Cross-link**: recommendation doc at `swift-foundations/swift-linter-rules/Research/numerics-rule-recognizer-2026-05-12.md` (Option 1).
+  - **Out of scope** for v1.6.0: the SOURCE-WRONG residuals in each numerics package (PATTERN-019 in `Tagged+*.swift`, IMPL-109 in `Tagged+*.Successor.swift` / `.Predecessor.swift`, PATTERN-020 in `Tagged+Cardinal.swift` / `Tagged+Ordinal.swift`, API-NAME-002 in `OutputSpan+Cardinal.swift`, IMPL-011 in `Unsafe*+*Ordinal.swift`). These are Agent A's territory.
+  - **Per-rule-author skill bookmark**: the package-scope admission mechanism is the missing engine-context-based counterpart to `[RULE-EXEMPT-*]` (currently AST-context only). Codification as `[RULE-EXEMPT-7]` is deferred per the recommendation doc's Follow-Up Actions §5 — wait until at least one more recognizer-class rule wires in.
 - **v1.5.0 (2026-05-12)** — Wave 4 closed via Option B inversion (research-driven framework correction):
   - **Wave 4 carve-out reverted in favor of inversion** per Tier 2 research at `swift-institute/Research/safe-attribute-absorber-pattern-fundamentals.md` v1.1.0 DECISION. The carve-out approach (v1.4.0's `[MEM-SAFE-025b]` exception for type-decl absorber pattern) was tool-capability-bound rather than structurally principled. Empirical surprise (~120 residuals vs <10 predicted) was the symptom of the underlying framing being wrong, not of carve-out being too narrow.
   - **`[MEM-SAFE-025b]` inverted** (Skills `b72677a`): admit `@safe` per SE-0458's intent instead of forbidding; the Wave 4 absorber-pattern carve-out language is removed. The "direct `@safe` on funcs/vars/lets/inits/subscripts remains forbidden" clause from Wave 3 also removed — `@safe` admitted on all declaration kinds per SE-0458's permission.
