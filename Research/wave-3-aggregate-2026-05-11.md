@@ -2,7 +2,7 @@
 
 <!--
 ---
-version: 1.2.0
+version: 1.3.0
 last_updated: 2026-05-12
 status: IMPLEMENTED
 ---
@@ -10,6 +10,23 @@ status: IMPLEMENTED
 
 ## Changelog
 
+- **v1.3.0 (2026-05-12)** — Post-closure empirical follow-ups (Phase 1.4
+  of the post-Wave-3 quick-wins dispatch):
+  - Open Follow-Up #4 answered — `nonisolated(unsafe)` site enumeration
+    ecosystem-wide: **28 occurrences across 20 files in production
+    Sources** (24 real + 4 in-rule token references). Workspace-wide
+    grep against `swift-primitives/*/Sources`, `swift-foundations/*/Sources`,
+    `swift-standards/*/Sources` 2026-05-12. `@safe`-on-same-line adjacency
+    rate: 0. Structural adjacency via enclosing-type `@safe` (absorber
+    pattern): observed, not enumerated per-site.
+  - Open Follow-Up #5 scope refined — Wave 4's absorber-pattern footprint
+    is **~128 sites, not ~80**. Empirical count: 140 `@safe` occurrences
+    in 125 files, of which ~128 attach to type-decls (absorber pattern)
+    and ~22 attach to individual decls (direct). Hot-spot packages
+    enumerated in Open Follow-Up #5 entry. Wave 4 dispatch sizing should
+    use 128, not 80.
+  - No engine / rule / Skills changes in v1.3.0 — empirical refinement
+    of Open Follow-Ups only.
 - **v1.2.0 (2026-05-12)** — Wave 3 fully closed:
   - All 3 user-tier policy decisions stamped DECISION (Options B, B, D) at swift-institute/Research stamp commit `78f9bea` (after the 3 RECOMMENDATION docs `59f3906`, `5e2b1c5`, `c3dfd92`).
   - **Thread 4 implemented** — [API-NAME-002] amended for fileprivate+private exemption. Skills `3a36ce3` + swift-institute-linter-rules `1c06647`. Visibility check walks the parent chain for effective visibility (the simple-modifier sketch in the research doc was insufficient — `Header` fields had no explicit modifier; visibility came from enclosing fileprivate struct). 15 new tests; 182 total pass. 2 Header.* residuals close (in-test verified via verbatim regression test).
@@ -171,16 +188,31 @@ directive site-by-site.
    would inform a future tightening pass.
 
 4. **`nonisolated(unsafe)` site enumeration** (per Thread 7 research
-   doc empirical follow-up) — partially answered in v1.2.0 (0 sites
-   in ownership/property-primitives Sources). Full ecosystem-wide
-   enumeration still pending; would inform the Wave 4 absorber-pattern
-   dispatch's scope.
+   doc empirical follow-up) — **answered 2026-05-12** via workspace-wide
+   grep across `swift-primitives/*/Sources`, `swift-foundations/*/Sources`,
+   `swift-standards/*/Sources`. Total: **28 occurrences across 20 files
+   in production Sources** (24 real + 4 in-rule token references inside
+   `Lint.Rule.Memory.NonisolatedUnsafeInvariant.swift` / `Lint.Rule.Memory.SafeForbidden.swift`).
+   `@safe`-on-same-line adjacency: 0 sites. Structural adjacency via
+   enclosing-type `@safe` (absorber pattern): observed e.g.
+   `swift-darwin-standard/Darwin.Loader.Image.Header.swift:31` where
+   `nonisolated(unsafe) let rawValue` lives inside a `@safe public struct Header`.
 
-5. **Wave 4 absorber-pattern dispatch** — Thread 7 surfaced ~80
-   `@safe` absorber-pattern sites that the new SafeForbidden rule
-   flags. Needs its own ledger + policy decision (carve-out / migrate
-   / disable-directive). [MEM-SAFE-025b] body explicitly names this
-   as Wave 3's out-of-scope follow-up.
+5. **Wave 4 absorber-pattern dispatch** — Thread 7 surfaced **~128 `@safe`
+   absorber-pattern sites** (NOT the initial ~80 estimate) — empirical
+   count 2026-05-12 across the same Sources/ scope: **140 `@safe`
+   occurrences total** (125 distinct files), of which **~128 attach to
+   type-decls (struct/class/enum/actor/extension/protocol)** (absorber
+   pattern) and **~22 attach to individual decls** (func/var/let/init/
+   subscript/typealias) (direct). Top packages by absorber-pattern
+   density: `swift-bit-vector-primitives` (17), `swift-ownership-primitives`
+   (14), `swift-machine-primitives` (9), `swift-buffer-primitives` (8),
+   `swift-queue-primitives` (7), `swift-property-primitives` (7),
+   `swift-memory-primitives` (6). Needs its own ledger + policy decision
+   (carve-out / migrate / disable-directive). [MEM-SAFE-025b] body
+   explicitly names this as Wave 3's out-of-scope follow-up. Scope is
+   60% larger than initial estimate — Wave 4 dispatch sizing should
+   reflect the ~128 figure, not ~80.
 
 6. **takeIfPresent / consumeIfStored API-rename pass** (HANDOFF Open
    Q3) — accept compound-name exception OR refactor to
