@@ -96,6 +96,18 @@ internal final class StructureRawValueAccessVisitor: SyntaxVisitor {
         guard structureRawValueAccessFlaggedAccessors.contains(name) else {
             return .visitChildren
         }
+        // Disambiguate Swift.enum.rawValue from Tagged-newtype rawValue
+        // via receiver-pattern recognition: `Lint.Visibility.public.rawValue`
+        // looks like `<TypeChain>.<member>.rawValue`, where TypeChain is
+        // one or more uppercase-leading identifier segments. Skip those —
+        // they are `RawRepresentable.rawValue` access, outside the rule's
+        // Tagged-newtype-targeting scope. The known false-negative on
+        // `Module.staticTagInstance.rawValue` is accepted (uncommon for
+        // Tagged consumer access). See Research/2026-05-12-foundation-up-dogfeed-triage.md
+        // §A2 for the architectural rationale.
+        if let receiver = node.base, receiverLooksLikeEnumCaseAccess(receiver) {
+            return .visitChildren
+        }
         let location = converter.location(
             for: node.declName.baseName.positionAfterSkippingLeadingTrivia
         )
@@ -111,5 +123,30 @@ internal final class StructureRawValueAccessVisitor: SyntaxVisitor {
             message: structureRawValueAccessMessage
         ))
         return .visitChildren
+    }
+
+    /// True if `base` parses as `<TypeChain>.<member>` — i.e. an enum
+    /// case access shape (`Foo.bar`, `Lint.Visibility.public`) rather
+    /// than a Tagged-newtype instance access (`tag`, `self.tag`).
+    private func receiverLooksLikeEnumCaseAccess(_ base: ExprSyntax) -> Swift.Bool {
+        guard let caseAccess = base.as(MemberAccessExprSyntax.self),
+              let typeBase = caseAccess.base else { return false }
+        return isTypeChain(typeBase)
+    }
+
+    /// True if `expr` is one or more uppercase-leading identifier
+    /// segments joined by `.` — i.e. a type qualifier like `Lint`,
+    /// `Lint.Visibility`, or `Module.Sub.Type`. Lowercase-leading
+    /// segments (instance refs like `self`, `tag`) return false.
+    private func isTypeChain(_ expr: ExprSyntax) -> Swift.Bool {
+        if let ref = expr.as(DeclReferenceExprSyntax.self) {
+            return ref.baseName.text.first?.isUppercase ?? false
+        }
+        if let member = expr.as(MemberAccessExprSyntax.self),
+           let base = member.base {
+            return isTypeChain(base)
+                && (member.declName.baseName.text.first?.isUppercase ?? false)
+        }
+        return false
     }
 }

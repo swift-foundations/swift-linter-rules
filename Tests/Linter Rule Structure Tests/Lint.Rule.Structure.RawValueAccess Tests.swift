@@ -83,5 +83,63 @@ extension Lint.Rule.`raw value access Tests`.`Edge Case` {
         let findings = Lint.Rule.`raw value access Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
+
+    // Receiver-pattern disambiguation — Swift.enum.rawValue (i.e.,
+    // `Type.case.rawValue`) is RawRepresentable territory, not the
+    // Tagged-newtype consumer access this rule targets. Per the
+    // foundation-up dogfeed (A2), these MUST NOT fire.
+    // See Research/2026-05-12-foundation-up-dogfeed-triage.md §A2.
+
+    @Test
+    func `Type case rawValue is NOT flagged - enum case access disambiguation`() {
+        let source = """
+        func op() {
+            let s = Visibility.public.rawValue
+            use(s)
+        }
+        """
+        let findings = Lint.Rule.`raw value access Tests`.findings(in: source)
+        #expect(findings.isEmpty)
+    }
+
+    @Test
+    func `qualified Type case rawValue is NOT flagged`() {
+        let source = """
+        func op() {
+            let s = Lint.Visibility.public.rawValue
+            use(s)
+        }
+        """
+        let findings = Lint.Rule.`raw value access Tests`.findings(in: source)
+        #expect(findings.isEmpty)
+    }
+
+    @Test
+    func `instance rawValue is still flagged - Tagged consumer access`() {
+        // Positive case: the rule's target is Tagged consumer access.
+        let source = """
+        func op(tag: MyTag) {
+            let r = tag.rawValue
+            use(r)
+        }
+        """
+        let findings = Lint.Rule.`raw value access Tests`.findings(in: source)
+        #expect(findings.count == 1)
+    }
+
+    @Test
+    func `self tag rawValue is still flagged`() {
+        let source = """
+        struct Holder {
+            var tag: MyTag
+            func op() {
+                let r = self.tag.rawValue
+                use(r)
+            }
+        }
+        """
+        let findings = Lint.Rule.`raw value access Tests`.findings(in: source)
+        #expect(findings.count == 1)
+    }
 }
 
