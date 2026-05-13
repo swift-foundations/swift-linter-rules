@@ -56,6 +56,7 @@ extension Lint.Rule.Bundle {
         .enable(.`enumerated with subscript`),
         .enable(.`intermediate binding then return`),
         .enable(.`counter loop iteration`),
+        .enable(.`redundant refinement`),
         .enable(.`string utf8 scanning`),
         // Memory pack
         .enable(.`borrowing self short circuit`),
