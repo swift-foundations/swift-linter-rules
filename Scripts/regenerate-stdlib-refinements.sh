@@ -67,8 +67,8 @@ echo ""
 
 # Step 2: Run the reducer against the extracted graph.
 echo "Step 2/3: running symbol-graph-conformance-oracle reducer"
-echo "  (typically 1–3 min wall-clock — swift-json text-parser bottleneck)"
-swift run symbol-graph-conformance-oracle Outputs/swift-stdlib/Swift.symbols.json
+echo "  (release build: ~1 min compile on first run, then ~1 s parse)"
+swift run -c release symbol-graph-conformance-oracle Outputs/swift-stdlib/Swift.symbols.json
 echo ""
 
 # Step 3: Copy the generated Swift source into the rule package.
