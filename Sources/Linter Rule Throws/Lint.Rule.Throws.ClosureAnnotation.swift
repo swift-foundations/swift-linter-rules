@@ -42,30 +42,6 @@ internal func throwsIsTypedThrows(_ clause: ThrowsClauseSyntax?) -> Swift.Bool {
     return clause.type != nil
 }
 
-/// Walks a closure body searching for `try` expressions that are NOT
-/// materialized into a Result-shape return via an enclosing
-/// `do { ... } catch { return ... }`. A `try` inside such a do-catch
-/// has its error captured into the catch's return value (the
-/// [IMPL-109] Result-materialization pattern) — the closure remains
-/// non-throwing by construction and doesn't need an explicit
-/// `throws(E)` annotation. A `try` NOT inside such a materializing
-/// do-catch escapes the closure and DOES need annotation.
-///
-/// The walker stops at nested closure boundaries (a try inside a
-/// nested closure is the nested closure's concern, not this one's).
-private final class ThrowsClosureTryFinder: SyntaxVisitor {
-    var found = false
-    override func visit(_ node: TryExprSyntax) -> SyntaxVisitorContinueKind {
-        if !throwsClosureTryIsInsideMaterializingDoCatch(Syntax(node)) {
-            found = true
-        }
-        return .skipChildren
-    }
-    override func visit(_: ClosureExprSyntax) -> SyntaxVisitorContinueKind {
-        return .skipChildren
-    }
-}
-
 /// Returns true if the node is inside an enclosing `DoStmtSyntax` whose
 /// `catchClauses` contain at least one catch body that ends with a
 /// `return` of a value (the Result-materialization shape). Stops the
@@ -109,18 +85,6 @@ private func throwsClosureCatchReturnsValue(_ clause: CatchClauseSyntax) -> Swif
     let finder = ThrowsClosureCatchThrowFinder(viewMode: .sourceAccurate)
     finder.walk(clause.body)
     return !finder.foundThrow
-}
-
-private final class ThrowsClosureCatchThrowFinder: SyntaxVisitor {
-    var foundThrow = false
-    override func visit(_: ThrowStmtSyntax) -> SyntaxVisitorContinueKind {
-        foundThrow = true
-        return .skipChildren
-    }
-    override func visit(_: ClosureExprSyntax) -> SyntaxVisitorContinueKind {
-        // Nested closures have their own boundary.
-        return .skipChildren
-    }
 }
 
 internal final class ThrowsClosureAnnotationVisitor: SyntaxVisitor {

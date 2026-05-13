@@ -36,17 +36,6 @@ internal let throwsDoCatchTypedMessage: Swift.String =
     + "erases the concrete error type. Use `do throws(E) { try ... } catch { }` "
     + "to preserve `E` in the catch binding."
 
-private final class ThrowsDoCatchTryFinder: SyntaxVisitor {
-    var found = false
-    override func visit(_: TryExprSyntax) -> SyntaxVisitorContinueKind {
-        found = true
-        return .skipChildren
-    }
-    override func visit(_: DoStmtSyntax) -> SyntaxVisitorContinueKind {
-        return .skipChildren
-    }
-}
-
 internal final class ThrowsDoCatchTypedVisitor: SyntaxVisitor {
     let source: Source.File
     let severity: Diagnostic.Severity

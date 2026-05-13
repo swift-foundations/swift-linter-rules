@@ -36,26 +36,6 @@ internal let throwsDoCatchTypedThrowMessage: Swift.String =
     + "catch { … }` erases the concrete error type. Use "
     + "`do throws(E) { throw … } catch { … }`."
 
-private final class ThrowsDoCatchThrowFinder: SyntaxVisitor {
-    var found = false
-    override func visit(_: ThrowStmtSyntax) -> SyntaxVisitorContinueKind {
-        found = true
-        return .skipChildren
-    }
-    override func visit(_: DoStmtSyntax) -> SyntaxVisitorContinueKind { return .skipChildren }
-    override func visit(_: ClosureExprSyntax) -> SyntaxVisitorContinueKind { return .skipChildren }
-}
-
-private final class ThrowsDoCatchTryFinder2: SyntaxVisitor {
-    var found = false
-    override func visit(_: TryExprSyntax) -> SyntaxVisitorContinueKind {
-        found = true
-        return .skipChildren
-    }
-    override func visit(_: DoStmtSyntax) -> SyntaxVisitorContinueKind { return .skipChildren }
-    override func visit(_: ClosureExprSyntax) -> SyntaxVisitorContinueKind { return .skipChildren }
-}
-
 internal final class ThrowsDoCatchTypedThrowVisitor: SyntaxVisitor {
     let source: Source.File
     let severity: Diagnostic.Severity
