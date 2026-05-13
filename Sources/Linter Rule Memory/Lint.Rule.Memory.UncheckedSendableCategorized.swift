@@ -12,11 +12,21 @@
 public import Linter_Primitives
 internal import SwiftSyntax
 
-/// Wave 2b finalization (2026-05-10) — `@unchecked Sendable`
-/// conformances MUST be `@unsafe @unchecked Sendable` (categories A,
-/// B, D per `[MEM-SAFE-024]`).
+/// 2026-05-13 BREAKING revision — flags `@unchecked Sendable`
+/// conformances that pair `@unsafe` on the same conformance clause
+/// (a deviation from Swift convention per SE-0458). The Sendable
+/// conformance carries `@unchecked` alone; `@unsafe` lives on the
+/// type/extension declaration when memory-safety unsafety is fundamental
+/// to the type's identity, or on individual methods/properties per
+/// SE-0458 — never on the Sendable protocol slot.
 ///
-/// Citation: `[MEM-SAFE-024]` (memory-safety skill, safety-isolation.md).
+/// Citation: `[MEM-SAFE-024]` (memory-safety skill, safety-isolation.md);
+/// `swift-institute/Research/safe-unsafe-attribute-and-unchecked-sendable-best-practices.md`
+/// v1.1.0.
+///
+/// Originally added 2026-05-10 (Wave 2b finalization Batch 4) flagging
+/// `@unchecked Sendable` WITHOUT `@unsafe`; inverted 2026-05-13 to flag
+/// `@unchecked Sendable` WITH `@unsafe` on the same conformance clause.
 extension Lint.Rule {
     public static let `unchecked sendable categorization` = Lint.Rule(
         id: "unchecked sendable categorization",
@@ -35,12 +45,17 @@ extension Lint.Rule {
 
 @usableFromInline
 internal let memoryUncheckedSendableCategorizedMessage: Swift.String =
-    "[unchecked sendable categorization] [MEM-SAFE-024]: `@unchecked Sendable` MUST "
-    + "be classified into category A (synchronized), B (~Copyable ownership), or D "
-    + "(structural workaround) AND paired with `@unsafe` plus a doc-comment safety "
-    + "invariant. Category C (thread-confined) should migrate to `~Sendable` per "
-    + "SE-0518. A fifth category requires explicit conversation per Wave 2b "
-    + "Decision 8 — do not add it silently."
+    "[unchecked sendable categorization] [MEM-SAFE-024]: `@unchecked Sendable` "
+    + "MUST NOT be paired with `@unsafe` on the same conformance clause. Per "
+    + "SE-0458, `@unsafe` is scoped to the four memory-safety dimensions "
+    + "(lifetime/bounds/type/initialization); thread safety is the separate "
+    + "fifth dimension carried by `@unchecked Sendable` alone. Drop the "
+    + "`@unsafe` from the conformance clause. If memory-safety unsafety is "
+    + "fundamental to the type, apply `@unsafe` on the type or extension "
+    + "declaration (a different syntactic position) instead. The Category "
+    + "(A/B/C/D) is documentation discipline carried in a `## Safety Invariant` "
+    + "doc-comment or adjacent `// SAFETY:` / `// WHY:` block, NOT a trigger "
+    + "for `@unsafe`."
 
 internal final class MemoryUncheckedSendableCategorizedVisitor: SyntaxVisitor {
     let source: Source.File
@@ -102,7 +117,10 @@ internal final class MemoryUncheckedSendableCategorizedVisitor: SyntaxVisitor {
         for inherited in inheritanceClause.inheritedTypes {
             guard isSendableInherited(inherited) else { continue }
             guard hasUncheckedAttribute(inherited) else { continue }
-            guard !hasUnsafeAttributeOnInherited(inherited) else { continue }
+            // Inverted 2026-05-13: flag when @unsafe IS paired with @unchecked
+            // on the same conformance clause (deviation from Swift convention
+            // per SE-0458). Previously: flag when @unsafe was absent.
+            guard hasUnsafeAttributeOnInherited(inherited) else { continue }
             let location = converter.location(for: inherited.positionAfterSkippingLeadingTrivia)
             matches.append(Diagnostic.Record(
                 location: Source.Location(
