@@ -19,10 +19,10 @@ import Linter_Rules_Test_Support
 extension Lint.Rule {
     @Suite
     struct `for loop in result builder Tests` {
-        @Suite struct PositiveCases {}
-        @Suite struct NegativeCases {}
-        @Suite struct CalleePatterns {}
-        @Suite struct EdgeCases {}
+        @Suite struct `Positive Cases` {}
+        @Suite struct `Negative Cases` {}
+        @Suite struct `Callee Patterns` {}
+        @Suite struct `Edge Cases` {}
         @Suite struct Severity {}
         @Suite struct Allowlist {}
     }
@@ -42,7 +42,7 @@ extension Lint.Rule.`for loop in result builder Tests` {
 
 // MARK: - Positive cases (rule fires)
 
-extension Lint.Rule.`for loop in result builder Tests`.PositiveCases {
+extension Lint.Rule.`for loop in result builder Tests`.`Positive Cases` {
     @Test
     func `Array with for-loop is flagged`() {
         let source = """
@@ -118,7 +118,7 @@ extension Lint.Rule.`for loop in result builder Tests`.PositiveCases {
 
 // MARK: - Negative cases (rule does NOT fire)
 
-extension Lint.Rule.`for loop in result builder Tests`.NegativeCases {
+extension Lint.Rule.`for loop in result builder Tests`.`Negative Cases` {
     @Test
     func `Array with Sequence overload is NOT flagged`() {
         let source = """
@@ -188,7 +188,7 @@ extension Lint.Rule.`for loop in result builder Tests`.NegativeCases {
 
 // MARK: - Callee identifier extraction
 
-extension Lint.Rule.`for loop in result builder Tests`.CalleePatterns {
+extension Lint.Rule.`for loop in result builder Tests`.`Callee Patterns` {
     @Test
     func `Generic Array callsite is recognized`() {
         let source = """
@@ -259,7 +259,7 @@ extension Lint.Rule.`for loop in result builder Tests`.CalleePatterns {
 
 // MARK: - Edge cases
 
-extension Lint.Rule.`for loop in result builder Tests`.EdgeCases {
+extension Lint.Rule.`for loop in result builder Tests`.`Edge Cases` {
     @Test
     func `Empty file produces no findings`() {
         let findings = Lint.Rule.`for loop in result builder Tests`.findings(in: "")
