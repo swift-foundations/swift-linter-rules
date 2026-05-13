@@ -20,7 +20,7 @@ internal import SwiftSyntax
 extension Lint.Rule {
     public static let `unchecked sendable noncopyable` = Lint.Rule(
         id: "unchecked sendable noncopyable",
-        defaultSeverity: .warning,
+        default: .warning,
         findings: { source, severity in
             let visitor = MemoryUnnecessaryUncheckedSendableNoncopyableVisitor(
                 source: source.file,

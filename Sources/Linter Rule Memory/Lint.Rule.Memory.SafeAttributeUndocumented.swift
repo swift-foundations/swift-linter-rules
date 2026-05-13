@@ -47,7 +47,7 @@ internal import SwiftSyntax
 extension Lint.Rule {
     public static let `safe attribute undocumented` = Lint.Rule(
         id: "safe attribute undocumented",
-        defaultSeverity: .warning,
+        default: .warning,
         findings: { source, severity in
             let visitor = MemorySafeAttributeUndocumentedVisitor(
                 source: source.file,

@@ -19,7 +19,7 @@ internal import SwiftSyntax
 extension Lint.Rule {
     public static let `single type per file` = Lint.Rule(
         id: "single type per file",
-        defaultSeverity: .warning,
+        default: .warning,
         findings: { source, severity in
             // Scope-exclusion per Decision 2: skip files whose path has a
             // segment named `Tests`, `Experiments`, or `Examples`.

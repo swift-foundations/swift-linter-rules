@@ -17,7 +17,7 @@ internal import SwiftSyntax
 extension Lint.Rule {
     public static let `do throws for typed catch` = Lint.Rule(
         id: "do throws for typed catch",
-        defaultSeverity: .warning,
+        default: .warning,
         findings: { source, severity in
             let visitor = ThrowsDoCatchTypedVisitor(
                 source: source.file,

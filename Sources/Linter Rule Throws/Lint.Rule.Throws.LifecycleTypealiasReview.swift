@@ -17,7 +17,7 @@ internal import SwiftSyntax
 extension Lint.Rule {
     public static let `lifecycle typealias review` = Lint.Rule(
         id: "lifecycle typealias review",
-        defaultSeverity: .warning,
+        default: .warning,
         findings: { source, severity in
             let visitor = ThrowsLifecycleTypealiasReviewVisitor(
                 source: source.file,

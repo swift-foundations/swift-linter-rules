@@ -20,7 +20,7 @@ internal import SwiftSyntax
 extension Lint.Rule {
     public static let `wrapper backing exposed` = Lint.Rule(
         id: "wrapper backing exposed",
-        defaultSeverity: .warning,
+        default: .warning,
         findings: { source, severity in
             let visitor = StructureWrapperBackingExposedVisitor(
                 source: source.file,

@@ -22,7 +22,7 @@ internal import SwiftSyntax
 extension Lint.Rule {
     public static let `optionset shell pattern` = Lint.Rule(
         id: "optionset shell pattern",
-        defaultSeverity: .warning,
+        default: .warning,
         findings: { source, severity in
             let visitor = PlatformOptionSetShellVisitor(
                 source: source.file,

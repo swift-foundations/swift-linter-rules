@@ -25,7 +25,7 @@ internal import SwiftSyntax
 extension Lint.Rule {
     public static let `configuration before content` = Lint.Rule(
         id: "configuration before content",
-        defaultSeverity: .warning,
+        default: .warning,
         findings: { source, severity in
             let visitor = ClosureConfigurationPlacementVisitor(
                 source: source.file,

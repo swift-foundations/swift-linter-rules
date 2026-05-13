@@ -26,7 +26,7 @@ internal import SwiftSyntax
 extension Lint.Rule {
     public static let `zero or one literal` = Lint.Rule(
         id: "zero or one literal",
-        defaultSeverity: .warning,
+        default: .warning,
         findings: { source, severity in
             let visitor = CardinalConstructorVisitor(
                 source: source.file,

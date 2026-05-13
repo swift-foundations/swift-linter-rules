@@ -20,7 +20,7 @@ internal import SwiftSyntax
 extension Lint.Rule {
     public static let `unsafe storage visibility` = Lint.Rule(
         id: "unsafe storage visibility",
-        defaultSeverity: .warning,
+        default: .warning,
         findings: { source, severity in
             let visitor = MemoryPrivateUnsafeStorageVisitor(
                 source: source.file,

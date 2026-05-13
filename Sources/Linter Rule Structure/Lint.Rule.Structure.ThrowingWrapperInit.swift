@@ -21,7 +21,7 @@ internal import SwiftSyntax
 extension Lint.Rule {
     public static let `throwing wrapper init` = Lint.Rule(
         id: "throwing wrapper init",
-        defaultSeverity: .warning,
+        default: .warning,
         findings: { source, severity in
             let visitor = StructureThrowingWrapperInitVisitor(
                 source: source.file,

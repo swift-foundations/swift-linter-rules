@@ -17,7 +17,7 @@ internal import SwiftSyntax
 extension Lint.Rule {
     public static let `compound suite name` = Lint.Rule(
         id: "compound suite name",
-        defaultSeverity: .warning,
+        default: .warning,
         findings: { source, severity in
             let visitor = TestingCompoundSuiteNameVisitor(
                 source: source.file,

@@ -17,7 +17,7 @@ internal import SwiftSyntax
 extension Lint.Rule {
     public static let `mock factory zero collision` = Lint.Rule(
         id: "mock factory zero collision",
-        defaultSeverity: .warning,
+        default: .warning,
         findings: { source, severity in
             let visitor = TestingMockFactoryZeroCollisionVisitor(
                 source: source.file,

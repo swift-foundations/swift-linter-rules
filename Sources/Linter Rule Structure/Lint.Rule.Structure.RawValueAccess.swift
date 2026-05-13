@@ -19,7 +19,7 @@ internal import SwiftSyntax
 extension Lint.Rule {
     public static let `raw value access` = Lint.Rule(
         id: "raw value access",
-        defaultSeverity: .warning,
+        default: .warning,
         findings: { source, severity in
             let visitor = StructureRawValueAccessVisitor(
                 source: source.file,

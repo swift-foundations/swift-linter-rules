@@ -17,7 +17,7 @@ internal import SwiftSyntax
 extension Lint.Rule {
     public static let `performance suite serialized` = Lint.Rule(
         id: "performance suite serialized",
-        defaultSeverity: .warning,
+        default: .warning,
         findings: { source, severity in
             let visitor = TestingPerformanceSuiteSerializedVisitor(
                 source: source.file,

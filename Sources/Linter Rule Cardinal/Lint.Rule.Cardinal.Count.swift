@@ -60,7 +60,7 @@ internal import SwiftOperators
 extension Lint.Rule {
     public static let `count minus one` = Lint.Rule(
         id: "count minus one",
-        defaultSeverity: .warning,
+        default: .warning,
         findings: { source, severity in
             let folded = OperatorTable.standardOperators.foldAll(source.tree, errorHandler: { _ in })
             let visitor = CardinalCountVisitor(

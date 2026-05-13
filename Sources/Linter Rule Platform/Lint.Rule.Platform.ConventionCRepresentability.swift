@@ -21,7 +21,7 @@ internal import SwiftSyntax
 extension Lint.Rule {
     public static let `convention c representability` = Lint.Rule(
         id: "convention c representability",
-        defaultSeverity: .warning,
+        default: .warning,
         findings: { source, severity in
             let visitor = PlatformConventionCRepresentabilityVisitor(
                 source: source.file,

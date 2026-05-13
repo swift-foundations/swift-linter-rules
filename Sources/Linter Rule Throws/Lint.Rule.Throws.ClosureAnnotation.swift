@@ -17,7 +17,7 @@ internal import SwiftSyntax
 extension Lint.Rule {
     public static let `closure typed throws annotation` = Lint.Rule(
         id: "closure typed throws annotation",
-        defaultSeverity: .warning,
+        default: .warning,
         findings: { source, severity in
             let visitor = ThrowsClosureAnnotationVisitor(
                 source: source.file,

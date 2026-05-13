@@ -26,7 +26,7 @@ internal import SwiftSyntax
 extension Lint.Rule {
     public static let `noncopyable error` = Lint.Rule(
         id: "noncopyable error",
-        defaultSeverity: .warning,
+        default: .warning,
         findings: { source, severity in
             let visitor = MemoryErrorNoncopyableVisitor(
                 source: source.file,

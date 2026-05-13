@@ -17,7 +17,7 @@ internal import SwiftSyntax
 extension Lint.Rule {
     public static let `benchmark timed required` = Lint.Rule(
         id: "benchmark timed required",
-        defaultSeverity: .warning,
+        default: .warning,
         findings: { source, severity in
             let visitor = TestingBenchmarkTimedRequiredVisitor(
                 source: source.file,

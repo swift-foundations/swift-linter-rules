@@ -21,7 +21,7 @@ internal import SwiftSyntax
 extension Lint.Rule {
     public static let `typealiased namespace bridge` = Lint.Rule(
         id: "typealiased namespace bridge",
-        defaultSeverity: .warning,
+        default: .warning,
         findings: { source, severity in
             let visitor = PlatformTypealiasedNamespaceVisitor(
                 source: source.file,

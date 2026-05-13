@@ -20,7 +20,7 @@ internal import SwiftSyntax
 extension Lint.Rule {
     public static let `type transform placement` = Lint.Rule(
         id: "type transform placement",
-        defaultSeverity: .warning,
+        default: .warning,
         findings: { source, severity in
             let visitor = StructureTypeTransformPlacementVisitor(
                 source: source.file,

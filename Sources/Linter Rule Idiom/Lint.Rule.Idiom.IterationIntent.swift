@@ -17,7 +17,7 @@ internal import SwiftSyntax
 extension Lint.Rule {
     public static let `counter loop iteration` = Lint.Rule(
         id: "counter loop iteration",
-        defaultSeverity: .warning,
+        default: .warning,
         findings: { source, severity in
             let visitor = IdiomIterationIntentVisitor(
                 source: source.file,

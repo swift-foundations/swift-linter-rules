@@ -21,7 +21,7 @@ internal import SwiftSyntax
 extension Lint.Rule {
     public static let `system subdomain` = Lint.Rule(
         id: "system subdomain",
-        defaultSeverity: .warning,
+        default: .warning,
         findings: { source, severity in
             let visitor = PlatformSystemSubdomainVisitor(
                 source: source.file,

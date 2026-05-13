@@ -17,7 +17,7 @@ internal import SwiftSyntax
 extension Lint.Rule {
     public static let `generic throws missing never` = Lint.Rule(
         id: "generic throws missing never",
-        defaultSeverity: .warning,
+        default: .warning,
         findings: { source, severity in
             let visitor = ThrowsGenericNeverSpecializationVisitor(
                 source: source.file,

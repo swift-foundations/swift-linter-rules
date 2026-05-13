@@ -19,7 +19,7 @@ internal import SwiftSyntax
 extension Lint.Rule {
     public static let `typed throws cannot use self error` = Lint.Rule(
         id: "typed throws cannot use self error",
-        defaultSeverity: .warning,
+        default: .warning,
         findings: { source, severity in
             let visitor = ThrowsSelfErrorInTypedThrowsVisitor(
                 source: source.file,

@@ -18,7 +18,7 @@ internal import SwiftSyntax
 extension Lint.Rule {
     public static let `unlabeled lifecycle closure` = Lint.Rule(
         id: "unlabeled lifecycle closure",
-        defaultSeverity: .warning,
+        default: .warning,
         findings: { source, severity in
             let visitor = ClosureMultipleLifecycleVisitor(
                 source: source.file,

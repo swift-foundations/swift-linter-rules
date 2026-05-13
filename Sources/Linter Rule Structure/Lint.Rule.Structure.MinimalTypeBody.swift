@@ -20,7 +20,7 @@ internal import SwiftSyntax
 extension Lint.Rule {
     public static let `minimal type body` = Lint.Rule(
         id: "minimal type body",
-        defaultSeverity: .warning,
+        default: .warning,
         findings: { source, severity in
             let visitor = StructureMinimalTypeBodyVisitor(
                 source: source.file,

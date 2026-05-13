@@ -30,7 +30,7 @@ internal import SwiftSyntax
 extension Lint.Rule {
     public static let `unchecked call site` = Lint.Rule(
         id: "unchecked call site",
-        defaultSeverity: .warning,
+        default: .warning,
         findings: { source, severity in
             let visitor = UncheckedVisitor(
                 source: source.file,

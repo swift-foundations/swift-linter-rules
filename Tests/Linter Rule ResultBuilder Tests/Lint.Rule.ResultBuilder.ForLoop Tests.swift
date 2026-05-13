@@ -329,7 +329,7 @@ extension Lint.Rule.`for loop in result builder Tests`.EdgeCases {
 extension Lint.Rule.`for loop in result builder Tests`.Severity {
     @Test
     func `Default severity is warning`() {
-        #expect(Lint.Rule.`for loop in result builder`.defaultSeverity == .warning)
+        #expect(Lint.Rule.`for loop in result builder`.severity.default == .warning)
     }
 
     @Test

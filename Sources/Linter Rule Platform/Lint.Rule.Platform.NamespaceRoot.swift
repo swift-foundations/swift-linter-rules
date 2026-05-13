@@ -21,7 +21,7 @@ internal import SwiftSyntax
 extension Lint.Rule {
     public static let `compound platform namespace root` = Lint.Rule(
         id: "compound platform namespace root",
-        defaultSeverity: .warning,
+        default: .warning,
         findings: { source, severity in
             let visitor = PlatformNamespaceRootVisitor(
                 source: source.file,

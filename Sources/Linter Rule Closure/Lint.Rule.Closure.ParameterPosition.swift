@@ -21,7 +21,7 @@ internal import SwiftSyntax
 extension Lint.Rule {
     public static let `parameter position` = Lint.Rule(
         id: "parameter position",
-        defaultSeverity: .warning,
+        default: .warning,
         findings: { source, severity in
             let visitor = ClosureParameterPositionVisitor(
                 source: source.file,

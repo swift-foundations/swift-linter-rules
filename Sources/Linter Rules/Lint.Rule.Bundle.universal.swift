@@ -25,7 +25,7 @@ public import Linter_Rule_Unchecked
 /// Universal-tier rule bundle.
 ///
 /// Every rule that currently lives in `swift-linter-rules`, enabled at
-/// each rule's `defaultSeverity`. A consumer pulls this bundle by name
+/// each rule's `severity.default`. A consumer pulls this bundle by name
 /// rather than enumerating individual rules:
 ///
 /// ```swift

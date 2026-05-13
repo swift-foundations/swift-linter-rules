@@ -19,7 +19,7 @@ internal import SwiftSyntax
 extension Lint.Rule {
     public static let `swift protocol qualification` = Lint.Rule(
         id: "swift protocol qualification",
-        defaultSeverity: .warning,
+        default: .warning,
         findings: { source, severity in
             let visitor = PlatformSwiftQualificationVisitor(
                 source: source.file,

@@ -37,7 +37,7 @@ internal import SwiftSyntax
 extension Lint.Rule {
     public static let `borrowing self short circuit` = Lint.Rule(
         id: "borrowing self short circuit",
-        defaultSeverity: .warning,
+        default: .warning,
         findings: { source, severity in
             let visitor = MemoryBorrowingSelfShortCircuitVisitor(
                 source: source.file,

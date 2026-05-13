@@ -31,7 +31,7 @@ internal import SwiftSyntax
 extension Lint.Rule {
     public static let `nonisolated unsafe without invariant` = Lint.Rule(
         id: "nonisolated unsafe without invariant",
-        defaultSeverity: .warning,
+        default: .warning,
         findings: { source, severity in
             let visitor = MemoryNonisolatedUnsafeInvariantVisitor(
                 source: source.file,

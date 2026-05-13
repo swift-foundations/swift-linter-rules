@@ -17,7 +17,7 @@ internal import SwiftSyntax
 extension Lint.Rule {
     public static let `test function naming` = Lint.Rule(
         id: "test function naming",
-        defaultSeverity: .warning,
+        default: .warning,
         findings: { source, severity in
             let visitor = TestingFunctionNamingVisitor(
                 source: source.file,

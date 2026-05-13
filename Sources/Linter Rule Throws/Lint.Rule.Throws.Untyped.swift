@@ -18,7 +18,7 @@ internal import SwiftSyntax
 extension Lint.Rule {
     public static let `untyped throws` = Lint.Rule(
         id: "untyped throws",
-        defaultSeverity: .warning,
+        default: .warning,
         findings: { source, severity in
             let visitor = ThrowsUntypedVisitor(
                 source: source.file,

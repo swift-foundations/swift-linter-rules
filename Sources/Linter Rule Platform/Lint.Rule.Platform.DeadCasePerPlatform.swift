@@ -20,7 +20,7 @@ internal import SwiftSyntax
 extension Lint.Rule {
     public static let `dead case per platform` = Lint.Rule(
         id: "dead case per platform",
-        defaultSeverity: .warning,
+        default: .warning,
         findings: { source, severity in
             let visitor = PlatformDeadCasePerPlatformVisitor(
                 source: source.file,

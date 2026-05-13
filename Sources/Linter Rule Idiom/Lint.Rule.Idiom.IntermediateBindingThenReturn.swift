@@ -17,7 +17,7 @@ internal import SwiftSyntax
 extension Lint.Rule {
     public static let `intermediate binding then return` = Lint.Rule(
         id: "intermediate binding then return",
-        defaultSeverity: .warning,
+        default: .warning,
         findings: { source, severity in
             let visitor = IdiomIntermediateBindingThenReturnVisitor(
                 source: source.file,

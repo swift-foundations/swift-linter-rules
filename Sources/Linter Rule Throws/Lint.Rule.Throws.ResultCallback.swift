@@ -17,7 +17,7 @@ internal import SwiftSyntax
 extension Lint.Rule {
     public static let `callback result over throws thunk` = Lint.Rule(
         id: "callback result over throws thunk",
-        defaultSeverity: .warning,
+        default: .warning,
         findings: { source, severity in
             let visitor = ThrowsResultCallbackVisitor(
                 source: source.file,

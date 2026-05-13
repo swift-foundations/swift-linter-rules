@@ -17,7 +17,7 @@ internal import SwiftSyntax
 extension Lint.Rule {
     public static let `string utf8 scanning` = Lint.Rule(
         id: "string utf8 scanning",
-        defaultSeverity: .warning,
+        default: .warning,
         findings: { source, severity in
             let visitor = IdiomStringUTF8ScanningVisitor(
                 source: source.file,

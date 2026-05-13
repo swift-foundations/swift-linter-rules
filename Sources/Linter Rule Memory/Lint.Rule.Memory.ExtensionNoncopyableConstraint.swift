@@ -26,7 +26,7 @@ internal import SwiftSyntax
 extension Lint.Rule {
     public static let `extension noncopyable constraint` = Lint.Rule(
         id: "extension noncopyable constraint",
-        defaultSeverity: .warning,
+        default: .warning,
         findings: { source, severity in
             let visitor = MemoryExtensionNoncopyableConstraintVisitor(
                 source: source.file,

@@ -20,7 +20,7 @@ internal import SwiftSyntax
 extension Lint.Rule {
     public static let `pointer advanced by` = Lint.Rule(
         id: "pointer advanced by",
-        defaultSeverity: .warning,
+        default: .warning,
         findings: { source, severity in
             let visitor = MemoryPointerArithmeticVisitor(
                 source: source.file,

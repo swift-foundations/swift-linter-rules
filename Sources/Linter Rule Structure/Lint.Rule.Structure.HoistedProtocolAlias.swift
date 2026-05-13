@@ -21,7 +21,7 @@ internal import SwiftSyntax
 extension Lint.Rule {
     public static let `hoisted protocol alias` = Lint.Rule(
         id: "hoisted protocol alias",
-        defaultSeverity: .warning,
+        default: .warning,
         findings: { source, severity in
             let visitor = StructureHoistedProtocolAliasVisitor(
                 source: source.file,

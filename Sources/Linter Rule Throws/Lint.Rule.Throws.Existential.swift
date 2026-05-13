@@ -17,7 +17,7 @@ internal import SwiftSyntax
 extension Lint.Rule {
     public static let `existential throws` = Lint.Rule(
         id: "existential throws",
-        defaultSeverity: .warning,
+        default: .warning,
         findings: { source, severity in
             let visitor = ThrowsExistentialVisitor(
                 source: source.file,

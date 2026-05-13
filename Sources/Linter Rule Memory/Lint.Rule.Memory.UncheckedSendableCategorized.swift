@@ -20,7 +20,7 @@ internal import SwiftSyntax
 extension Lint.Rule {
     public static let `unchecked sendable categorization` = Lint.Rule(
         id: "unchecked sendable categorization",
-        defaultSeverity: .warning,
+        default: .warning,
         findings: { source, severity in
             let visitor = MemoryUncheckedSendableCategorizedVisitor(
                 source: source.file,

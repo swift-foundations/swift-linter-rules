@@ -19,7 +19,7 @@ internal import SwiftSyntax
 extension Lint.Rule {
     public static let `usable from inline internal import` = Lint.Rule(
         id: "usable from inline internal import",
-        defaultSeverity: .warning,
+        default: .warning,
         findings: { source, severity in
             let visitor = StructureUsableFromInlineInternalImportVisitor(
                 source: source.file,

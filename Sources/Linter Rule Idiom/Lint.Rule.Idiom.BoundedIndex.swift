@@ -18,7 +18,7 @@ internal import SwiftSyntax
 extension Lint.Rule {
     public static let `bounded index static capacity` = Lint.Rule(
         id: "bounded index static capacity",
-        defaultSeverity: .warning,
+        default: .warning,
         findings: { source, severity in
             let visitor = IdiomBoundedIndexVisitor(
                 source: source.file,

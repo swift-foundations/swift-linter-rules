@@ -18,7 +18,7 @@ internal import SwiftSyntax
 extension Lint.Rule {
     public static let `inlinable internal access` = Lint.Rule(
         id: "inlinable internal access",
-        defaultSeverity: .warning,
+        default: .warning,
         findings: { source, severity in
             let visitor = StructureInlinableInternalAccessVisitor(
                 source: source.file,

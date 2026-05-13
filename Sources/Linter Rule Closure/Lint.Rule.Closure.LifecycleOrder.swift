@@ -17,7 +17,7 @@ internal import SwiftSyntax
 extension Lint.Rule {
     public static let `lifecycle order` = Lint.Rule(
         id: "lifecycle order",
-        defaultSeverity: .warning,
+        default: .warning,
         findings: { source, severity in
             let visitor = ClosureLifecycleOrderVisitor(
                 source: source.file,

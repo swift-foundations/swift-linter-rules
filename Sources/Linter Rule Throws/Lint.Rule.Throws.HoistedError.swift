@@ -16,7 +16,7 @@ internal import SwiftSyntax
 extension Lint.Rule {
     public static let `hoisted error in public throws` = Lint.Rule(
         id: "hoisted error in public throws",
-        defaultSeverity: .warning,
+        default: .warning,
         findings: { source, severity in
             let visitor = ThrowsHoistedErrorVisitor(
                 source: source.file,
