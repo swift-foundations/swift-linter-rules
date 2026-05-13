@@ -62,26 +62,6 @@ internal let bodyTierLabels: Swift.Set<Swift.String> = [
     "transform",
 ]
 
-internal enum LifecycleTier {
-    case completion
-    case body
-    case other
-}
-
-internal func lifecycleTier(of parameter: FunctionParameterSyntax) -> LifecycleTier {
-    if parameter.firstName.tokenKind == .wildcard {
-        return .body
-    }
-    let labelText = parameter.firstName.text
-    if completionTierLabels.contains(labelText) {
-        return .completion
-    }
-    if bodyTierLabels.contains(labelText) {
-        return .body
-    }
-    return .other
-}
-
 internal final class ClosureLifecycleOrderVisitor: SyntaxVisitor {
     let source: Source.File
     let severity: Diagnostic.Severity

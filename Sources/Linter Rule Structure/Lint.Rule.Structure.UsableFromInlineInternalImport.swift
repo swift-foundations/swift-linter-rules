@@ -40,19 +40,6 @@ internal let structureUsableFromInlineInternalImportMessage: Swift.String =
     + "internally-imported modules at compile time. Either downgrade the "
     + "decl's visibility or upgrade the import to `public` / `package`."
 
-/// Carries an internal-import's diagnostic site (the `import` keyword
-/// position) and the imported module's leaf name. The leaf name is the
-/// reach-target the rule uses to test whether any `@usableFromInline`
-/// decl syntactically references the module — without a name match,
-/// there's no co-firing condition and the rule must not fire.
-///
-/// Citation: tightening per A6 in
-/// `Research/2026-05-12-thread-b-rule-pack-dogfeed-triage.md`.
-internal struct StructureUsableFromInlineInternalImportModule {
-    let position: AbsolutePosition
-    let leafName: Swift.String
-}
-
 internal final class StructureUsableFromInlineInternalImportVisitor: SyntaxVisitor {
     let source: Source.File
     let severity: Diagnostic.Severity
