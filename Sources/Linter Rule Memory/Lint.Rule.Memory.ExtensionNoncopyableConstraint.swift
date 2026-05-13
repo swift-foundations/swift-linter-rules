@@ -39,25 +39,22 @@ extension Lint.Rule {
     )
 }
 
-/// Types where the `where ... ~Copyable` constraint is either
-/// structurally inexpressible or vacuous:
+/// Stdlib generic types whose generic parameter is language-bounded to
+/// `Copyable` — writing `where ... ~Copyable` against these types is
+/// rejected at type-check, so the rule's request is impossible to
+/// satisfy. These types ARE generic (they take a generic parameter), so
+/// the syntactic non-generic detection does NOT skip them when the user
+/// writes the explicit-parameter form `extension Array<Element>`. The
+/// allowlist covers the explicit-parameter case.
 ///
-/// - **Stdlib generic types language-bounded to Copyable**: stdlib type
-///   declarations like `UnsafePointer<Pointee>` and `Array<Element>`
-///   don't suppress Copyable on their parameter; `where Pointee: ~Copyable`
-///   is rejected at type-check.
-/// - **Non-generic institute types**: types with no generic parameters
-///   at all (e.g., `Comparison`, the institute comparison-result enum)
-///   have nothing to constrain. `consuming Self` is fine without any
-///   where clause.
-///
-/// Curated allowlist — adding entries requires verifying that the type
-/// either (a) genuinely rejects `~Copyable` on its parameter at type-check
-/// or (b) has no generic parameter at all.
+/// (Non-generic institute types — Comparison, Equation, Hash, Ordinal,
+/// Cardinal, Affine.Discrete.Vector, Lint.Source.Parsed, and any future
+/// directly-`~Copyable` type — are handled by
+/// `extensionTargetIsSyntacticallyNonGeneric(_:)` below, NOT by allowlist
+/// entries. Adding allowlist entries for non-generic types would be
+/// redundant maintenance.)
 @usableFromInline
 internal let memoryExtensionConstraintInexpressibleTypes: Swift.Set<Swift.String> = [
-    // Stdlib generic types whose parameter is Copyable-bounded by the
-    // stdlib declaration.
     "UnsafePointer",
     "UnsafeMutablePointer",
     "UnsafeRawPointer",
@@ -82,14 +79,6 @@ internal let memoryExtensionConstraintInexpressibleTypes: Swift.Set<Swift.String
     "String",
     "Substring",
     "Result",
-    // Institute non-generic types — no generic parameter exists to
-    // constrain. Extensions with `consuming`/`borrowing` are valid
-    // without any where clause.
-    "Comparison",
-    "Equation",
-    "Hash",
-    "Ordinal",
-    "Cardinal",
 ]
 
 /// Curated allowlist for nested institute types whose leaf names are
@@ -104,9 +93,12 @@ internal let memoryExtensionConstraintInexpressibleTypes: Swift.Set<Swift.String
 /// `~Copyable`-constraint omissions.
 @usableFromInline
 internal let memoryExtensionConstraintInexpressibleQualifiedTypes: Swift.Set<Swift.String> = [
-    // Non-generic — the institute discrete-affine vector. Lives in
-    // `swift-affine-primitives/Sources/Affine Primitives Core/`.
-    "Affine.Discrete.Vector",
+    // Reserved for future entries where syntactic-non-generic detection
+    // is insufficient (e.g., generic type whose leaf name is shared by
+    // non-generic siblings elsewhere). Currently empty: the syntactic
+    // detection in `extensionTargetIsSyntacticallyNonGeneric(_:)` handles
+    // the Affine.Discrete.Vector + Comparison-family + Lint.Source.Parsed
+    // cases without per-type allowlist maintenance.
 ]
 
 @usableFromInline
@@ -153,6 +145,76 @@ internal final class MemoryExtensionNoncopyableConstraintVisitor: SyntaxVisitor 
         return nil
     }
 
+    /// Detects whether the extension's target carries any syntactic
+    /// generic-parameter marker. Returns `true` when the extension is
+    /// against a type that is syntactically non-generic (no `<...>` at
+    /// any segment of the extended type AND no generic where clause on
+    /// the extension itself).
+    ///
+    /// The rule's premise — "extension on a `~Copyable`-aware generic
+    /// type implicitly constrains to Copyable when no `where ...
+    /// ~Copyable` clause is given, silently shrinking the surface" —
+    /// only applies when the extension target IS generic. For
+    /// syntactically-non-generic targets, the where clause is structurally
+    /// inexpressible (no generic parameter exists to constrain), so the
+    /// rule's request is vacuous and the rule MUST NOT fire.
+    ///
+    /// Examples of syntactically-non-generic forms (correctly skipped):
+    ///
+    /// ```swift
+    /// extension Comparison { consuming func ... }            // bare leaf
+    /// extension Affine.Discrete.Vector { ... }               // qualified non-generic
+    /// extension Lint.Source.Parsed { borrowing func ... }    // qualified non-generic
+    /// ```
+    ///
+    /// Examples of syntactically-generic forms (correctly visited):
+    ///
+    /// ```swift
+    /// extension Container<Element> { consuming func ... }    // explicit `<Element>`
+    /// extension Container where Element: Sendable { ... }    // explicit where clause
+    /// ```
+    ///
+    /// **Known limitation — the implicit-generic-target false negative**:
+    /// when an author writes `extension SomeGenericType { ... }` without
+    /// `<T>` and without a where clause, this detection treats it as
+    /// non-generic and skips. The detection is wrong if `SomeGenericType`
+    /// IS generic. The trade-off vs. the prior allowlist-only approach:
+    ///
+    /// - Allowlist-only: every new directly-`~Copyable` type required a
+    ///   per-entry allowlist add (Lint.Source.Parsed, future `~Copyable`
+    ///   types) → ongoing maintenance burden.
+    /// - Syntactic detection: false negatives on implicit-parameter
+    ///   extensions of generic types (rare per institute conventions
+    ///   which encourage explicit `<T>` or `where T:` forms) → zero
+    ///   ongoing maintenance.
+    ///
+    /// Institute conventions strongly favor explicit generic parameter
+    /// declaration; the false-negative risk is bounded.
+    private func extensionTargetIsSyntacticallyNonGeneric(_ node: ExtensionDeclSyntax) -> Bool {
+        if extendedTypeHasGenericArguments(node.extendedType) {
+            return false
+        }
+        if node.genericWhereClause != nil {
+            return false
+        }
+        return true
+    }
+
+    /// Recursively checks whether any segment of the extended-type
+    /// expression carries a `<...>` generic argument clause.
+    private func extendedTypeHasGenericArguments(_ type: TypeSyntax) -> Bool {
+        if let identifier = type.as(IdentifierTypeSyntax.self) {
+            return identifier.genericArgumentClause != nil
+        }
+        if let member = type.as(MemberTypeSyntax.self) {
+            if member.genericArgumentClause != nil {
+                return true
+            }
+            return extendedTypeHasGenericArguments(member.baseType)
+        }
+        return false
+    }
+
     private func whereClauseHasNoncopyable(_ clause: GenericWhereClauseSyntax?) -> Bool {
         guard let clause else { return false }
         for requirement in clause.requirements {
@@ -173,17 +235,26 @@ internal final class MemoryExtensionNoncopyableConstraintVisitor: SyntaxVisitor 
         if source.filePath.contains(" where ") {
             return .visitChildren
         }
-        // Constraint-inexpressible exemption: the extended type either
-        // rejects `~Copyable` at type-check (stdlib Copyable-bounded
-        // generic) or has no generic parameter at all (non-generic
-        // institute type). The rule's premise doesn't apply.
-        //
-        // The qualified-name lookup runs first for nested institute types
-        // whose bare leaf name collides with generic types elsewhere in
-        // the ecosystem (see comment on
-        // `memoryExtensionConstraintInexpressibleQualifiedTypes`). The
-        // leaf lookup remains for stdlib types and unambiguous institute
-        // leaves.
+        // Syntactic non-generic exemption: the rule's premise applies
+        // only to generic types whose where clause could silently shrink
+        // to Copyable. For syntactically-non-generic targets, no generic
+        // parameter exists to constrain — the rule's request is vacuous.
+        // This subsumes prior per-type allowlist entries for non-generic
+        // institute types (Comparison, Equation, Hash, Ordinal, Cardinal,
+        // Affine.Discrete.Vector) and scales automatically to new
+        // directly-`~Copyable` types (Lint.Source.Parsed and successors).
+        // See `extensionTargetIsSyntacticallyNonGeneric(_:)` for the
+        // false-negative trade-off documentation.
+        if extensionTargetIsSyntacticallyNonGeneric(node) {
+            return .visitChildren
+        }
+        // Constraint-inexpressible exemption for syntactically-generic
+        // targets whose generic parameter is language-bounded to Copyable.
+        // Specifically catches `extension Array<Element>` (and the wider
+        // stdlib generic-Copyable-bounded family) where the user wrote
+        // the explicit generic-parameter form, so syntactic-non-generic
+        // detection didn't fire. The qualified-name lookup runs first;
+        // the leaf lookup remains for unambiguous stdlib leaves.
         if let qualified = extendedTypeQualifiedName(node.extendedType),
            memoryExtensionConstraintInexpressibleQualifiedTypes.contains(qualified) {
             return .visitChildren

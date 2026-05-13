@@ -34,7 +34,7 @@ extension Lint.Rule.`extension noncopyable constraint Tests`.Unit {
     @Test
     func `extension with consuming method but no constraint is flagged`() {
         let source = """
-        extension Container {
+        extension Container<Element> {
             consuming func transfer() {}
         }
         """
@@ -56,7 +56,7 @@ extension Lint.Rule.`extension noncopyable constraint Tests`.Unit {
     @Test
     func `extension with no ownership-affecting members is not flagged`() {
         let source = """
-        extension Container {
+        extension Container<Element> {
             func describe() -> String { "" }
         }
         """
@@ -67,7 +67,7 @@ extension Lint.Rule.`extension noncopyable constraint Tests`.Unit {
     @Test
     func `extension with borrowing method but no constraint is flagged`() {
         let source = """
-        extension Container {
+        extension Container<Element> {
             borrowing func peek() {}
         }
         """
@@ -78,7 +78,7 @@ extension Lint.Rule.`extension noncopyable constraint Tests`.Unit {
     @Test
     func `extension with consuming parameter but no constraint is flagged`() {
         let source = """
-        extension Pipe {
+        extension Pipe<Token> {
             func push(_ token: consuming Token) {}
         }
         """
@@ -126,7 +126,7 @@ extension Lint.Rule.`extension noncopyable constraint Tests`.Unit {
     @Test
     func `extension on namespace with both nested type and own consuming method flags only the latter`() {
         let source = """
-        extension Container {
+        extension Container<Element> {
             struct Inner<T: ~Copyable>: ~Copyable {
                 init(consuming value: consuming T) {}
             }
@@ -173,7 +173,7 @@ extension Lint.Rule.`extension noncopyable constraint Tests`.Unit {
     @Test
     func `extension with consuming parameter whose type is not method-local is still flagged`() {
         let source = """
-        extension Pool {
+        extension Pool<Resource> {
             func take<T>(_ resource: consuming Resource) {}
         }
         """
@@ -206,7 +206,7 @@ extension Lint.Rule.`extension noncopyable constraint Tests`.Unit {
     @Test
     func `consuming-self method without own generic params is still flagged`() {
         let source = """
-        extension Container {
+        extension Container<Element> {
             consuming func transfer() {}
         }
         """
@@ -252,8 +252,28 @@ extension Lint.Rule.`extension noncopyable constraint Tests`.Unit {
         #expect(findings.isEmpty)
     }
 
+    // Exemption shape: syntactic non-generic detection. The rule's
+    // premise — "extension on `~Copyable`-aware GENERIC type implicitly
+    // constrains to Copyable, silently shrinking the surface" — applies
+    // only when the extension target IS generic. For syntactically-
+    // non-generic targets (no `<...>`, no where clause), the where
+    // clause is structurally inexpressible and the rule MUST NOT fire.
+    // Scales automatically to new directly-`~Copyable` types without
+    // per-type allowlist maintenance.
+
     @Test
-    func `extension on Affine_Discrete_Vector is not flagged via qualified-name allowlist`() {
+    func `extension on bare non-generic leaf is exempt via syntactic detection`() {
+        let source = """
+        extension Comparison {
+            consuming func transfer() {}
+        }
+        """
+        let findings = Lint.Rule.`extension noncopyable constraint Tests`.findings(in: source)
+        #expect(findings.isEmpty)
+    }
+
+    @Test
+    func `extension on qualified non-generic type is exempt via syntactic detection`() {
         let source = """
         extension Affine.Discrete.Vector {
             consuming func transfer() {}
@@ -264,14 +284,18 @@ extension Lint.Rule.`extension noncopyable constraint Tests`.Unit {
     }
 
     @Test
-    func `extension on bare Vector leaf still fires because the qualified-name gate is strict`() {
+    func `extension on directly-Noncopyable type is exempt via syntactic detection`() {
+        // Lint.Source.Parsed is `~Copyable, Sendable` at L1 per the
+        // Tier-2 RECOMMENDATION v1.1.0 (2026-05-13). Extensions carry
+        // `borrowing func` methods; the rule's `where ~Copyable` request
+        // is structurally inexpressible (no generic parameter exists).
         let source = """
-        extension Vector {
-            consuming func transfer() {}
+        extension Lint.Source.Parsed {
+            borrowing func visibility(at position: Int) -> Int { 0 }
         }
         """
         let findings = Lint.Rule.`extension noncopyable constraint Tests`.findings(in: source)
-        #expect(findings.count == 1)
+        #expect(findings.isEmpty)
     }
 
     @Test
@@ -283,5 +307,20 @@ extension Lint.Rule.`extension noncopyable constraint Tests`.Unit {
         """
         let findings = Lint.Rule.`extension noncopyable constraint Tests`.findings(in: source)
         #expect(findings.isEmpty)
+    }
+
+    @Test
+    func `extension on explicit-generic-form of bare leaf still fires`() {
+        // Demonstrates that the syntactic detection's discriminator is
+        // presence of `<...>` (not the type's leaf name). An author who
+        // writes the explicit-parameter form of a generic type without
+        // a where clause IS subject to the rule's premise.
+        let source = """
+        extension Vector<Element> {
+            consuming func transfer() {}
+        }
+        """
+        let findings = Lint.Rule.`extension noncopyable constraint Tests`.findings(in: source)
+        #expect(findings.count == 1)
     }
 }
