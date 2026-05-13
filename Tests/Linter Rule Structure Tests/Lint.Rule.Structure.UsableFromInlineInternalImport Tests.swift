@@ -34,11 +34,16 @@ extension Lint.Rule.`usable from inline internal import Tests` {
 extension Lint.Rule.`usable from inline internal import Tests`.Unit {
     @Test
     func `usableFromInline plus internal import is flagged`() {
+        // The `@usableFromInline` body must syntactically reach into
+        // the internally-imported module (post-86ec63d recognizer
+        // tightening): `OtherModule.Foo` in the return type carries
+        // the `OtherModule` leaf-name identifier token that the
+        // visitor collects, so the recognizer fires on the import.
         let source = """
         internal import OtherModule
 
         @usableFromInline
-        func helper() -> Int { 0 }
+        func helper() -> OtherModule.Foo { fatalError() }
         """
         let findings = Lint.Rule.`usable from inline internal import Tests`.findings(in: source)
         #expect(findings.count == 1)
@@ -50,12 +55,16 @@ extension Lint.Rule.`usable from inline internal import Tests`.Unit {
 
     @Test
     func `multiple internal imports each flagged when usableFromInline present`() {
+        // Both `ModuleA` and `ModuleB` must appear as identifier
+        // tokens inside the `@usableFromInline` decl — the recognizer
+        // fires per internal-import whose leaf name is in the
+        // reference set. Two parameter type annotations supply both.
         let source = """
         internal import ModuleA
         internal import ModuleB
 
         @usableFromInline
-        let x: Int = 0
+        func x(_ a: ModuleA.Foo, _ b: ModuleB.Foo) {}
         """
         let findings = Lint.Rule.`usable from inline internal import Tests`.findings(in: source)
         #expect(findings.count == 2)
