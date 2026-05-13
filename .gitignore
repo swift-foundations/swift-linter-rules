@@ -78,3 +78,8 @@ Thumbs.db
 
 # Shape-γ unified consumer manifest — committed alongside the package.
 !/Lint.swift
+
+# Regeneration scripts for rules whose tables are auto-generated.
+# Ship alongside the package so future contributors can reproduce the
+# table on a new toolchain.
+!/Scripts/
