@@ -67,7 +67,10 @@ echo ""
 
 # Step 2: Run the reducer against the extracted graph.
 echo "Step 2/3: running symbol-graph-conformance-oracle reducer"
-echo "  (release build: ~1 min compile on first run, then ~1 s parse)"
+echo "  (release build: ~1 min compile on first run, then ~0.15 s parse"
+echo "   after Wave 1 event-grain decode migration; ~1 s on the prior"
+echo "   tree-walk path. See streaming-json-deserialize-comparative-analysis.md"
+echo "   v1.0.2 §10.2.)"
 swift run -c release symbol-graph-conformance-oracle Outputs/swift-stdlib/Swift.symbols.json
 echo ""
 
