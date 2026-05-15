@@ -94,7 +94,6 @@ extension Lint.Rule.Bundle {
         .enable(.`wrapper backing exposed`),
         // Testing pack
         .enable(.`benchmark timed required`),
-        .enable(.`compound suite name`),
         .enable(.`test function naming`),
         .enable(.`mock factory zero collision`),
         .enable(.`performance suite serialized`),
