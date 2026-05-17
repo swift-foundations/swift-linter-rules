@@ -20,6 +20,7 @@ Thumbs.db
 !/Skills/
 !/.github/
 !/Package.swift
+!/Lint.swift
 !/LICENSE
 !/LICENSE.md
 !/README.md
@@ -76,10 +77,3 @@ Thumbs.db
 # ========== LOCAL OVERRIDES ==========
 # Package-specific rules below (managed by sync-gitignore.sh)
 
-# Shape-γ unified consumer manifest — committed alongside the package.
-!/Lint.swift
-
-# Regeneration scripts for rules whose tables are auto-generated.
-# Ship alongside the package so future contributors can reproduce the
-# table on a new toolchain.
-!/Scripts/
