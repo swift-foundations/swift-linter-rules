@@ -66,6 +66,7 @@ let package = Package(
     dependencies: [
         .package(path: "../../swift-primitives/swift-linter-primitives"),
         .package(path: "../../swift-primitives/swift-cardinal-primitives"),
+        .package(path: "../../swift-primitives/swift-byte-primitives"),
         .package(url: "https://github.com/swiftlang/swift-syntax.git", "602.0.0"..<"603.0.0"),
     ],
     targets: [
@@ -136,6 +137,7 @@ let package = Package(
                 // does not depend on any rule pack. Per-pack test targets
                 // depend on their own pack + this support module.
                 .product(name: "Linter Primitives Test Support", package: "swift-linter-primitives"),
+                .product(name: "Byte Primitives", package: "swift-byte-primitives"),
                 .product(name: "SwiftParser", package: "swift-syntax"),
                 .product(name: "SwiftSyntax", package: "swift-syntax"),
             ],

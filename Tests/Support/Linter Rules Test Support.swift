@@ -11,6 +11,7 @@
 
 import SwiftParser
 import SwiftSyntax
+public import Byte_Primitives
 public import Linter_Primitives
 
 extension Lint.Source {
@@ -35,7 +36,7 @@ extension Lint.Source {
         let id = manager.register(
             fileID: file,
             filePath: file,
-            content: Swift.Array(source.utf8)
+            content: source.utf8.map(Byte.init)
         )
         return Lint.Source.Parsed(
             file: manager.file(for: id),
