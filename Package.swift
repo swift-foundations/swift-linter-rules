@@ -64,9 +64,9 @@ let package = Package(
         ),
     ],
     dependencies: [
-        .package(path: "../../swift-primitives/swift-linter-primitives"),
-        .package(path: "../../swift-primitives/swift-cardinal-primitives"),
-        .package(path: "../../swift-primitives/swift-byte-primitives"),
+        .package(url: "https://github.com/swift-primitives/swift-linter-primitives.git", branch: "main"),
+        .package(url: "https://github.com/swift-primitives/swift-cardinal-primitives.git", branch: "main"),
+        .package(url: "https://github.com/swift-primitives/swift-byte-primitives.git", branch: "main"),
         .package(url: "https://github.com/swiftlang/swift-syntax.git", "602.0.0"..<"603.0.0"),
     ],
     targets: [
