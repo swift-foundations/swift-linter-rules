@@ -1,0 +1,9 @@
+# .github/metadata.yaml
+description: "Catalog of SwiftSyntax-based AST lint rule packs, each shipped as its own SwiftPM product for per-rule activation via swift-linter."
+topics:
+  - foundations
+  - linter
+  - swift-syntax
+homepage: "https://swift-institute.org"
+readme:
+  family: E
