@@ -16,8 +16,10 @@ active:
 
 ```swift
 // Lint/Package.swift
-.package(url: "https://github.com/swift-foundations/swift-linter-rules.git", from: "0.1.0"),
+.package(url: "https://github.com/swift-foundations/swift-linter-rules.git", branch: "main"),
 ```
+
+> Pre-1.0: no version tags yet. APIs may change; pin a commit for reproducible builds.
 
 ```swift
 // Lint/Sources/Lint/main.swift
@@ -40,9 +42,11 @@ the activated rules against your sources.
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/swift-foundations/swift-linter-rules.git", from: "0.1.0"),
+    .package(url: "https://github.com/swift-foundations/swift-linter-rules.git", branch: "main"),
 ]
 ```
+
+> Pre-1.0: no version tags yet. APIs may change; pin a commit for reproducible builds.
 
 ```swift
 .target(
