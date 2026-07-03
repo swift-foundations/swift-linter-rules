@@ -72,7 +72,8 @@ internal final class StructureUsableFromInlineInternalImportVisitor: SyntaxVisit
         for attribute in attributes {
             guard let attr = attribute.as(AttributeSyntax.self) else { continue }
             if let identifier = attr.attributeName.as(IdentifierTypeSyntax.self),
-               identifier.name.text == "usableFromInline" {
+                identifier.name.text == "usableFromInline"
+            {
                 return true
             }
             if attr.attributeName.trimmedDescription == "usableFromInline" {
@@ -147,10 +148,12 @@ internal final class StructureUsableFromInlineInternalImportVisitor: SyntaxVisit
         }
         guard isInternal else { return .visitChildren }
         let leafName = importDeclLeafModuleName(node)
-        internalImportModules.append(.init(
-            position: node.importKeyword.positionAfterSkippingLeadingTrivia,
-            leafName: leafName
-        ))
+        internalImportModules.append(
+            .init(
+                position: node.importKeyword.positionAfterSkippingLeadingTrivia,
+                leafName: leafName
+            )
+        )
         return .visitChildren
     }
 
@@ -180,17 +183,19 @@ internal final class StructureUsableFromInlineInternalImportVisitor: SyntaxVisit
                 continue
             }
             let location = converter.location(for: module.position)
-            matches.append(Diagnostic.Record(
-                location: Source.Location(
-                    fileID: source.fileID,
-                    filePath: source.filePath,
-                    line: location.line,
-                    column: location.column
-                ),
-                severity: severity,
-                identifier: "usable from inline internal import",
-                message: structureUsableFromInlineInternalImportMessage
-            ))
+            matches.append(
+                Diagnostic.Record(
+                    location: Source.Location(
+                        fileID: source.fileID,
+                        filePath: source.filePath,
+                        line: location.line,
+                        column: location.column
+                    ),
+                    severity: severity,
+                    identifier: "usable from inline internal import",
+                    message: structureUsableFromInlineInternalImportMessage
+                )
+            )
         }
     }
 

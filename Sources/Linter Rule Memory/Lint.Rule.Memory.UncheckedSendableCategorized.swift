@@ -122,17 +122,19 @@ internal final class MemoryUncheckedSendableCategorizedVisitor: SyntaxVisitor {
             // per SE-0458). Previously: flag when @unsafe was absent.
             guard hasUnsafeAttributeOnInherited(inherited) else { continue }
             let location = converter.location(for: inherited.positionAfterSkippingLeadingTrivia)
-            matches.append(Diagnostic.Record(
-                location: Source.Location(
-                    fileID: source.fileID,
-                    filePath: source.filePath,
-                    line: location.line,
-                    column: location.column
-                ),
-                severity: severity,
-                identifier: "unchecked sendable categorization",
-                message: memoryUncheckedSendableCategorizedMessage
-            ))
+            matches.append(
+                Diagnostic.Record(
+                    location: Source.Location(
+                        fileID: source.fileID,
+                        filePath: source.filePath,
+                        line: location.line,
+                        column: location.column
+                    ),
+                    severity: severity,
+                    identifier: "unchecked sendable categorization",
+                    message: memoryUncheckedSendableCategorizedMessage
+                )
+            )
         }
     }
 

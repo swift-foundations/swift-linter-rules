@@ -150,14 +150,14 @@ internal final class ResultBuilderForLoopVisitor: SyntaxVisitor {
         }
         // Inspect the trailing closure first (the canonical Builder shape)
         if let trailing = node.trailingClosure,
-           Self.containsForInStmt(in: trailing.statements)
+            Self.containsForInStmt(in: trailing.statements)
         {
             emit(at: trailing.leftBrace.positionAfterSkippingLeadingTrivia)
         }
         // Inspect any non-trailing argument that's a closure literal
         for argument in node.arguments {
             if let closure = argument.expression.as(ClosureExprSyntax.self),
-               Self.containsForInStmt(in: closure.statements)
+                Self.containsForInStmt(in: closure.statements)
             {
                 emit(at: closure.leftBrace.positionAfterSkippingLeadingTrivia)
             }
@@ -217,4 +217,3 @@ internal final class ResultBuilderForLoopVisitor: SyntaxVisitor {
         return nil
     }
 }
-

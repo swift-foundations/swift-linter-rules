@@ -9,10 +9,10 @@
 //
 // ===----------------------------------------------------------------------===//
 
-import SwiftParser
-import SwiftSyntax
 public import Byte_Primitives
 public import Linter_Primitives
+import SwiftParser
+import SwiftSyntax
 
 extension Lint.Source {
     /// Build a `Lint.Source.Parsed` from a Swift source string for use
@@ -38,9 +38,9 @@ extension Lint.Source {
             filePath: file,
             content: source.utf8.map(Byte.init)
         )
-        return Lint.Source.Parsed(
+        return Self.Parsed(
             file: manager.file(for: id),
-            path: path ?? Lint.Source.Path(file),
+            path: path ?? Self.Path(file),
             tree: tree,
             converter: converter
         )

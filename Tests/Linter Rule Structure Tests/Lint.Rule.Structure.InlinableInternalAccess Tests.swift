@@ -9,11 +9,12 @@
 //
 // ===----------------------------------------------------------------------===//
 
-import Testing
-import SwiftSyntax
-import SwiftParser
 import Linter_Primitives
 import Linter_Rules_Test_Support
+import SwiftParser
+import SwiftSyntax
+import Testing
+
 @testable import Linter_Rule_Structure
 
 extension Lint.Rule {
@@ -35,9 +36,9 @@ extension Lint.Rule.`inlinable internal access Tests`.Unit {
     @Test
     func `inlinable internal func is flagged`() {
         let source = """
-        @inlinable
-        func foo() {}
-        """
+            @inlinable
+            func foo() {}
+            """
         let findings = Lint.Rule.`inlinable internal access Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
@@ -45,9 +46,9 @@ extension Lint.Rule.`inlinable internal access Tests`.Unit {
     @Test
     func `inlinable public func is permitted`() {
         let source = """
-        @inlinable
-        public func foo() {}
-        """
+            @inlinable
+            public func foo() {}
+            """
         let findings = Lint.Rule.`inlinable internal access Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
@@ -55,9 +56,9 @@ extension Lint.Rule.`inlinable internal access Tests`.Unit {
     @Test
     func `inlinable package func is permitted`() {
         let source = """
-        @inlinable
-        package func foo() {}
-        """
+            @inlinable
+            package func foo() {}
+            """
         let findings = Lint.Rule.`inlinable internal access Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
@@ -65,9 +66,9 @@ extension Lint.Rule.`inlinable internal access Tests`.Unit {
     @Test
     func `inlinable usableFromInline func is permitted`() {
         let source = """
-        @inlinable @usableFromInline
-        func foo() {}
-        """
+            @inlinable @usableFromInline
+            func foo() {}
+            """
         let findings = Lint.Rule.`inlinable internal access Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
@@ -75,9 +76,9 @@ extension Lint.Rule.`inlinable internal access Tests`.Unit {
     @Test
     func `inlinable internal var is flagged`() {
         let source = """
-        @inlinable
-        var x: Int { 1 }
-        """
+            @inlinable
+            var x: Int { 1 }
+            """
         let findings = Lint.Rule.`inlinable internal access Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
@@ -85,9 +86,9 @@ extension Lint.Rule.`inlinable internal access Tests`.Unit {
     @Test
     func `inlinable public var is permitted`() {
         let source = """
-        @inlinable
-        public var x: Int { 1 }
-        """
+            @inlinable
+            public var x: Int { 1 }
+            """
         let findings = Lint.Rule.`inlinable internal access Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
@@ -95,11 +96,11 @@ extension Lint.Rule.`inlinable internal access Tests`.Unit {
     @Test
     func `inlinable internal init is flagged`() {
         let source = """
-        struct S {
-            @inlinable
-            init() {}
-        }
-        """
+            struct S {
+                @inlinable
+                init() {}
+            }
+            """
         let findings = Lint.Rule.`inlinable internal access Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
@@ -116,9 +117,9 @@ extension Lint.Rule.`inlinable internal access Tests`.`Edge Case` {
     @Test
     func `inlinable open func is permitted`() {
         let source = """
-        @inlinable
-        open func foo() {}
-        """
+            @inlinable
+            open func foo() {}
+            """
         let findings = Lint.Rule.`inlinable internal access Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
@@ -126,11 +127,11 @@ extension Lint.Rule.`inlinable internal access Tests`.`Edge Case` {
     @Test
     func `inlinable init flagged message recommends package init not usableFromInline`() {
         let source = """
-        struct S {
-            @inlinable
-            init() {}
-        }
-        """
+            struct S {
+                @inlinable
+                init() {}
+            }
+            """
         let findings = Lint.Rule.`inlinable internal access Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
@@ -144,9 +145,9 @@ extension Lint.Rule.`inlinable internal access Tests`.`Edge Case` {
     @Test
     func `inlinable func flagged message recommends usableFromInline pairing`() {
         let source = """
-        @inlinable
-        func foo() {}
-        """
+            @inlinable
+            func foo() {}
+            """
         let findings = Lint.Rule.`inlinable internal access Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
@@ -159,11 +160,11 @@ extension Lint.Rule.`inlinable internal access Tests`.`Edge Case` {
     @Test
     func `package init satisfies the rule`() {
         let source = """
-        struct S {
-            @inlinable
-            package init() {}
-        }
-        """
+            struct S {
+                @inlinable
+                package init() {}
+            }
+            """
         let findings = Lint.Rule.`inlinable internal access Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }

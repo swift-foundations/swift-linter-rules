@@ -97,17 +97,19 @@ internal final class TestingMockFactoryZeroCollisionVisitor: SyntaxVisitor {
         guard firstArgumentLooksRaw(firstArgument) else { return .visitChildren }
         guard firstArgumentLooksLikeIntegerTag(firstArgument) else { return .visitChildren }
         let location = converter.location(for: node.positionAfterSkippingLeadingTrivia)
-        matches.append(Diagnostic.Record(
-            location: Source.Location(
-                fileID: source.fileID,
-                filePath: source.filePath,
-                line: location.line,
-                column: location.column
-            ),
-            severity: severity,
-            identifier: "mock factory zero collision",
-            message: testingMockFactoryZeroCollisionMessage
-        ))
+        matches.append(
+            Diagnostic.Record(
+                location: Source.Location(
+                    fileID: source.fileID,
+                    filePath: source.filePath,
+                    line: location.line,
+                    column: location.column
+                ),
+                severity: severity,
+                identifier: "mock factory zero collision",
+                message: testingMockFactoryZeroCollisionMessage
+            )
+        )
         return .visitChildren
     }
 }

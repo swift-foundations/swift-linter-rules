@@ -9,11 +9,12 @@
 //
 // ===----------------------------------------------------------------------===//
 
-import Testing
-import SwiftSyntax
-import SwiftParser
 import Linter_Primitives
 import Linter_Rules_Test_Support
+import SwiftParser
+import SwiftSyntax
+import Testing
+
 @testable import Linter_Rule_Memory
 
 extension Lint.Rule {
@@ -39,8 +40,8 @@ extension Lint.Rule.`unchecked sendable categorization Tests`.Unit {
     @Test
     func `unchecked Sendable without unsafe is permitted`() {
         let source = """
-        final class Foo: @unchecked Sendable {}
-        """
+            final class Foo: @unchecked Sendable {}
+            """
         let findings = Lint.Rule.`unchecked sendable categorization Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
@@ -48,8 +49,8 @@ extension Lint.Rule.`unchecked sendable categorization Tests`.Unit {
     @Test
     func `unsafe unchecked Sendable on conformance is flagged`() {
         let source = """
-        final class Foo: @unsafe @unchecked Sendable {}
-        """
+            final class Foo: @unsafe @unchecked Sendable {}
+            """
         let findings = Lint.Rule.`unchecked sendable categorization Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
@@ -57,8 +58,8 @@ extension Lint.Rule.`unchecked sendable categorization Tests`.Unit {
     @Test
     func `plain Sendable is not flagged`() {
         let source = """
-        struct Foo: Sendable {}
-        """
+            struct Foo: Sendable {}
+            """
         let findings = Lint.Rule.`unchecked sendable categorization Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
@@ -66,8 +67,8 @@ extension Lint.Rule.`unchecked sendable categorization Tests`.Unit {
     @Test
     func `extension with unchecked Sendable without unsafe is permitted`() {
         let source = """
-        extension Bar: @unchecked Sendable {}
-        """
+            extension Bar: @unchecked Sendable {}
+            """
         let findings = Lint.Rule.`unchecked sendable categorization Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
@@ -75,8 +76,8 @@ extension Lint.Rule.`unchecked sendable categorization Tests`.Unit {
     @Test
     func `extension with unsafe unchecked Sendable on conformance is flagged`() {
         let source = """
-        extension Bar: @unsafe @unchecked Sendable {}
-        """
+            extension Bar: @unsafe @unchecked Sendable {}
+            """
         let findings = Lint.Rule.`unchecked sendable categorization Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
@@ -84,8 +85,8 @@ extension Lint.Rule.`unchecked sendable categorization Tests`.Unit {
     @Test
     func `actor with unchecked Sendable without unsafe is permitted`() {
         let source = """
-        actor Foo: @unchecked Sendable {}
-        """
+            actor Foo: @unchecked Sendable {}
+            """
         let findings = Lint.Rule.`unchecked sendable categorization Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
@@ -96,9 +97,9 @@ extension Lint.Rule.`unchecked sendable categorization Tests`.Unit {
         // syntactic position from @unchecked on the conformance clause
         // (thread-safety claim). They are NOT combined; rule does not fire.
         let source = """
-        @unsafe
-        public struct UnsafeWrapper: @unchecked Sendable {}
-        """
+            @unsafe
+            public struct UnsafeWrapper: @unchecked Sendable {}
+            """
         let findings = Lint.Rule.`unchecked sendable categorization Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }

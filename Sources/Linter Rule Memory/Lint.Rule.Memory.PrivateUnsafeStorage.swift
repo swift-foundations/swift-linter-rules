@@ -91,6 +91,7 @@ internal final class MemoryPrivateUnsafeStorageVisitor: SyntaxVisitor {
             switch modifier.name.tokenKind {
             case .keyword(.public), .keyword(.open):
                 return true
+
             default:
                 continue
             }
@@ -119,17 +120,19 @@ internal final class MemoryPrivateUnsafeStorageVisitor: SyntaxVisitor {
             guard let typeAnnotation = binding.typeAnnotation else { continue }
             if memoryPrivateUnsafeStorageIsUnsafePointerType(typeAnnotation.type) {
                 let location = converter.location(for: binding.pattern.positionAfterSkippingLeadingTrivia)
-                matches.append(Diagnostic.Record(
-                    location: Source.Location(
-                        fileID: source.fileID,
-                        filePath: source.filePath,
-                        line: location.line,
-                        column: location.column
-                    ),
-                    severity: severity,
-                    identifier: "unsafe storage visibility",
-                    message: memoryPrivateUnsafeStorageMessage
-                ))
+                matches.append(
+                    Diagnostic.Record(
+                        location: Source.Location(
+                            fileID: source.fileID,
+                            filePath: source.filePath,
+                            line: location.line,
+                            column: location.column
+                        ),
+                        severity: severity,
+                        identifier: "unsafe storage visibility",
+                        message: memoryPrivateUnsafeStorageMessage
+                    )
+                )
             }
         }
         return .visitChildren

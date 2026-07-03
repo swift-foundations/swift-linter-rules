@@ -9,11 +9,12 @@
 //
 // ===----------------------------------------------------------------------===//
 
-import Testing
-import SwiftSyntax
-import SwiftParser
 import Linter_Primitives
 import Linter_Rules_Test_Support
+import SwiftParser
+import SwiftSyntax
+import Testing
+
 @testable import Linter_Rule_Memory
 
 extension Lint.Rule {
@@ -34,8 +35,8 @@ extension Lint.Rule.`unchecked sendable noncopyable Tests`.Unit {
     @Test
     func `noncopyable struct with unchecked Sendable is flagged`() {
         let source = """
-        struct Reader: ~Copyable, @unchecked Sendable {}
-        """
+            struct Reader: ~Copyable, @unchecked Sendable {}
+            """
         let findings = Lint.Rule.`unchecked sendable noncopyable Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
@@ -43,8 +44,8 @@ extension Lint.Rule.`unchecked sendable noncopyable Tests`.Unit {
     @Test
     func `noncopyable struct with plain Sendable is permitted`() {
         let source = """
-        struct Reader: ~Copyable, Sendable {}
-        """
+            struct Reader: ~Copyable, Sendable {}
+            """
         let findings = Lint.Rule.`unchecked sendable noncopyable Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
@@ -53,8 +54,8 @@ extension Lint.Rule.`unchecked sendable noncopyable Tests`.Unit {
     func `copyable struct with unchecked Sendable is not flagged here`() {
         // Out of scope for this rule — covered by UncheckedSendableCategorized.
         let source = """
-        final class Foo: @unchecked Sendable {}
-        """
+            final class Foo: @unchecked Sendable {}
+            """
         let findings = Lint.Rule.`unchecked sendable noncopyable Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
@@ -62,8 +63,8 @@ extension Lint.Rule.`unchecked sendable noncopyable Tests`.Unit {
     @Test
     func `noncopyable struct without Sendable is not flagged`() {
         let source = """
-        struct Reader: ~Copyable {}
-        """
+            struct Reader: ~Copyable {}
+            """
         let findings = Lint.Rule.`unchecked sendable noncopyable Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
@@ -74,8 +75,8 @@ extension Lint.Rule.`unchecked sendable noncopyable Tests`.Unit {
         // — even with @unsafe, the @unchecked is unnecessary because the
         // compiler synthesizes Sendable for noncopyable structs.
         let source = """
-        struct Arena: ~Copyable, @unsafe @unchecked Sendable {}
-        """
+            struct Arena: ~Copyable, @unsafe @unchecked Sendable {}
+            """
         let findings = Lint.Rule.`unchecked sendable noncopyable Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
@@ -83,8 +84,8 @@ extension Lint.Rule.`unchecked sendable noncopyable Tests`.Unit {
     @Test
     func `regular copyable struct with Sendable is not flagged`() {
         let source = """
-        struct Foo: Sendable {}
-        """
+            struct Foo: Sendable {}
+            """
         let findings = Lint.Rule.`unchecked sendable noncopyable Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }

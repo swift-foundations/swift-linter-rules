@@ -9,11 +9,12 @@
 //
 // ===----------------------------------------------------------------------===//
 
-import Testing
-import SwiftSyntax
-import SwiftParser
 import Linter_Primitives
 import Linter_Rules_Test_Support
+import SwiftParser
+import SwiftSyntax
+import Testing
+
 @testable import Linter_Rule_Memory
 
 extension Lint.Rule {
@@ -34,10 +35,10 @@ extension Lint.Rule.`unsafe storage visibility Tests`.Unit {
     @Test
     func `public unsafe pointer property is flagged`() {
         let source = """
-        struct Buffer {
-            public let storage: UnsafeMutablePointer<UInt8>
-        }
-        """
+            struct Buffer {
+                public let storage: UnsafeMutablePointer<UInt8>
+            }
+            """
         let findings = Lint.Rule.`unsafe storage visibility Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
@@ -45,10 +46,10 @@ extension Lint.Rule.`unsafe storage visibility Tests`.Unit {
     @Test
     func `private unsafe pointer property is permitted`() {
         let source = """
-        struct Buffer {
-            private let storage: UnsafeMutablePointer<UInt8>
-        }
-        """
+            struct Buffer {
+                private let storage: UnsafeMutablePointer<UInt8>
+            }
+            """
         let findings = Lint.Rule.`unsafe storage visibility Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
@@ -56,10 +57,10 @@ extension Lint.Rule.`unsafe storage visibility Tests`.Unit {
     @Test
     func `internal unsafe pointer property is permitted`() {
         let source = """
-        struct Buffer {
-            let storage: UnsafeMutablePointer<UInt8>
-        }
-        """
+            struct Buffer {
+                let storage: UnsafeMutablePointer<UInt8>
+            }
+            """
         let findings = Lint.Rule.`unsafe storage visibility Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
@@ -67,10 +68,10 @@ extension Lint.Rule.`unsafe storage visibility Tests`.Unit {
     @Test
     func `public unsafe pointer with unsafe attr is permitted`() {
         let source = """
-        struct Buffer {
-            @unsafe public let storage: UnsafeMutablePointer<UInt8>
-        }
-        """
+            struct Buffer {
+                @unsafe public let storage: UnsafeMutablePointer<UInt8>
+            }
+            """
         let findings = Lint.Rule.`unsafe storage visibility Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
@@ -78,10 +79,10 @@ extension Lint.Rule.`unsafe storage visibility Tests`.Unit {
     @Test
     func `public non-pointer property is not flagged`() {
         let source = """
-        struct Foo {
-            public let count: Int
-        }
-        """
+            struct Foo {
+                public let count: Int
+            }
+            """
         let findings = Lint.Rule.`unsafe storage visibility Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
@@ -89,10 +90,10 @@ extension Lint.Rule.`unsafe storage visibility Tests`.Unit {
     @Test
     func `optional unsafe pointer property still flagged`() {
         let source = """
-        struct Buffer {
-            public let storage: UnsafeMutablePointer<UInt8>?
-        }
-        """
+            struct Buffer {
+                public let storage: UnsafeMutablePointer<UInt8>?
+            }
+            """
         let findings = Lint.Rule.`unsafe storage visibility Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
@@ -100,12 +101,12 @@ extension Lint.Rule.`unsafe storage visibility Tests`.Unit {
     @Test
     func `multiple unsafe pointer types in allowlist`() {
         let source = """
-        struct Buffer {
-            public let raw: UnsafeRawPointer
-            public let mutableRaw: UnsafeMutableRawPointer
-            public let buf: UnsafeBufferPointer<UInt8>
-        }
-        """
+            struct Buffer {
+                public let raw: UnsafeRawPointer
+                public let mutableRaw: UnsafeMutableRawPointer
+                public let buf: UnsafeBufferPointer<UInt8>
+            }
+            """
         let findings = Lint.Rule.`unsafe storage visibility Tests`.findings(in: source)
         #expect(findings.count == 3)
     }

@@ -47,10 +47,10 @@ internal func idiomRedundantRefinementMessage(
     refined: Swift.String
 ) -> Swift.String {
     "[redundant refinement] feedback_redundant_protocol_refinement: "
-    + "`\(refining) & \(refined)` — `\(refining)` already refines `\(refined)` "
-    + "in the standard library. The `& \(refined)` half is redundant; "
-    + "the compiler enforces `\(refined)` through `\(refining)`. Drop "
-    + "the redundant member."
+        + "`\(refining) & \(refined)` — `\(refining)` already refines `\(refined)` "
+        + "in the standard library. The `& \(refined)` half is redundant; "
+        + "the compiler enforces `\(refined)` through `\(refining)`. Drop "
+        + "the redundant member."
 }
 
 internal final class IdiomRedundantRefinementVisitor: SyntaxVisitor {
@@ -92,20 +92,22 @@ internal final class IdiomRedundantRefinementVisitor: SyntaxVisitor {
                 guard !reportedPositions.contains(position) else { continue }
                 reportedPositions.insert(position)
                 let location = converter.location(for: position)
-                matches.append(Diagnostic.Record(
-                    location: Source.Location(
-                        fileID: source.fileID,
-                        filePath: source.filePath,
-                        line: location.line,
-                        column: location.column
-                    ),
-                    severity: severity,
-                    identifier: "redundant refinement",
-                    message: idiomRedundantRefinementMessage(
-                        refining: refining,
-                        refined: refined
+                matches.append(
+                    Diagnostic.Record(
+                        location: Source.Location(
+                            fileID: source.fileID,
+                            filePath: source.filePath,
+                            line: location.line,
+                            column: location.column
+                        ),
+                        severity: severity,
+                        identifier: "redundant refinement",
+                        message: idiomRedundantRefinementMessage(
+                            refining: refining,
+                            refined: refined
+                        )
                     )
-                ))
+                )
             }
         }
         return .visitChildren

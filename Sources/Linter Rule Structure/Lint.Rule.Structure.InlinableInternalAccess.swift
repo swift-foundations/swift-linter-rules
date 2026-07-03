@@ -81,6 +81,7 @@ internal final class StructureInlinableInternalAccessVisitor: SyntaxVisitor {
             switch modifier.name.tokenKind {
             case .keyword(.public), .keyword(.package), .keyword(.open):
                 return true
+
             default:
                 continue
             }
@@ -100,23 +101,25 @@ internal final class StructureInlinableInternalAccessVisitor: SyntaxVisitor {
 
     private func emit(at position: AbsolutePosition, message: Swift.String) {
         let location = converter.location(for: position)
-        matches.append(Diagnostic.Record(
-            location: Source.Location(
-                fileID: source.fileID,
-                filePath: source.filePath,
-                line: location.line,
-                column: location.column
-            ),
-            severity: severity,
-            identifier: "inlinable internal access",
-            message: message
-        ))
+        matches.append(
+            Diagnostic.Record(
+                location: Source.Location(
+                    fileID: source.fileID,
+                    filePath: source.filePath,
+                    line: location.line,
+                    column: location.column
+                ),
+                severity: severity,
+                identifier: "inlinable internal access",
+                message: message
+            )
+        )
     }
 
     override func visit(_ node: FunctionDeclSyntax) -> SyntaxVisitorContinueKind {
         if hasInlinableAttribute(node.attributes),
-           !hasNonInternalAccess(node.modifiers),
-           !hasUsableFromInline(node.attributes)
+            !hasNonInternalAccess(node.modifiers),
+            !hasUsableFromInline(node.attributes)
         {
             emit(
                 at: node.name.positionAfterSkippingLeadingTrivia,
@@ -128,8 +131,8 @@ internal final class StructureInlinableInternalAccessVisitor: SyntaxVisitor {
 
     override func visit(_ node: VariableDeclSyntax) -> SyntaxVisitorContinueKind {
         if hasInlinableAttribute(node.attributes),
-           !hasNonInternalAccess(node.modifiers),
-           !hasUsableFromInline(node.attributes)
+            !hasNonInternalAccess(node.modifiers),
+            !hasUsableFromInline(node.attributes)
         {
             emit(
                 at: node.bindingSpecifier.positionAfterSkippingLeadingTrivia,
@@ -141,8 +144,8 @@ internal final class StructureInlinableInternalAccessVisitor: SyntaxVisitor {
 
     override func visit(_ node: InitializerDeclSyntax) -> SyntaxVisitorContinueKind {
         if hasInlinableAttribute(node.attributes),
-           !hasNonInternalAccess(node.modifiers),
-           !hasUsableFromInline(node.attributes)
+            !hasNonInternalAccess(node.modifiers),
+            !hasUsableFromInline(node.attributes)
         {
             emit(
                 at: node.initKeyword.positionAfterSkippingLeadingTrivia,

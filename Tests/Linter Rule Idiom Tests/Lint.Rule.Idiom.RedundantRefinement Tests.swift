@@ -9,11 +9,12 @@
 //
 // ===----------------------------------------------------------------------===//
 
-import Testing
-import SwiftSyntax
-import SwiftParser
 import Linter_Primitives
 import Linter_Rules_Test_Support
+import SwiftParser
+import SwiftSyntax
+import Testing
+
 @testable import Linter_Rule_Idiom
 
 extension Lint.Rule {
@@ -96,8 +97,8 @@ extension Lint.Rule.`redundant refinement Tests`.Unit {
     @Test
     func `where clause Failure Error ampersand Sendable is flagged`() {
         let source = """
-        func f<E>(_ e: E) where E: Error & Sendable {}
-        """
+            func f<E>(_ e: E) where E: Error & Sendable {}
+            """
         let findings = Lint.Rule.`redundant refinement Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
@@ -105,9 +106,9 @@ extension Lint.Rule.`redundant refinement Tests`.Unit {
     @Test
     func `multiple redundant compositions in one file all flagged`() {
         let source = """
-        func a<E: Error & Sendable>(_ e: E) {}
-        func b<T: Hashable & Equatable>(_ t: T) {}
-        """
+            func a<E: Error & Sendable>(_ e: E) {}
+            func b<T: Hashable & Equatable>(_ t: T) {}
+            """
         let findings = Lint.Rule.`redundant refinement Tests`.findings(in: source)
         #expect(findings.count == 2)
     }
@@ -150,8 +151,8 @@ extension Lint.Rule.`redundant refinement Tests`.Unit {
     @Test
     func `ExpressibleByStringLiteral ampersand ExpressibleByUnicodeScalarLiteral is flagged`() {
         let source = """
-        func f<S: ExpressibleByStringLiteral & ExpressibleByUnicodeScalarLiteral>(_ s: S) {}
-        """
+            func f<S: ExpressibleByStringLiteral & ExpressibleByUnicodeScalarLiteral>(_ s: S) {}
+            """
         let findings = Lint.Rule.`redundant refinement Tests`.findings(in: source)
         #expect(findings.count == 1)
     }

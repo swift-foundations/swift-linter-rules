@@ -104,17 +104,19 @@ internal final class MemoryUnnecessaryUncheckedSendableNoncopyableVisitor: Synta
             return .visitChildren
         }
         let location = converter.location(for: position)
-        matches.append(Diagnostic.Record(
-            location: Source.Location(
-                fileID: source.fileID,
-                filePath: source.filePath,
-                line: location.line,
-                column: location.column
-            ),
-            severity: severity,
-            identifier: "unchecked sendable noncopyable",
-            message: memoryUnnecessaryUncheckedSendableNoncopyableMessage
-        ))
+        matches.append(
+            Diagnostic.Record(
+                location: Source.Location(
+                    fileID: source.fileID,
+                    filePath: source.filePath,
+                    line: location.line,
+                    column: location.column
+                ),
+                severity: severity,
+                identifier: "unchecked sendable noncopyable",
+                message: memoryUnnecessaryUncheckedSendableNoncopyableMessage
+            )
+        )
         return .visitChildren
     }
 }

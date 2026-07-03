@@ -9,11 +9,12 @@
 //
 // ===----------------------------------------------------------------------===//
 
-import Testing
-import SwiftSyntax
-import SwiftParser
 import Linter_Primitives
 import Linter_Rules_Test_Support
+import SwiftParser
+import SwiftSyntax
+import Testing
+
 @testable import Linter_Rule_ResultBuilder
 
 extension Lint.Rule {
@@ -46,12 +47,12 @@ extension Lint.Rule.`for loop in result builder Tests`.`Positive Cases` {
     @Test
     func `Array with for-loop is flagged`() {
         let source = """
-        let a = Array<Int> {
-            for i in 0..<100 {
-                i
+            let a = Array<Int> {
+                for i in 0..<100 {
+                    i
+                }
             }
-        }
-        """
+            """
         let findings = Lint.Rule.`for loop in result builder Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
@@ -63,12 +64,12 @@ extension Lint.Rule.`for loop in result builder Tests`.`Positive Cases` {
     @Test
     func `Set with for-loop is flagged`() {
         let source = """
-        let s = Set<Int> {
-            for i in 0..<10 {
-                i
+            let s = Set<Int> {
+                for i in 0..<10 {
+                    i
+                }
             }
-        }
-        """
+            """
         let findings = Lint.Rule.`for loop in result builder Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
@@ -76,12 +77,12 @@ extension Lint.Rule.`for loop in result builder Tests`.`Positive Cases` {
     @Test
     func `Bitset with for-loop is flagged`() {
         let source = """
-        let b = Bitset {
-            for i in 0..<10 {
-                i
+            let b = Bitset {
+                for i in 0..<10 {
+                    i
+                }
             }
-        }
-        """
+            """
         let findings = Lint.Rule.`for loop in result builder Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
@@ -89,14 +90,14 @@ extension Lint.Rule.`for loop in result builder Tests`.`Positive Cases` {
     @Test
     func `For-loop nested inside an if-statement is flagged`() {
         let source = """
-        let a = Array<Int> {
-            if condition {
-                for i in 0..<100 {
-                    i
+            let a = Array<Int> {
+                if condition {
+                    for i in 0..<100 {
+                        i
+                    }
                 }
             }
-        }
-        """
+            """
         let findings = Lint.Rule.`for loop in result builder Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
@@ -104,11 +105,11 @@ extension Lint.Rule.`for loop in result builder Tests`.`Positive Cases` {
     @Test
     func `Multiple for-loops in same builder body are each flagged`() {
         let source = """
-        let a = Array<Int> {
-            for i in 0..<10 { i }
-            for j in 10..<20 { j }
-        }
-        """
+            let a = Array<Int> {
+                for i in 0..<10 { i }
+                for j in 10..<20 { j }
+            }
+            """
         let findings = Lint.Rule.`for loop in result builder Tests`.findings(in: source)
         // Single emission per builder closure with at least one for-loop.
         // Detector finds first for-loop and skips children — only one finding.
@@ -122,10 +123,10 @@ extension Lint.Rule.`for loop in result builder Tests`.`Negative Cases` {
     @Test
     func `Array with Sequence overload is NOT flagged`() {
         let source = """
-        let a = Array<Int> {
-            0..<100
-        }
-        """
+            let a = Array<Int> {
+                0..<100
+            }
+            """
         let findings = Lint.Rule.`for loop in result builder Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
@@ -133,12 +134,12 @@ extension Lint.Rule.`for loop in result builder Tests`.`Negative Cases` {
     @Test
     func `Array with literal statements is NOT flagged`() {
         let source = """
-        let a = Array<Int> {
-            1
-            2
-            3
-        }
-        """
+            let a = Array<Int> {
+                1
+                2
+                3
+            }
+            """
         let findings = Lint.Rule.`for loop in result builder Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
@@ -146,11 +147,11 @@ extension Lint.Rule.`for loop in result builder Tests`.`Negative Cases` {
     @Test
     func `For-loop outside any builder context is NOT flagged`() {
         let source = """
-        var a: [Int] = []
-        for i in 0..<100 {
-            a.append(i)
-        }
-        """
+            var a: [Int] = []
+            for i in 0..<100 {
+                a.append(i)
+            }
+            """
         let findings = Lint.Rule.`for loop in result builder Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
@@ -158,12 +159,12 @@ extension Lint.Rule.`for loop in result builder Tests`.`Negative Cases` {
     @Test
     func `Custom non-allowlisted Builder with for-loop is NOT flagged`() {
         let source = """
-        let m = MyCustomThing {
-            for i in 0..<10 {
-                i
+            let m = MyCustomThing {
+                for i in 0..<10 {
+                    i
+                }
             }
-        }
-        """
+            """
         let findings = Lint.Rule.`for loop in result builder Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
@@ -173,14 +174,14 @@ extension Lint.Rule.`for loop in result builder Tests`.`Negative Cases` {
         // The for-loop is inside `someFunction { ... }`, which is NOT in the
         // allowlist. The outer Array body has no for-loop directly.
         let source = """
-        let a = Array<Int> {
-            someFunction {
-                for i in 0..<10 {
-                    print(i)
+            let a = Array<Int> {
+                someFunction {
+                    for i in 0..<10 {
+                        print(i)
+                    }
                 }
             }
-        }
-        """
+            """
         let findings = Lint.Rule.`for loop in result builder Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
@@ -192,8 +193,8 @@ extension Lint.Rule.`for loop in result builder Tests`.`Callee Patterns` {
     @Test
     func `Generic Array callsite is recognized`() {
         let source = """
-        let a = Array<Int> { for i in 0..<10 { i } }
-        """
+            let a = Array<Int> { for i in 0..<10 { i } }
+            """
         let findings = Lint.Rule.`for loop in result builder Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
@@ -201,8 +202,8 @@ extension Lint.Rule.`for loop in result builder Tests`.`Callee Patterns` {
     @Test
     func `Module-qualified Swift_Array callsite is recognized`() {
         let source = """
-        let a = Swift.Array<Int> { for i in 0..<10 { i } }
-        """
+            let a = Swift.Array<Int> { for i in 0..<10 { i } }
+            """
         let findings = Lint.Rule.`for loop in result builder Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
@@ -210,8 +211,8 @@ extension Lint.Rule.`for loop in result builder Tests`.`Callee Patterns` {
     @Test
     func `Nested Buffer_Linear callsite is recognized`() {
         let source = """
-        let b = Buffer<Int>.Linear { for i in 0..<10 { i } }
-        """
+            let b = Buffer<Int>.Linear { for i in 0..<10 { i } }
+            """
         let findings = Lint.Rule.`for loop in result builder Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
@@ -219,8 +220,8 @@ extension Lint.Rule.`for loop in result builder Tests`.`Callee Patterns` {
     @Test
     func `Nested Tree_N callsite is recognized`() {
         let source = """
-        let t = Tree<Int>.N<2> { for i in 0..<10 { i } }
-        """
+            let t = Tree<Int>.N<2> { for i in 0..<10 { i } }
+            """
         let findings = Lint.Rule.`for loop in result builder Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
@@ -228,8 +229,8 @@ extension Lint.Rule.`for loop in result builder Tests`.`Callee Patterns` {
     @Test
     func `Nested Tree_Binary callsite is recognized`() {
         let source = """
-        let t = Tree<Int>.Binary { for i in 0..<10 { i } }
-        """
+            let t = Tree<Int>.Binary { for i in 0..<10 { i } }
+            """
         let findings = Lint.Rule.`for loop in result builder Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
@@ -237,8 +238,8 @@ extension Lint.Rule.`for loop in result builder Tests`.`Callee Patterns` {
     @Test
     func `Nested Set_Ordered callsite is recognized`() {
         let source = """
-        let s = Set<Int>.Ordered { for i in 0..<10 { i } }
-        """
+            let s = Set<Int>.Ordered { for i in 0..<10 { i } }
+            """
         let findings = Lint.Rule.`for loop in result builder Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
@@ -246,12 +247,12 @@ extension Lint.Rule.`for loop in result builder Tests`.`Callee Patterns` {
     @Test
     func `Heap callsite with order argument is recognized`() {
         let source = """
-        let h = Heap<Int>(order: .ascending) {
-            for i in 0..<10 {
-                i
+            let h = Heap<Int>(order: .ascending) {
+                for i in 0..<10 {
+                    i
+                }
             }
-        }
-        """
+            """
         let findings = Lint.Rule.`for loop in result builder Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
@@ -269,8 +270,8 @@ extension Lint.Rule.`for loop in result builder Tests`.`Edge Cases` {
     @Test
     func `For-loop in string literal is NOT flagged`() {
         let source = """
-        let s = "Array<Int> { for i in 0..<10 { i } }"
-        """
+            let s = "Array<Int> { for i in 0..<10 { i } }"
+            """
         let findings = Lint.Rule.`for loop in result builder Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
@@ -278,9 +279,9 @@ extension Lint.Rule.`for loop in result builder Tests`.`Edge Cases` {
     @Test
     func `For-loop in comment is NOT flagged`() {
         let source = """
-        // Don't write Array<Int> { for i in 0..<10 { i } }
-        let a = 42
-        """
+            // Don't write Array<Int> { for i in 0..<10 { i } }
+            let a = 42
+            """
         let findings = Lint.Rule.`for loop in result builder Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
@@ -288,8 +289,8 @@ extension Lint.Rule.`for loop in result builder Tests`.`Edge Cases` {
     @Test
     func `Empty Array builder body is NOT flagged`() {
         let source = """
-        let a = Array<Int> {}
-        """
+            let a = Array<Int> {}
+            """
         let findings = Lint.Rule.`for loop in result builder Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
@@ -302,13 +303,13 @@ extension Lint.Rule.`for loop in result builder Tests`.`Edge Cases` {
         // (which is empty here). The INNER builder's for-loop is detected
         // when the visitor reaches the inner FunctionCallExprSyntax.
         let source = """
-        let a = Array<[Int]> {
-            for i in 0..<3 { i }
-            Array<Int> {
-                for j in 0..<10 { j }
+            let a = Array<[Int]> {
+                for i in 0..<3 { i }
+                Array<Int> {
+                    for j in 0..<10 { j }
+                }
             }
-        }
-        """
+            """
         let findings = Lint.Rule.`for loop in result builder Tests`.findings(in: source)
         #expect(findings.count == 2)
     }
@@ -317,8 +318,8 @@ extension Lint.Rule.`for loop in result builder Tests`.`Edge Cases` {
     func `Allowlisted callee without trailing closure is NOT flagged`() {
         // Array(repeating:count:) — no closure, no body to inspect.
         let source = """
-        let a = Array(repeating: 0, count: 10)
-        """
+            let a = Array(repeating: 0, count: 10)
+            """
         let findings = Lint.Rule.`for loop in result builder Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
@@ -335,8 +336,8 @@ extension Lint.Rule.`for loop in result builder Tests`.Severity {
     @Test
     func `Custom severity is honored`() {
         let source = """
-        let a = Array<Int> { for i in 0..<10 { i } }
-        """
+            let a = Array<Int> { for i in 0..<10 { i } }
+            """
         let findings = Lint.Rule.`for loop in result builder Tests`.findings(in: source, severity: .error)
         #expect(findings.count == 1)
         if findings.count == 1 {
@@ -361,8 +362,8 @@ extension Lint.Rule.`for loop in result builder Tests`.Allowlist {
     @Test
     func `Empty allowlist suppresses all findings`() {
         let source = """
-        let a = Array<Int> { for i in 0..<10 { i } }
-        """
+            let a = Array<Int> { for i in 0..<10 { i } }
+            """
         let rule = Lint.Rule.`for loop in result builder`(allowlist: [])
         let findings = Lint.Rule.`for loop in result builder Tests`.findings(in: source, rule: rule)
         #expect(findings.isEmpty)
@@ -371,8 +372,8 @@ extension Lint.Rule.`for loop in result builder Tests`.Allowlist {
     @Test
     func `Consumer-extended allowlist catches custom Builders`() {
         let source = """
-        let m = MyCustomBuilder<Int> { for i in 0..<10 { i } }
-        """
+            let m = MyCustomBuilder<Int> { for i in 0..<10 { i } }
+            """
         let rule = Lint.Rule.`for loop in result builder`(allowlist: ["MyCustomBuilder"])
         let findings = Lint.Rule.`for loop in result builder Tests`.findings(in: source, rule: rule)
         #expect(findings.count == 1)
