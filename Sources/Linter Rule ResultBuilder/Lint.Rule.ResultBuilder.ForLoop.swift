@@ -111,8 +111,8 @@ public let resultBuilderForLoopDefaultAllowlist: Set<Swift.String> = [
 
 @usableFromInline
 internal let resultBuilderForLoopMessage: Swift.String =
-    "[for loop in result builder] result-builder-performance-optimization.md (DECISION "
-    + "v2.0.0): `for`-loop in result-builder body materializes a fresh [Element] per "
+    "[for loop in result builder] [PATTERN-063]: "
+    + "`for`-loop in result-builder body materializes a fresh [Element] per "
     + "iteration (12-44x slower than imperative under SE-0289). Write the sequence "
     + "directly: `Builder { 0..<N }` instead of `Builder { for i in 0..<N { i } }`. "
     + "See swift-institute/Research/result-builder-performance-optimization.md for "

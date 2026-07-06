@@ -46,7 +46,7 @@ internal func idiomRedundantRefinementMessage(
     refining: Swift.String,
     refined: Swift.String
 ) -> Swift.String {
-    "[redundant refinement] feedback_redundant_protocol_refinement: "
+    "[redundant refinement] [API-IMPL-024]: "
         + "`\(refining) & \(refined)` — `\(refining)` already refines `\(refined)` "
         + "in the standard library. The `& \(refined)` half is redundant; "
         + "the compiler enforces `\(refined)` through `\(refining)`. Drop "
