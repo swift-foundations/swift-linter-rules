@@ -48,6 +48,12 @@ let package = Package(
             targets: ["Linter Rule Idiom"]
         ),
 
+        // Rules-pass tail (2026-07-07) — suppression-directive hygiene.
+        .library(
+            name: "Linter Rule Suppression",
+            targets: ["Linter Rule Suppression"]
+        ),
+
         .library(
             name: "Linter Rules Test Support",
             targets: ["Linter Rules Test Support"]
@@ -116,6 +122,15 @@ let package = Package(
             ]
         ),
 
+        // MARK: - Rules-Pass Tail — Linter Rule Suppression
+        .target(
+            name: "Linter Rule Suppression",
+            dependencies: [
+                .product(name: "Linter Primitives", package: "swift-linter-primitives"),
+                .product(name: "SwiftSyntax", package: "swift-syntax"),
+            ]
+        ),
+
         // MARK: - Universal Bundle (aggregate)
         .target(
             name: "Linter Rules",
@@ -125,6 +140,7 @@ let package = Package(
                 "Linter Rule Memory",
                 "Linter Rule ResultBuilder",
                 "Linter Rule Structure",
+                "Linter Rule Suppression",
                 "Linter Rule Testing",
             ]
         ),
@@ -184,6 +200,16 @@ let package = Package(
             name: "Linter Rule Idiom Tests",
             dependencies: [
                 "Linter Rule Idiom",
+                "Linter Rules Test Support",
+                .product(name: "SwiftParser", package: "swift-syntax"),
+            ]
+        ),
+
+        // MARK: - Rules-Pass Tail Tests
+        .testTarget(
+            name: "Linter Rule Suppression Tests",
+            dependencies: [
+                "Linter Rule Suppression",
                 "Linter Rules Test Support",
                 .product(name: "SwiftParser", package: "swift-syntax"),
             ]

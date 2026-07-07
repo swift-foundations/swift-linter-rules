@@ -14,6 +14,7 @@ public import Linter_Rule_Idiom
 public import Linter_Rule_Memory
 public import Linter_Rule_ResultBuilder
 public import Linter_Rule_Structure
+public import Linter_Rule_Suppression
 public import Linter_Rule_Testing
 
 /// Universal-tier rule bundle.
@@ -47,6 +48,8 @@ extension Lint.Rule.Bundle {
         // Structure pack
         .enable(.`inlinable internal access`),
         .enable(.`usable from inline internal import`),
+        // Suppression pack (rules-pass tail 2026-07-07) — [LINT-SUPPRESS-001]
+        .enable(.`malformed suppression directive`),
         // Testing pack
         .enable(.`mock factory zero collision`),
     ]
