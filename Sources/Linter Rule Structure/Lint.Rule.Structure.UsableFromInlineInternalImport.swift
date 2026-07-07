@@ -17,6 +17,7 @@ internal import SwiftSyntax
 ///
 /// Citation: `[PATTERN-055]` (implementation skill, patterns.md).
 extension Lint.Rule {
+    /// Flags an `@usableFromInline` decl paired with an `internal import` it reaches into.
     public static let `usable from inline internal import` = Lint.Rule(
         id: "usable from inline internal import",
         default: .warning,
@@ -46,7 +47,9 @@ internal final class StructureUsableFromInlineInternalImportVisitor: SyntaxVisit
     let converter: SourceLocationConverter
     var matches: [Diagnostic.Record] = []
     /// Token texts collected from every `@usableFromInline`-annotated
-    /// declaration's subtree. The collection happens at the
+    /// declaration's subtree.
+    ///
+    /// The collection happens at the
     /// declaration level (not the attribute level) so that the type
     /// annotation, initializer, and body all contribute their
     /// identifier references — the rule's principled scope is
@@ -65,7 +68,9 @@ internal final class StructureUsableFromInlineInternalImportVisitor: SyntaxVisit
     }
 
     /// Returns true if `attributes` carries the `@usableFromInline`
-    /// attribute. Walks the attribute list looking for an attribute
+    /// attribute.
+    ///
+    /// Walks the attribute list looking for an attribute
     /// whose identifier name (or its trimmed description) is
     /// `usableFromInline`.
     private func hasUsableFromInlineAttribute(_ attributes: AttributeListSyntax) -> Swift.Bool {
@@ -83,13 +88,15 @@ internal final class StructureUsableFromInlineInternalImportVisitor: SyntaxVisit
         return false
     }
 
-    /// Walks `node`'s subtree and collects every identifier-shaped
-    /// token text into `usableFromInlineReferencedNames`. Used to
+    /// Walks the subtree of `node` and collects every identifier-shaped
+    /// token text into `usableFromInlineReferencedNames`.
+    ///
+    /// Used to
     /// build the syntactic-reach set: the rule fires per
     /// internal-import only when the imported module's leaf name is
-    /// present in this set (i.e., the `@usableFromInline` body
+    /// present in this set — the `@usableFromInline` body
     /// syntactically references the module, qualified or as a leaf
-    /// identifier coincidentally matching the module name).
+    /// identifier coincidentally matching the module name.
     ///
     /// Token-kind filter: `.identifier` covers type names, decl
     /// references, member-access bases, and function names. Keyword
@@ -158,7 +165,9 @@ internal final class StructureUsableFromInlineInternalImportVisitor: SyntaxVisit
     }
 
     /// Returns the leaf module name of an `import M` (or
-    /// `import A.B.M`) declaration. Submodule imports are uncommon
+    /// `import A.B.M`) declaration.
+    ///
+    /// Submodule imports are uncommon
     /// in the ecosystem but the leaf-name semantics match the
     /// inheritance-clause walk used elsewhere — both bare and
     /// dotted forms collapse to the trailing component, which is
@@ -172,6 +181,7 @@ internal final class StructureUsableFromInlineInternalImportVisitor: SyntaxVisit
     /// Tightened recognizer (Thread C, A6): fires per
     /// `internal import` only when its leaf module name appears in
     /// the `@usableFromInline` decls' identifier-reference set.
+    ///
     /// The prior recognizer fired on co-presence of any
     /// `@usableFromInline` annotation + any `internal import`,
     /// which over-fires on rule-pack files whose `@usableFromInline`

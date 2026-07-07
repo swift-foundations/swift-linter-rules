@@ -15,6 +15,7 @@ internal import SwiftSyntax
 /// Mock factories on pointer-wrapping `BitwiseCopyable` types MUST
 /// offset tag input by at least 1. Citation: `[TEST-028]`.
 extension Lint.Rule {
+    /// Flags a mock factory `unsafeBitCast` that fails to offset its tag input.
     public static let `mock factory zero collision` = Lint.Rule(
         id: "mock factory zero collision",
         default: .warning,
@@ -67,8 +68,10 @@ internal final class TestingMockFactoryZeroCollisionVisitor: SyntaxVisitor {
     /// The rule targets mock-factory hygiene: tag-pointer collision with
     /// `Optional<T>.none` only occurs when the bitcast source is a small
     /// integer literal / variable being cast to a pointer-wrapping
-    /// `BitwiseCopyable` type. Function references being reshaped
-    /// (e.g., `unsafeBitCast(Type.init(arrayLiteral:) as ..., to: ...)`)
+    /// `BitwiseCopyable` type.
+    ///
+    /// Function references being reshaped
+    /// (for example, `unsafeBitCast(Type.init(arrayLiteral:) as ..., to: ...)`)
     /// have no such collision shape.
     private func firstArgumentLooksLikeIntegerTag(_ argument: LabeledExprSyntax) -> Swift.Bool {
         // Reject function-reference forms (the swift-tagged Tagged+Literals

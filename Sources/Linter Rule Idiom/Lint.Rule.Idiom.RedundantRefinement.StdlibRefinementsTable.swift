@@ -28,7 +28,9 @@
 /// Stdlib protocol refinements: each pair `(refining, refined)` means
 /// `refining` declares `: refined` in the standard library (directly or
 /// transitively), so a composition `refining & refined` (in either order)
-/// is redundant. Sourced from the transitive closure of protocol→protocol
+/// is redundant.
+///
+/// Sourced from the transitive closure of protocol→protocol
 /// `conformsTo` relationships in the Swift module's symbol graph.
 @usableFromInline
 internal let idiomKnownStdlibRefinements: [(refining: Swift.String, refined: Swift.String)] = [

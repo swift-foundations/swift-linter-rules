@@ -13,7 +13,9 @@ internal import SwiftSyntax
 
 /// Returns true if `name` is the institute `Protocol` sentinel — a
 /// member name reserved for the hoisted-protocol pattern per
-/// [API-IMPL-009] / [PKG-NAME-001]. The sentinel can appear either
+/// [API-IMPL-009] / [PKG-NAME-001].
+///
+/// The sentinel can appear either
 /// raw (`Protocol`) or backtick-escaped (`` `Protocol` ``); both forms
 /// signal the same intent.
 ///
@@ -51,7 +53,9 @@ internal let structureSyntaxVisitorFamilyNames: Swift.Set<Swift.String> = [
 
 /// Returns true if `clause` lists any member of the SwiftSyntax
 /// visitor family (`SyntaxVisitor`, `SyntaxAnyVisitor`,
-/// `SyntaxRewriter`) as an inherited type. Used by
+/// `SyntaxRewriter`) as an inherited type.
+///
+/// Used by
 /// `Lint.Rule.Structure.MinimalTypeBody` to skip the type-body check
 /// on rule-pack visitor subclasses, whose `override func visit(_:)`
 /// hooks are protocol-shaped members dictated by the base class.

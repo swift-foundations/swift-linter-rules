@@ -51,6 +51,8 @@ internal import SwiftSyntax
 /// - `swift-institute/Experiments/result-builder-perf/` (12-case empirical
 ///   acceptance suite, 8/12 PASS post-fix).
 extension Lint.Rule {
+    /// Flags a `for`-in loop inside a result-builder body (materializes a fresh array per
+    /// iteration).
     public static let `for loop in result builder` = Lint.Rule.`for loop in result builder`(
         allowlist: resultBuilderForLoopDefaultAllowlist
     )
@@ -79,8 +81,10 @@ extension Lint.Rule {
 
 /// Default allowlist for `Lint.Rule.\`for loop in result builder\``:
 /// 13 institute Round-1/Round-2 Builders + 5 standard-library-extensions
-/// Builders. Stored as canonical dotted identifiers
-/// ("Buffer.Linear", "Tree.N", etc.).
+/// Builders.
+///
+/// Stored as canonical dotted identifiers
+/// ("Buffer.Linear", "Tree.N", and similar).
 public let resultBuilderForLoopDefaultAllowlist: Set<Swift.String> = [
     // Standard Library Extensions builders
     "Array",
@@ -184,7 +188,9 @@ internal final class ResultBuilderForLoopVisitor: SyntaxVisitor {
 
     /// Walks the closure's statement list, returning `true` if any
     /// `ForInStmt` is present at the closure's own scope or in nested
-    /// non-closure scopes (e.g., inside an `if` or `switch`). Nested
+    /// non-closure scopes (inside an `if` or `switch`, for example).
+    ///
+    /// Nested
     /// closures (which may belong to different builder contexts or be
     /// regular Swift) are skipped.
     @usableFromInline

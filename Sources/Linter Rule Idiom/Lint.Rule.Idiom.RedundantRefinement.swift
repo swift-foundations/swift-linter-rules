@@ -26,6 +26,7 @@ internal import SwiftSyntax
 /// backend (per `swift-foundations/swift-linter/Research/lsp-sourcekit-integration.md`
 /// v1.2.0).
 extension Lint.Rule {
+    /// Flags `A & B` protocol compositions where `A` already refines `B` in the standard library.
     public static let `redundant refinement` = Lint.Rule(
         id: "redundant refinement",
         default: .warning,
@@ -113,8 +114,10 @@ internal final class IdiomRedundantRefinementVisitor: SyntaxVisitor {
         return .visitChildren
     }
 
-    /// Returns the rightmost identifier of a type expression — e.g.
-    /// `Swift.Error` → `Error`, `Error` → `Error`. Existential `any P`
+    /// Returns the rightmost identifier of a type expression, such as
+    /// `Swift.Error` → `Error` or `Error` → `Error`.
+    ///
+    /// Existential `any P`
     /// and `some P` unwrap to their constraint. Suppression types
     /// (`~Copyable`) and structural types return nil so they cannot
     /// shadow a real refinement-table entry.

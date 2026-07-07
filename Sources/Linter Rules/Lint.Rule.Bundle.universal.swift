@@ -36,6 +36,7 @@ public import Linter_Rule_Testing
 /// }
 /// ```
 extension Lint.Rule.Bundle {
+    /// The strict T1 (universal) rule set, activated wholesale by consumers.
     public static let universal: [Lint.Rule.Configuration] = [
         // Idiom pack
         .enable(.`redundant refinement`),

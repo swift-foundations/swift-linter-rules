@@ -18,6 +18,8 @@ internal import SwiftSyntax
 ///
 /// Citation: `[MEM-SEND-004]` (memory-safety skill, concurrency.md).
 extension Lint.Rule {
+    /// Flags `@unchecked Sendable` on a `~Copyable` type whose stored surface is
+    /// Sendable-by-construction.
     public static let `unchecked sendable noncopyable` = Lint.Rule(
         id: "unchecked sendable noncopyable",
         default: .warning,

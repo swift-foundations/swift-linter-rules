@@ -18,6 +18,7 @@ internal import SwiftSyntax
 ///
 /// Citation: `[MEM-SAFE-023]` (memory-safety skill, safety-isolation.md).
 extension Lint.Rule {
+    /// Flags a public stored unsafe-pointer property lacking `private`/`internal`/`@unsafe`.
     public static let `unsafe storage visibility` = Lint.Rule(
         id: "unsafe storage visibility",
         default: .warning,

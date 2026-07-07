@@ -16,6 +16,7 @@ internal import SwiftSyntax
 ///
 /// Citation: `[PATTERN-052]` (implementation skill, patterns.md).
 extension Lint.Rule {
+    /// Flags an `@inlinable` decl whose body references a bare-`internal` identifier.
     public static let `inlinable internal access` = Lint.Rule(
         id: "inlinable internal access",
         default: .warning,
@@ -41,7 +42,9 @@ internal let structureInlinableInternalAccessMessage: Swift.String =
 
 /// Initializer-specific message: Swift rejects `@usableFromInline` on
 /// `@inlinable init` as `has no effect`, so the func/var advice doesn't
-/// apply. The canonical fix for `@inlinable internal init` is `package
+/// apply.
+///
+/// The canonical fix for `@inlinable internal init` is `package
 /// init` (without `@usableFromInline`), which satisfies both the lint
 /// rule and Swift's redundancy check while keeping the init bounded to
 /// the package's inline-into-consumer surface.

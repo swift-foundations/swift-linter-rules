@@ -35,6 +35,7 @@ internal import SwiftSyntax
 /// Rule-id EXISTENCE (a well-formed directive naming an unknown rule) is
 /// likewise out of scope: it needs the run's rule registry, not the file.
 extension Lint.Rule {
+    /// Flags a `swift-linter:` suppression comment that does not match the engine's grammar.
     public static let `malformed suppression directive` = Lint.Rule(
         id: "malformed suppression directive",
         default: .warning,
@@ -62,8 +63,8 @@ internal let malformedSuppressionDirectiveMessage: Swift.String =
 private let malformedSuppressionDisableNextPrefix = "// swift-linter:disable:next "
 private let malformedSuppressionDisableLinePrefix = "// swift-linter:disable:line "
 
-/// Walks every token's leading and trailing trivia, mirroring
-/// `Lint.Suppression.scan`'s cursor arithmetic so reported line/column
+/// Walks every token's leading and trailing trivia, mirroring the cursor
+/// arithmetic of `Lint.Suppression.scan` so reported line/column
 /// match exactly where the engine would (or would fail to) parse a
 /// directive.
 internal func malformedSuppressionDirectiveFindings(
@@ -123,7 +124,8 @@ private func scanTriviaForMalformedDirectives(
                 severity: severity,
                 identifier: "malformed suppression directive",
                 message: malformedSuppressionDirectiveMessage
-            ))
+            )
+        )
     }
 }
 

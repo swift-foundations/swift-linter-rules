@@ -12,7 +12,9 @@
 internal import SwiftSyntax
 
 /// Returns true if `clause` carries an explicit positive `Copyable`
-/// conformance requirement on any generic parameter. The author has
+/// conformance requirement on any generic parameter.
+///
+/// The author has
 /// deliberately scoped the surface to copyable element types — rules
 /// that fire on absence of `~Copyable`-related signals MUST treat this
 /// as an authoritative opt-in, not silent shrinkage.
@@ -40,7 +42,9 @@ internal func memoryWhereClauseHasPositiveCopyable(_ clause: GenericWhereClauseS
     return false
 }
 
-/// Walks a type syntax for any positive `Copyable` mention. Composition
+/// Walks a type syntax for any positive `Copyable` mention.
+///
+/// Composition
 /// types (`Element: Comparison.Protocol & Copyable`) are descended into
 /// so the constraint is recognized regardless of how the author wrote it.
 ///

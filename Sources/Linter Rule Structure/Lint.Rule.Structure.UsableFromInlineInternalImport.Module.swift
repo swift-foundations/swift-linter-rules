@@ -12,7 +12,9 @@
 internal import SwiftSyntax
 
 /// Carries an internal-import's diagnostic site (the `import` keyword
-/// position) and the imported module's leaf name. The leaf name is the
+/// position) and the imported module's leaf name.
+///
+/// The leaf name is the
 /// reach-target the rule uses to test whether any `@usableFromInline`
 /// decl syntactically references the module — without a name match,
 /// there's no co-firing condition and the rule must not fire.

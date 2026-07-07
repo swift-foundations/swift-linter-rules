@@ -28,6 +28,7 @@ internal import SwiftSyntax
 /// `@unchecked Sendable` WITHOUT `@unsafe`; inverted 2026-05-13 to flag
 /// `@unchecked Sendable` WITH `@unsafe` on the same conformance clause.
 extension Lint.Rule {
+    /// Flags `@unchecked Sendable` paired with `@unsafe` on the same conformance clause.
     public static let `unchecked sendable categorization` = Lint.Rule(
         id: "unchecked sendable categorization",
         default: .warning,

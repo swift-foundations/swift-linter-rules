@@ -1,5 +1,11 @@
 // Phase 4 wave-1 integration fixture — one violation per new rule.
 // The linter run against this file must fire exactly 7 diagnostics.
+//
+// swiftlint:disable no_existential_throws no_impl_obj_inst_bindings options_not_flags swift_error_qualification
+// REASON: this fixture's entire purpose is to contain exactly one violation per rule under
+// test (self-referential fixture shape, rule-exemptions skill) — the parent SwiftLint config's
+// institute rule bundle also lints this repo's own sources and flags the same patterns this
+// file deliberately embeds for the Phase 4 wave-1 integration run.
 
 // 1. `try optional` — `try?` swallows the typed error
 let result1 = try? throwingCall()
@@ -26,3 +32,4 @@ func openWrite() {}
 
 // 7. `tag suffix` — phantom-type marker named with `Tag` suffix
 struct CardinalTag {}
+// swiftlint:enable no_existential_throws no_impl_obj_inst_bindings options_not_flags swift_error_qualification
