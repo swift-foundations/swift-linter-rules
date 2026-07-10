@@ -188,7 +188,9 @@ extension Lint.Rule.`inlinable internal access Tests`.`Edge Case` {
 
 extension Lint.Rule.`inlinable internal access Tests`.`Edge Case` {
     /// Variant A, `@usableFromInline` enclosing type — the
-    /// swift-async-primitives shape. A member cannot be widened past its
+    /// swift-async-primitives shape.
+    ///
+    /// A member cannot be widened past its
     /// enclosing type's access, so `package` is compiler-illegal here.
     @Test
     func `A6 variant A: member in usableFromInline struct is exempt`() {

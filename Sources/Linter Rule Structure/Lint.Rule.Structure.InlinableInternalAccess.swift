@@ -19,7 +19,9 @@ extension Lint.Rule {
     /// Flags an `@inlinable` decl whose body references a bare-`internal` identifier.
     public static let `inlinable internal access` = Lint.Rule(
         id: "inlinable internal access",
-        default: .warning,
+        // 2026-07-10 ratchet flip 1 (PATTERN-052 at fleet-zero; grant: overday master session):
+        // first advisory->blocking class per the endorsed per-class ratchet.
+        default: .error,
         findings: { source, severity in
             let visitor = StructureInlinableInternalAccessVisitor(
                 source: source.file,
@@ -83,7 +85,9 @@ internal let structureInlinableInternalAccessInitializerMessage: Swift.String =
     + structureInlinableInternalAccessExemptionSuffix
 
 /// Returns `true` when a type declaration's modifier list carries
-/// `public` / `package` / `open`. A type without one of these is
+/// `public` / `package` / `open`.
+///
+/// A type without one of these is
 /// internal-default (or `@usableFromInline`-internal) — a member inside
 /// it cannot be widened to `package` because a member's access cannot
 /// exceed its enclosing type's, so the rule's prescribed `package`
@@ -102,7 +106,9 @@ private func structureTypeIsPackageUpgradable(_ modifiers: DeclModifierListSynta
 }
 
 /// The simple (leaf) name of a type reference — the base identifier with
-/// `Optional` / IUO wrappers stripped. Used to resolve an extension's
+/// `Optional` / IUO wrappers stripped.
+///
+/// Used to resolve an extension's
 /// extended type and an initializer parameter's type against same-file
 /// declarations. Returns `nil` for shapes we do not resolve (tuples,
 /// functions, composed generics), which conservatively keep firing.
@@ -124,7 +130,9 @@ private func structureSimpleTypeName(_ type: TypeSyntax) -> Swift.String? {
 
 /// Collects the names of every type declaration in the file whose access
 /// is below `package` (internal-default, `@usableFromInline`-internal,
-/// `private`, `fileprivate`). A name lands in the set if *any* same-file
+/// `private`, `fileprivate`).
+///
+/// A name lands in the set if *any* same-file
 /// declaration of it is below `package`. This is the same-file symbol
 /// table amendment §A6 consults for variant A (extension resolution) and
 /// variant B (initializer parameter resolution).
@@ -137,12 +145,19 @@ private func structureCollectNonUpgradableTypeNames(
             names.insert(identifier.text)
         }
     }
-    if let decl = node.as(StructDeclSyntax.self) { record(decl.name, decl.modifiers) }
-    else if let decl = node.as(ClassDeclSyntax.self) { record(decl.name, decl.modifiers) }
-    else if let decl = node.as(EnumDeclSyntax.self) { record(decl.name, decl.modifiers) }
-    else if let decl = node.as(ActorDeclSyntax.self) { record(decl.name, decl.modifiers) }
-    else if let decl = node.as(ProtocolDeclSyntax.self) { record(decl.name, decl.modifiers) }
-    else if let decl = node.as(TypeAliasDeclSyntax.self) { record(decl.name, decl.modifiers) }
+    if let decl = node.as(StructDeclSyntax.self) {
+        record(decl.name, decl.modifiers)
+    } else if let decl = node.as(ClassDeclSyntax.self) {
+        record(decl.name, decl.modifiers)
+    } else if let decl = node.as(EnumDeclSyntax.self) {
+        record(decl.name, decl.modifiers)
+    } else if let decl = node.as(ActorDeclSyntax.self) {
+        record(decl.name, decl.modifiers)
+    } else if let decl = node.as(ProtocolDeclSyntax.self) {
+        record(decl.name, decl.modifiers)
+    } else if let decl = node.as(TypeAliasDeclSyntax.self) {
+        record(decl.name, decl.modifiers)
+    }
     for child in node.children(viewMode: .sourceAccurate) {
         structureCollectNonUpgradableTypeNames(child, into: &names)
     }
@@ -155,7 +170,9 @@ internal final class StructureInlinableInternalAccessVisitor: SyntaxVisitor {
     var matches: [Diagnostic.Record] = []
 
     /// Same-file type declarations whose access is below `package`
-    /// (amendment §A6). Populated lazily on first exemption query so the
+    /// (amendment §A6).
+    ///
+    /// Populated lazily on first exemption query so the
     /// whole-file scan happens at most once per visitor.
     private var nonUpgradableTypeNames: Swift.Set<Swift.String>?
 
@@ -174,7 +191,9 @@ internal final class StructureInlinableInternalAccessVisitor: SyntaxVisitor {
         return names
     }
 
-    /// Variant A: walk the enclosing declaration chain. The member is
+    /// Variant A: walk the enclosing declaration chain.
+    ///
+    /// The member is
     /// exempt if any enclosing nominal type is below `package` access, or
     /// if an enclosing extension extends a same-file type that is below
     /// `package`. There the prescribed `package` upgrade is
@@ -192,7 +211,8 @@ internal final class StructureInlinableInternalAccessVisitor: SyntaxVisitor {
                 if !structureTypeIsPackageUpgradable(decl.modifiers) { return true }
             } else if let decl = ancestor.as(ExtensionDeclSyntax.self) {
                 if let name = structureSimpleTypeName(decl.extendedType),
-                    nonUpgradableNames(from: node).contains(name) {
+                    nonUpgradableNames(from: node).contains(name)
+                {
                     return true
                 }
             }
@@ -203,7 +223,9 @@ internal final class StructureInlinableInternalAccessVisitor: SyntaxVisitor {
 
     /// Variant B: an `@inlinable init` is exempt when any parameter's
     /// type resolves in the same file to a declaration below `package`
-    /// access. Cross-file parameter types keep firing (they cannot be
+    /// access.
+    ///
+    /// Cross-file parameter types keep firing (they cannot be
     /// resolved here, so the conservative default is to fire).
     private func initializerParameterForbidsPackageUpgrade(_ node: InitializerDeclSyntax) -> Bool {
         let names = nonUpgradableNames(from: node)
