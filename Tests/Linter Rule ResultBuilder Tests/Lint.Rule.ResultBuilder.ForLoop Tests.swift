@@ -24,8 +24,8 @@ extension Lint.Rule {
         @Suite struct `Negative Cases` {}
         @Suite struct `Callee Patterns` {}
         @Suite struct `Edge Cases` {}
-        @Suite struct Severity {}
-        @Suite struct Allowlist {}
+        @Suite struct `Severity` {}
+        @Suite struct `Allowlist` {}
     }
 }
 
