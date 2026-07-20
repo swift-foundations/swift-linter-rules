@@ -26,3 +26,15 @@ jobs:
   docs:
     uses: swift-foundations/.github/.github/workflows/swift-docs.yml@main
     secrets: inherit
+
+  # Instant [CI-116] republish: a rule-pack push to main dispatches
+  # swift-foundations/swift-linter's publish-ci-binaries.yml immediately
+  # (digest-gated there, so duplicates are no-ops). Cross-org reusable ⇒
+  # explicit secret forward per [CI-109].
+  notify-linter-republish:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    uses: swift-institute/.github/.github/workflows/notify-linter-republish.yml@main
+    secrets:
+      SWIFT_INSTITUTE_BOT_APP_CLIENT_ID: ${{ secrets.SWIFT_INSTITUTE_BOT_APP_CLIENT_ID }}
+      SWIFT_INSTITUTE_BOT_APP_ID: ${{ secrets.SWIFT_INSTITUTE_BOT_APP_ID }}
+      SWIFT_INSTITUTE_BOT_APP_PRIVATE_KEY: ${{ secrets.SWIFT_INSTITUTE_BOT_APP_PRIVATE_KEY }}
